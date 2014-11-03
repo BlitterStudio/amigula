@@ -1,0 +1,1853 @@
+XMPlay 3.6
+Copyright (c) 1998-2010 Ian Luck. All rights reserved.
+
+Files that you should have found in the XMPlay package
+======================================================
+XMPLAY.TXT    This file
+XMPLAY.EXE    The executable
+XMP-CD.DLL    CD Audio plugin
+XMP-WMA.DLL   WMA plugin
+XMP-WADSP.DLL Winamp DSP plugin wrapper
+
+You can safely remove the XMP-CD.DLL, XMP-WMA.DLL and XMP-WADSP.DLL files
+if you don't need CD/WMA playback or Winamp DSP plugin support.
+
+
+What's the point?
+=================
+XMPlay is a Win32 (Windows 95/98/NT/2k/ME/XP/Vista/7/etc...) audio player,
+supporting several formats. Initially, when XMPlay was first released in 1998,
+only the XM format was supported, hence the name "XMPlay".
+
+Stream formats
+--------------
+* OGG - Ogg Vorbis
+* MP3 - MPEG1/2/2.5 layer 3
+* MP2 - MPEG layer 2
+* MP1 - MPEG layer 1
+* WMA - Windows Media Audio
+* WAV - any WAVE format that has a codec installed
+* AIFF - Audeo Interchange File Format
+* CDA - CD Audio
+
+WMA playback requires the Windows Media Format modules to be installed. They
+come installed with Windows Media player, so will already be on most users'
+systems, but they can also be installed separately (WMFDIST.EXE is available
+at the XMPlay website). If these modules are not installed, XMPlay will still
+work fine, just without WMA support.
+
+Module (MOD) formats
+--------------------
+* MO3 - Modules with MP3 or OGG encoded samples
+* IT  - Impulse Tracker modules
+* XM  - FastTracker 2 modules
+* S3M - ScreamTracker 3 modules
+* MTM - MultiTracker modules
+* MOD - Generic module formats
+* UMX - Unreal/Tournament music package
+
+XMPlay's got the best (most accurate to FT2) XM reproduction to be heard
+from any player. All features/effects (including several FT2 quirks) are
+100% supported. The IT reproduction is also practically balls-on, with full
+support for all effects/NNA/DCA/filters etc... additional features like
+stereo samples and DMO effects are also fully supported.
+
+XMPlay also supports the MO3 format (modules with MP3 or OGG compressed
+samples). If you wish to create MO3s, then you should download the MO3
+encoder from the XMPlay website (URL below).
+
+Plugins
+-------
+As well as the listed formats with built-in support, a whole load more
+formats can be played with XMPlay too, via plugins. XMPlay has its own
+native "input" plugin system but can also use Winamp plugins.
+
+
+The main window
+===============
+In the main display area, the title, playback time and other basic info
+about the current track are shown. The time display can be switched (by
+clicking on it) between the time passed, the time remaining, or the
+order position (if it is a MOD format being played).
+
+Below that is the position indicator, which can also be used to change
+the playback position. When streaming from the 'net, it will light-up to
+indicate how much of the file has been downloaded so far (if the file
+length is known). Right-clicking gives the option of bookmarking the
+current position, or resuming a previously bookmarked position.
+
+NOTE: The bookmark is not retained when closing XMPlay.
+
+The next 2 sliders control the volume and balance. Right-clicking the volume
+slider mutes the output.
+
+TIP: The volume can be adjusted using the mouse-wheel, when the mouse is not
+     above anything else scrollable.
+
+The row of buttons below the sliders are...
+
+Track info & extended playlist:
+    Opens/closes a window to display information on the current track, also
+    a playlist and library. See "The info window" below.
+
+NOTE: Some skins may also have separate buttons to access the playlist and
+      library.
+
+Previous track:
+    Play the previous track in the playlist, skipping over any that are set
+    to "skip". Right-clicking jumps to the previous sub-song in a multi-song
+    track, or previous cue point when a CUE sheet is present.
+
+Stop:
+    Stops playback, and sets the position to the start. Pressing again, when
+    already stopped, unloads the track. Right-clicking gives the option to
+    "Stop at end of track", which temporarily (one time) disables looping and
+    auto-advancing.
+
+Play / Pause:
+    Toggles play/pause of the track. If no track is loaded, then the 1st
+    queued track is loaded. If there is no queue, then the currently selected
+    track in the playlist is loaded. If no tracks are selected, the 1st track
+    is loaded. Right-clicking plays a random track.
+
+Next track:
+    Play the next track in the playlist, skipping over any that are set to
+    "skip". Right-clicking jumps to the next sub-song in a multi-song track,
+    or next cue point when a CUE sheet is present.
+
+Open file(s):
+    Opens and plays file(s). If you open an FTP directory URL, XMPlay will
+    automatically scan the directory for playable files. Right-click to open
+    a directory.
+
+Looping switch:
+    This can be set to never loop, always loop, or auto-loop (only files
+    that are intended to be looped). When looping is enabled, you can also
+	choose (by right-clicking) to have the tracks looped only once.
+
+When you drag'n'drop files into the main panel, they are opened as if the
+"Open file(s)" button had been used, ie. playlist cleared and new tracks
+added. As well as files, whole directory trees and shortcuts can also be
+drag'n'dropped into XMPlay.
+
+TIP: Double-click on any non-button area to toggle mini mode.
+
+TIP: Right-click the minimize button to minimize to the tray.
+
+TIP: Right-click the close button to have the option of closing at the end
+     of the current track or saving the position to resume from next time
+     XMPlay is loaded.
+
+TIP: When moving the window, right-clicking will make the info window move
+     too. The same is true when moving the info window.
+
+
+The Output/DSP panel
+====================
+These options change the way things sound. The response speed to all these
+options is dependant on the buffer size: the delay will be the length of
+the buffer chosen in the "Output" options.
+
+Equalizer switch & sliders:
+Reverb switch & sliders:
+Auto-amp reduction switch:
+Amplification slider:
+    See the "DSP" section below for details on these.
+
+TIP: Right-clicking the amplification slider will reset it to the default
+     level, and right-clicking the EQ bands will reset them to 0 dB.
+
+Some skins may also have MOD options present here. See the "MOD" section
+below for details on these.
+
+Disk switch
+-----------
+When switched on, this enables the automatic loading of settings that have
+been saved for the track being loaded. Right-clicking brings up options to
+load settings specific to the file, load settings for the file's path, and
+load presets. See the "Saved settings" section below.
+
+
+The playlist panel
+==================
+Double-clicking on a track will make XMPlay play the track. Right-clicking
+brings up further options to play the track, to write a copy to disk while
+playing the track (URLs only), queue the track, skip the track, add it to
+the library, locate similar tracks in the library, rate the track, display
+track info, and remove the track. A track can also be queued by clicking
+the middle mouse button on it.
+
+TIP: The actions performed by double/middle-clicking (as well as 4th/5th
+     button clicks) can be customised in the "Playlist" options (see below).
+
+If an internet stream is of a known length (a file on an FTP/HTTP server),
+the "Write to disk" option can be selected while the track is already playing
+(or has even finished playing), and XMPlay will write the portion that has
+already been downloaded and continue to write the remainder that is being
+downloaded. So you can preview the track before deciding if you want to keep
+it, without having to start downloading it again.
+
+Shoutcast/Icecast/Icecast2 streams that include the track titles, can be
+automatically split into the separate files when writing them to disk, with
+optional time-stamping of the files. Alternatively, a CUE sheet can also be
+generated.
+
+NOTE: Due to the way that title updates are transmitted in streams, they
+      don't usually occur exactly upon track changes, so the CUE points may
+      sound a little off and require some post-tweaking.
+
+Tracks that are set to be skipped are displayed in a small dimmed font. Dead
+tracks are indicated by red lines through them: a single red line means
+the track is unplayable, while a double line means it can't even be opened,
+eg. doesn't exist. The currently opened track is signified with a light-blue
+arrow. Tracks that are queued for playback have a smaller light-blue arrow,
+and the queue position next to it.
+
+Files can be added to the list by drag'n'dropping them there. Whole directory
+trees and shortcuts can also be drag'n'dropped into the list. URLs can also be
+dragged from web-browsers. The new tracks are inserted into the position that
+they are dropped in.
+
+TIP: Left-clicking above/below the scroller "thumb" scrolls the list a page
+     up/down. That is repeated if the button is held down. If the right button
+     is then also clicked, the "thumb" is grabbed so that it follows the mouse
+     movement.
+
+TIP: You can drag tracks up/down the list by holding down the left button.
+     Tracks can also be dragged from XMPlay into other programs, by clicking
+     the right button while the left button is held down. Tracks can also be
+     dragged from the playlist to the library (and vice versa), or back into
+     the playlist to add duplicates.
+
+Queue:
+    This toggles listing the tracks that are queued for playback, instead of
+    the entire playlist. The queued tracks can be rearranged and generally
+    manipulated just like in the playlist.
+
+Bottom buttons
+--------------
+Random play order:
+    Plays the tracks in random order. Right-clicking brings up more options
+    to shuffle the list, sort the list, and to reverse the order.
+
+Save list:
+    Writes the list to a PLS or M3U file.
+
+Add to list:
+    Adds files/URLs to the list. Right-clicking allows you to add all tracks
+    in a directory (and sub-directories) to the list. If you add an FTP
+    directory, XMPlay will scan it for playable files, and add them all to
+    the list.
+
+Remove from list:
+    Removes the selected track from the list. Right-clicking gives further
+    options to remove duplicate tracks, dead tracks, and all tracks. There
+    are also options to refresh the dead tracks and clear the queue.
+
+Loop list:
+    If enabled, XMPlay plays the first track in the list again after the last
+    track. Right-clicking gives the option whether XMPlay should go on to the
+    next track when the current one ends, whether playback should stop at a
+    dead track or at the end of a queue, and whether to unload the final track
+    when finished.
+
+Next to the buttons is the total list duration; clicking it will switch it to
+a track count display. When multiple tracks are selected, the display will
+alternate between the list total length, and the selected tracks length.
+
+Multiple tracks can be selected using the standard ctrl/shift+click methods.
+
+The playlist is duplicated in the info window, where it can be resized.
+
+
+The "Options and stuff" window
+==============================
+Clicking the spanner icon in the main panel, or right-clicking on any non-
+button area gives the option to open the "Options and stuff" window, which,
+as the name suggest, contains options and stuff. A description of the page
+contents follows...
+
+
+Appearance
+----------
+The current skin name, and a link to the author's website or email address
+is shown at the top of the page. If the author has included a "readme"
+message, that can be viewed by clicking the "Readme" button.
+
+Open panels:
+    When switching skins, the panels will be opened if this is enabled.
+
+Text size:
+    This allows the info window text size to increased.
+
+Maximum text width:
+    This restricts the width of info window texts (eg. tags), and wraps any
+    text that exceeds the specified width. Setting it to 0, disables it.
+
+Auto-resize to fit contents:
+    When enabled, the info window will automatically be resized to fit its
+    contents.
+
+Restrict rendering:
+    Visual plugins can take a very high amount of CPU when the window is
+    expanded to a large size. Using this option restricts the rendering to
+    the dimensions specified, beyond which the rendered image is stretched
+    to fit the window. Some visual plugins don't like high resolutions and
+    crash, so this can be used to avoid that too.
+
+TIP: The stretching is generally hardware accelerated, but might not be in
+     some card/driver's case, in which case it may be more efficient to just
+     render unrestricted.
+
+Move info window with main:
+    When enabled, moving the main window will also move the info window. It
+    does not apply the other way: moving the info window will not also move
+    the main window. The right-click while moving action is also reversed by
+    this option, ie. it will stop the info window moving.
+
+Vertical sync vis display:
+    When enabled, visual display refreshing will be done in sync with the
+    monitor, to avoid any flickering.
+
+Info bubbles:
+    Info bubbles display descriptions and other info when the mouse is left
+    over a control for a short time. If they are not needed, they can be
+    disabled here, either entirely or just for fullscreen vis mode.
+
+Fading:
+    When enabled, the info bubbles will be faded in and out. This option is
+    only available on Win2k and above.
+
+Text size:
+    This allows the info bubble text size to adjusted.
+
+Hours:
+    When enabled, time displays will include an hours column (if exceeding
+    60 minutes).
+
+10ths:
+    When enabled, the playback time position will be shown within a 10th of a
+    second (if it fits).
+
+
+Miscellaneous
+-------------
+Track looping:
+    This controls looping, as with the switch in the main panel (above).
+
+Only once:
+    If enabled, tracks will only be looped once (when looping is enabled).
+
+Fade-out:
+    When playing a looped track, rather than have a sudden stop at the end,
+    XMPlay can smoothly fade it out. The length of the fade (in seconds) is
+    determined here. If set to "0", no fading is performed.
+
+Auto-loop any track ending with sound:
+    For formats that don't contain looping information, this option tells
+    XMPlay to loop tracks that have sound at the very end when looping is
+    set to "auto". This also affects the "fade-out" option above, as tracks
+    will only fade-out if a loop is detected.
+
+Wait for end to decay:
+    When enabled, XMPlay will wait for the end (eg. last notes) of the track
+    to decay. This is only applicable with some formats (eg. MIDI). The
+    "including DSP" option apples to all formats, and makes XMPlay also wait
+    for any DSP (eg. reverb) to decay. When set to "single track", XMPlay
+    will only wait when playing a single track (auto-advance is disabled or
+    writing to disk), so as not to affect gapless playback.
+
+Crossfade:
+    If this is set above 0, track changes will crossfade over the specified
+    duration. Crossfading can only be applied when both tracks have the same
+    sample format. The "Apply sample rate to all file formats" option (see
+    the "Output" section below) can be used to ensure that is pretty much
+    always the case.
+
+Manual changes:
+    If crossfading is enabled, this setting determines whether manual track
+    changes (eg. via the next/previous controls) should be crossfaded too,
+    and if so, what percentage of the full crossfade length should apply.
+
+Timeout:
+    This determines how long (in seconds) XMPlay will wait for a successful
+    connection when streaming from the 'net.
+
+Buffer:
+    This determines how large a buffer (in seconds) is used when streaming
+    from the 'net. The larger the buffer is, the less likely it is that the
+    playback will be interrupted.
+
+Prebuf:
+    This determines how much data (in seconds) of a 'net stream should be
+    buffered before starting playback, and is limited to the "Buffer" length.
+
+Restrict rate:
+    If enabled, the download rate is restricted to the rate required to
+    sustain playback. Otherwise, the file will be downloaded as quickly
+    as the internet connection allows.
+
+Proxy:
+    If enabled, XMPlay will connect to the 'net via a proxy. The proxy config
+    goes in the adjacent box, in the form of "user:pass@server:port". If the
+    box is left empty, XMPlay will use the Windows proxy settings set in the
+    Internet Options control panel. If only the "user:pass@" part is provided,
+    then XMPlay will use the user/pass details with the server in the Windows
+    proxy settings. If only the "server:port" part is provided, then that
+    server will be used without any user/pass authentication.
+
+Auto-reconnect:
+    This tells XMPlay to automatically try to reconnect whenever it gets
+    disconnected from a Shoutcast or Icecast server.
+
+NOTE: None of the internet options above affect Winamp plugins, and may not
+      affect native plugins that do their own streaming either.
+
+On top:
+    These 2 switches determine whether XMPlay will stay on top of other windows
+    when in "normal" and/or "mini" mode.
+
+Always in tray:
+    This removes XMPlay from the taskbar, and puts the icon in the tray.
+    A side-effect of this is that XMPlay is removed from the "Alt-Tab"
+    list. Instead, you can bring XMPlay to the foreground by clicking on
+    the icon in the tray.
+
+Allow multiple instances:
+    When enabled, multiple copies of XMPlay can be running at the same time.
+    When disabled, attempting to run XMPlay while it is already running will
+    just result in the command-line being passed onto the already running
+    instance.
+
+Save playback position upon closing:
+    When enabled, XMPlay will store the current playback position when it is
+    closing, and then resume it when XMPlay is next loaded.
+
+Store per-user config/etc:
+    This allows multiple users to share a single XMPlay installation, without
+    interfering with one another's settings/playlist/library/etc...
+
+Clear history:
+    This clears the folder/URL/search history.
+
+Check for updates:
+    When enabled, XMPlay will periodically (daily or weekly) check if updated
+    versions of XMPlay and the installed plugins are available. A notification
+    will be displayed when updates become available, which can be downloaded
+    from the website (they won't be downloaded automatically).
+
+NOTE: Update notifications may not be available for all plugins.
+
+
+Playlist
+--------
+Verify file content:
+    If enabled, XMPlay will verify that files that you open are playable
+    before they are put in the playlist or library (except URLs, which are
+    not verified). The contents of directories are always verified before
+    being added.
+
+No duplicates:
+    If this option is enabled, whenever an attempt is made to add a track
+    which is already in the list, the track already in the list will just
+    be selected; it won't be added again. The existing track can be moved
+    so that it is grouped with any other new tracks, via the "move existing"
+    option.
+
+NOTE: There are never duplicates in the library.
+
+Scan HTML pages for playable URLs:
+    This makes XMPlay scan webpage URLs for links to playable files, which
+    it then adds to the playlist (or library). Playlists in HTML pages will
+    also be opened when "including playlists" is enabled.
+
+Ignore filetypes:
+    A space-delimited list of file extensions to ignore. Non-playable files
+    may occasionally be erroneously detected as playable. This option can be
+    used to block those filetypes.
+
+Archive recursion:
+    When opening archives, XMPlay can look for playable files in archives
+    within archives. This option determines how many levels it will go up
+    to.
+
+Auto-advance:
+    This tells XMPlay to go onto the next track when the current one ends.
+
+Loop:
+    If enabled, the first track in the list will be played again after the
+    last track.
+
+Unload final track:
+    When XMPlay reaches the end (stops advancing), it will unload the last
+    track that was played.
+
+Random order:
+    Plays the tracks in random order. XMPlay keeps record of which tracks
+    have been played, so that they are not randomly played again until
+    the others have also been played. Toggling clears the record of which
+    tracks have been played.
+
+Apply to play/next/previous controls:
+    When enabled, the next control will jump to a random track and the
+    previous control will jump to the previously played track. Otherwise,
+    those controls will jump the next/previous track in the list. In the
+    case of the play button, it will open a random track (if a track is
+    not already open).
+
+Stop at dead track:
+    If a "dead" track is encountered, XMPlay will stop (not advance).
+
+Stop at end of queue:
+    After playing all queued tracks, XMPlay will stop (not advance).
+
+Follow current track:
+    These options determine whether the playlist views should automatically
+    jump to the track when opening a new track.
+
+Mouse button actions:
+    This option allows customisation of the track action performed when a
+    particular mouse button is clicked on a playlist/library entry.
+
+Auto-save every:
+    This auto-saves the playlist (and library) at the specified interval.
+
+Toggle queuing:
+    When enabled, the "queue" option will toggle queuing of tracks, ie.
+    if the track(s) are already queued, they will be dequeued rather than
+    queued again.
+
+Show queue in playlist panel:
+    When enabled, the playlist panel will show the tracks that are queued
+    for playback, instead of the entire playlist. Note this does not apply
+    to the extended playlist in the info window.
+
+Show filenames in extended list:
+    Makes XMPlay show the filenames (rather than titles) in the info window
+    playlist.
+
+
+Playlist / Library
+------------------
+XMPlay can monitor directories (inc. sub-directories), and automatically add
+new files to the library, and remove deleted ones. The monitored directories
+and the number of library entries contained in them are listed.
+
+Right-clicking on a list entry gives the option of rescanning the directory,
+removing it, and toggling whether to include sub-directories.
+
+TIP: Rescanning can be useful after installing new plugins, eg. if formerly
+     unplayable files become playable.
+
+NOTE: When removing a directory from the monitored list, the directory's
+      library entries are not removed.
+
+Add:
+    Sets up monitoring of a directory.
+
+Keep tracks with overridden tags:
+    When a monitored file with overridden tags is deleted, it'll remain in
+    the library if this option is enabled. If the file has been moved, the
+    dead track recovery options (below) can be used to recover it without
+    having to re-enter the overridden tags.
+
+Auto-add to library:
+    This option tells XMPlay if/when it should automatically add tracks to
+    the library. When set to "on play", tracks will be added to the library
+    when they are played. When set to "on list", tracks will also be added
+    to the library when they are added to the playlist.
+
+Count as played after:
+    This will delay the incrementing of a track's play count (and last play
+    time), until some time (in seconds) after the track was opened, or at
+    the end of the track if that comes sooner. If the track is unloaded
+    before then, the playback is not counted.
+
+Process playlists:
+    If enabled, when adding playlist files (eg. PLS/M3U/ASX) to the library,
+    they will be parsed and their contents added to the library. Otherwise,
+    the playlist file itself will be added to the library, and only parsed
+    when it is added to the playlist/played.
+	
+TIP: A 'net radio playlist URL could be added to the library to ensure that
+     the correct stream URL is always used, even if it changes.
+
+Expand chopped text in-line:
+    Sometimes text may be too long to fit in its column. In that case, with
+    this option enabled, leaving the mouse over the text for a second will
+    cause the text to be expanded across subsequent columns. If this option
+    is disabled (or the text doesn't fit "in-line"), it will be shown in a
+    bubble instead.
+
+Show overridden tags in Message info:
+    When enabled, and a track with overridden tags is played, the tags will
+    be shown in the "Message" info window.
+
+
+Playlist / Dead
+---------------
+If you rearrange your music files, it could leave you with a load of "dead"
+tracks in XMPlay and a lot of work to fix them, particularly the library
+entries. That is where this options page comes into play.
+
+All missing files from the playlist and library are listed. You can either
+manually correct them (type the new location), or more conveniently, scan
+directories (including sub-directories) for the missing files. Whenever
+possible, XMPlay will not only check for filename matches, but also file
+sizes, to reduce the chance of false-positives (same filename but different
+contents). This depends on the original file's size being known.
+
+Automatically check other drives for missing files:
+    When XMPlay encounters a missing file, and this option is enabled, it
+    will look for the file at the same path on the other drives.
+
+Remove all dead:
+    This removes all dead tracks (both non-existent and just unplayable)
+    from the playlist and library.
+
+Individual dead tracks can also be removed via right-clicking, or pressing
+the Delete key.
+
+
+Integration
+-----------
+You can set XMPlay to be the default player for the formats it supports. So
+that whenever you "open" a file from within Windows Explorer, it is opened
+by XMPlay. A filetype association can be removed by deselecting it.
+
+The icon that is displayed for files associated with XMPlay is shown to the
+bottom-right of the filetypes list. It can be changed by clicking on it.
+
+Add to XMPlay-list:
+    This adds an "Add to XMPlay-list" option to the shell context menu of
+    files (and folders) associated with XMPlay. Using this menu option results
+    in the files just being added to the playlist, without playing them or
+    clearing the list.
+
+Add to XMPlay-library:
+    This adds an "Add to XMPlay-library" option to the shell context menu of
+    files (and folders) associated with XMPlay. Like "Add to XMPlay-list",
+    except it adds the files to the library instead of the playlist.
+
+Folders:
+    This enables the context menu options for folders/directories. With
+    the "sub" option enabled, XMPlay will search sub-directories for
+    playable files too; this setting also applies when drag'n'dropping
+    directories into XMPlay, and when they're in the command-line.
+
+Monitor the clipboard URLs:
+    XMPlay can monitor the clipboard for URLs of playable files, which
+    it will automatically play or add to the playlist. When you see a
+    playable file on a webpage, simply right-click and "Copy Shortcut"
+    to have XMPlay stream it.
+
+Default action:
+    This determines what should be done with files opened via the default
+    "Open" shell context menu option or the clipboard. They can either
+    replace the current playlist contents or add to them (as if the "Add
+    to XMPlay-list" option was used).
+
+Play listed tracks:
+    This determines whether XMPlay should immediately play tracks that are
+    added to the list via external means (not when using the "Add to list"
+    button), optionally bookmarking the current playback first.
+
+Auto-sort by filename:
+    When enabled, new tracks are sorted by filename. Otherwise, they are left
+    in order that XMPlay received them.
+
+NOTE: Playback (if applicable) is started when the 1st track is received, but
+      it may not be the 1st track in the list once they have all been received
+      and sorted.
+
+Desktop:
+    Places a shortcut to XMPlay on the desktop.
+
+Quick launch:
+    Places a shortcut to XMPlay in the quick launch bar.
+
+
+Titles
+------
+Here you can choose how XMPlay should format the title of the tracks,
+based on the tags contained in them. Tags are not available from Winamp
+plugins, so the formatting won't generally apply to them (they'll usually
+have their own formatting options), but XMPlay will read ID3v1, ID3v2
+and APEv2 tags from Winamp plugin played files if the "Apply to Winamp
+plugins when possible" option is enabled.
+
+TIP: It is possible to override a track's tags. See the "Track info"
+     section below.
+
+Some formats don't have tags, eg. MOD formats just have a title "tag".
+This could make the titles messy when elements are not available, if it
+wasn't for the fact that the formatting can vary depending on what tags
+are available. For example, the default formatting is:
+
+    %?2{%2 - }%?1{%1|%0}
+
+This means if the artist tag (%2) is present, use that and place " - "
+after it. Then, if the title tag (%1) is present, add that, otherwise
+add the filename (%0).
+
+The length of the title (or parts there of) can be limited with the
+"%cut{A|B|C}" function, where "A" is the string, "B" is the length limit,
+and "C" is an optional replacement string. For example, "%cut{%1|10|...}"
+would limit the title to 10 characters and append "..." when the limit is
+applied.
+
+NOTE: If the replacement string would take the length beyond the original
+      length, then the original string will be retained instead.
+
+A separate title format can be specified for use in the playlist panel,
+which may be useful if you want to include extra info in the title that
+would not fit in the playlist panel's space.
+
+NOTE: When sorting tracks by title in the playlist panel, the normal title
+      format will be used rather than the "Playlist panel" format.
+
+When a CUE sheet is present, XMPlay will use the title and performer info
+from that when it is not available from the track itself. XMPlay will also
+update the title at the CUE points, if the "Update title from cues" option
+is enabled.
+
+Scroll long titles:
+    When enabled, titles that are too long to fit the title display will
+    be scrolled.
+
+Tray title bubbles:
+    When XMPlay is minimized to the tray, and this option is enabled, a
+    bubble containing the new title will be shown next to the tray on
+    track changes.
+
+Fullscreen vis title bubbles:
+    When in fullscreen vis mode, and this option is enabled, a bubble
+    containing the new title will be shown on track changes.
+
+Refresh all tags & titles:
+    This tells XMPlay to rescan the tags/titles for all tracks, which may
+    take quite some time if there are a lot of tracks.
+
+
+Shortcuts
+---------
+Here you can fully customise how you control XMPlay via the keyboard. This
+includes setting "global" shortcuts which can be used from within other
+applications, ie. without XMPlay being in focus.
+
+Multiple keys can be assigned to perform the same action, likewise multiple
+actions can be assigned to a single key. When multiple actions are assigned
+to a single key, they are performed in the order that they are listed; the
+order can be changed using the "Up" and "Down" buttons.
+
+As an example, you could assign a key to select all search matches, invert
+the selection, and delete selected tracks. That would leave you with just
+the search matches left in the list.
+
+Defaults:
+    Resets all shortcuts back to the defaults as when XMPlay is first run.
+
+These are the default shortcuts...
+
+    O               Open files/URL
+    shift+O         Open directory
+    P/Pause         Current track - Play / pause
+    shift+P/Pause   Current track - Stop
+    Home            Current track - Restart
+    right           Current track - Forward
+    left            Current track - Back
+    shift+right     Current track - Next subsong
+    shift+left      Current track - Prev subsong
+    Page Up         Change track - Previous
+    Page Down       Change track - Next
+    End             Change track - Random
+    Insert          List - Add files/URL
+    shift+Insert    List - Add directory
+    ctrl+Z          List - Undo
+    Q               List - Show queue in list
+    shift+/         List - Clear queue
+    up              List nav - Up
+    down            List nav - Down
+    ctrl+up/down    List nav - Jump to current
+    shift+up        List nav - Select extend up
+    shift+down      List nav - Select extend down
+    ctrl+A          List nav - Select all
+    ctrl+I          List nav - Invert selection
+    ctrl+F          List nav - Find
+    alt+F           List nav - Find quick
+    F               List nav - Find next
+    shift+F         List nav - Find previous
+    ctrl+shift+F    List nav - Find all
+    Enter           List track - Play
+    Space           List track - Skip
+    /               List track - Queue
+    ctrl+/          List track - Dequeue
+    Delete          List track - Remove
+    shift+Delete    List track - Remove & delete file
+    + (numpad)      DSP - Volume up
+    - (numpad)      DSP - Volume down
+    / (numpad)      DSP - Balance left
+    * (numpad)      DSP - Balance right
+    M               Toggle mini mode
+    N               Minimize / restore
+    shift+N         Minimize to tray / restore
+    alt+F4          Close
+    alt+shift+F4    Close with position saved
+    F9              Options and stuff
+    F1              Info - General
+    F2              Info - Message
+    F3              Info - Samples
+    F4              Info - Visuals
+    F5              Info - Extended list
+    F6              Info - Library
+    ctrl+C          Info - Copy to clipboard
+    8 (numpad)      Info - Scroll up
+    2 (numpad)      Info - Scroll down
+    4 (numpad)      MOD pattern - Prev channel
+    6 (numpad)      MOD pattern - Next channel
+    5 (numpad)      MOD pattern - Mute channel
+    7 (numpad)      MOD pattern - Unmute all
+    9 (numpad)      MOD pattern - Invert all
+    F12             Reload skin
+
+
+MOD
+---
+These options only affect MOD file formats (MO3/XM/IT/etc).
+
+Interpolation:
+    "Linear" interpolation "draws" a straight line between the samples.
+    "Sinc" interpolation "draws" a smooth curve between the samples and
+    gives better quality but requires more CPU power.
+
+Ramping:
+    Ramping makes volume and panning changes smoother so that sudden large
+    volume/panning changes do not cause any "clicking" in the sound. It
+    also fades in (very quickly) new samples so that there is no click from
+    them. Sensitive ramping only performs the fade-in when it is necessary
+    to prevent a click, so percussive sounds stay sharp.
+
+Surround Sound:
+    "Mode 2" ignores panning, so is particularly good for mono MODs.
+
+Pan separation:
+    The higher the setting, the more sounds are pushed away from centre.
+    Obviously can only affect things when playing in stereo.
+
+Auto-looping:
+    When looping is set to "auto", this option determines when to loop MOD
+    formats.
+
+MOD playback mode - decides how MOD files should be played:
+    FT2 = FT2 plays MODs slightly differently from the convention,
+      in fact most trackers play MODs differently from each other! Anyway,
+      if you want to hear MOD files as FT2 plays them, then select this.
+    PT1 = This plays MODs as the original ProTracker did, so now you
+      can relive those early Amiga days! :)
+    PT1 -filter = This is the same as "PT1", but with the Amiga filter
+      disabled.
+
+Ignore muting in files:
+    IT and S3M files can have muted channels, which XMPlay will honour
+    when loading the files, unless this option is enabled.
+
+TIP: Channels can be (un)muted via the MOD pattern display options (see
+     shortcuts above).
+
+Trim ending silence:
+    If there is any silent space at the end of a track, it will not be
+    played. Instead XMPlay will jump to the next track, assuming there
+    is more than one track in the list, and looping is not on.
+
+Universal Y/Z effects:
+    This enables support for the IT Yxx (panbrello) and Zxx (filter) effects
+    in the XM and S3M formats. They are automatically enabled when DMO
+    effects are used, as that indicates the file was created with MPT (which
+    is what allows Yxx and Zxx to be used in XM/S3M files).
+
+Show bpm/etc in time display:
+    This option determines when, if at all, the number of active channels
+    and bpm/speed are shown in the time display. When enabled, the active
+    channel count is shown to the left, and the bpm/speed is shown to the
+    right. The channel count will be inverted if any virtual channels have
+    been killed within the last few seconds (due to excess CPU use).
+
+Shrink columns when channel count is:
+    When there are a lot of channels, the MOD pattern display can become
+    too wide for the screen. This option will cause the instrument/volume
+    column to be removed when there are a certain number of channels, so
+    that more channels can be fitted on screen.
+
+
+DSP
+---
+The response speed to all these options is dependant on the buffer size,
+the delay will be the length of the buffer chosen in the "Output" options.
+
+Amplification slider:
+    This is different to the volume slider. The volume slider controls the
+    level of the sound card output, the amplification slider controls the
+    level of the actual decoding. The higher the amplification, the greater
+    the dynamic range of the decoding output, but if it is too high clipping
+    may occur resulting in distortion of the sound.
+
+Reset on new track:
+    Resets the amp level to 0 dB (or replaygain value) when a track is loaded.
+
+Auto-amp:
+    This causes the amplification level to be automatically reduced whenever
+    clipping occurs. With fade-in enabled, it will fade-in new tracks until
+    they clip, then it'll behave the same as normal. Dynamic mode continues
+    to increase and decrease the amplification level throughout playback.
+
+Replaygain:
+    When a track has "replaygain" information, XMPlay can use it for the
+    default amp level. XMPlay can read RG information from OGG files and
+    APEv2 and ID3v2 tags. Native plugins may also support it, but Winamp
+    plugins have no way of communicating that information. When a track
+    doesn't have the preferred value but does have the other (eg. "Album"
+    is chosen but only "Track" is available), it will be used instead.
+
+NOTE: When replaygain is active, auto-amp is automatically disabled until
+      the amplification slider is moved away from the replaygain level.
+
+Limit according to peak level:
+    When enabled, this will limit the replaygain level according to the peak
+    sample level (if available), so that it does not clip. If available, the
+    peak sample level is shown in the "General" info window.
+
+NOTE: If there is other DSP enabled (EQ/reverb/etc), they could change the
+      level and cause clipping despite this limiting. The "Pre-amp" option
+      could be used to compensate.
+
+Pre-amp:
+    This is added to the replaygain level.
+
+Logarithmic volume:
+    When enabled, the volume slider will use a logarithmic curve. Otherwise,
+    it is linear (a percentage).
+
+
+Plugins
+-------
+This page lists the installed DSP and "general" plugins, and is fairly
+self-explanatory. The "up" and "down" buttons can be used to change the order
+in which the DSP are applied (top first).
+
+There are 2 built in DSP: the equalizer and reverb. Most Winamp DSP plugins
+can be used via the "Winamp DSP wrapper". You can create your own plugins by
+using the SDK available from the XMPlay website.
+
+Exclude from saved settings:
+    This prevents a DSP from being included in saved settings. This is only
+    available with DSP plugins that only allow a single instance.
+
+
+Plugins / Input
+---------------
+The "input" and "archive" plugins that are installed are listed here, with a
+list of the file formats that they support. When changing an input plugin's
+config while it is being used to play a track, you may have to reopen the
+track for the config changes to take effect.
+
+Priority filetypes:
+    This is a space-delimited list of filetypes that the plugin will get
+    1st look at, before the built-in decoders and other plugins. Normally,
+    built-in decoders get 1st look at files, followed by the plugins (in
+    the listed order).
+
+TIP: A large selection of plugins are available at the support site.
+
+NOTE: Only Winamp plugins that can feed the sample data to XMPlay (rather
+      than use their own output) are loaded, which is most of them.
+
+
+Saved settings
+--------------
+Amp/DSP/looping/MOD settings can be saved, to be automatically applied when
+specific tracks are loaded, or saved as presets to be quickly set whenever
+wanted.
+
+When saving settings, the settings that are actually saved is determined by
+the check boxes. The "MOD" box can have a greyed tick, which means that the
+MOD settings are only saved if the current track is a MOD format.
+
+* "Amp" is the amplification settings ("DSP" options page).
+
+* "DSP" is the config of all DSP plugins that are currently active (in the
+  DSP Plugins list), except for those that are set to be excluded.
+
+* "Loop" is the track looping/ending settings ("Miscellaneous" options page).
+
+* "Decoder" can be the settings of any decoder/plugin that supports saved
+  settings. If set the "Current", the current track's decoder settings will
+  be saved (if supported).
+
+Before clicking "Add", you need to select what the settings will apply to.
+There are 5 types of saved settings: File, Type, Path, Tags, Preset.
+
+"Preset" is fairly obvious, and the saved settings can be accessed by right
+clicking the settings button (disk icon) in the left panel.
+
+When XMPlay tries to load settings for a track, it will first look for a
+"File" match. If there is none, it will look for a "Tags" match, and then a
+"Type" match, and then finally a "Path" match. In the case of there being
+multiple path matches, the longest match will be used. For example, both
+"c:\" and "c:\blah\" match "c:\blah\blob.mod", but the "c:\blah\" settings
+will be used.
+
+The preset name or file/type/path/tags of a saved settings can be edited by
+clicking on the entry in the list. In the case of "tags", the text it is a
+search string in the same form as in the "Find tracks" window.
+
+TIP: An empty path setting will match all files.
+
+Right-clicking on a saved setting entry gives the option to load, update or
+remove the settings. When updating settings, the saved settings are replaced
+by the current settings.
+
+Save settings:
+    Writes the settings to disk. No changes are kept otherwise.
+
+Automatically load saved settings:
+    This enables the automatic loading of settings that have been saved for
+    the new track being played.
+
+
+Output
+------
+Here you can choose which device to use, and what output format to use with
+the device.
+
+You may also choose the "WAV Writer" device, to write the output to WAV
+files rather than a soundcard. External encoders ("Encoder - ?") can also
+be used to write compressed audio files, eg. MP3 or OGG.
+
+NOTE: If looping is enabled while using a writer device, the track will be
+      looped only once in the written file, even if the "Only once" switch
+      is not on.
+
+When writing to disk, the amplification slider controls the volume level.
+Be careful not to use a too high amplification level as this may result in
+samples being clipped. You can avoid any amplification problems by using
+the "WAV Writer - normalized" device.
+
+Apply sample rate to all formats:
+    Most file formats have a particular sample rate that they are intended
+    to be played at, and XMPlay will usually play them at that rate, unless
+    this option is enabled. In which case, XMPlay will resample all tracks
+    to the chosen sample rate
+
+SRC quality:
+    This controls the quality of the sample rate conversion. Higher settings
+    reduce aliasing, but also require more CPU.
+
+Downmix multi-channel:
+    When enabled, tracks that have more than the chosen number of channels
+    will be downmixed. Otherwise they will be played with their default
+    number of channels, which may mean that some channels are not heard if
+    the extra speakers are not present.
+
+NOTE: If the device does not support the chosen output format, different
+      settings may automatically be used. See the "Output" text in the
+      "General" info window for the exact format of the output.
+	  
+Dithering and noise-shaping are recommended when writing to disk (eg. to
+burn on CD), but noise shaping is not recommended if you intend to process
+the written file (use 32-bit whenever possible instead).
+
+NOTE: When writing to disk (including external encoder), 32-bit is standard
+      IEEE754 floating-point ("type 3" WAV).
+
+Directory:
+    The default directory to write files in.
+
+Source:
+    When enabled, the output file will be written to the same directory as
+    the track that is being played, instead of the "Directory" setting.
+
+Auto-filename:
+    This removes the need to select a filename when writing to disk. The files
+    are written as the same name with the default extension added. Because no
+    user interaction is required, writing is also continuous in this mode; it
+    automatically moves onto the next track when the current one ends if the
+    "auto-advance" option is enabled.
+
+Remove original extension:
+    When enabled, the original file's extension will be removed from the
+    written file.
+
+Use source resolution:
+    When enabled, the track's sample resolution (if it has one) will be used
+    in the written file instead of the one chosen above. When an encoder is
+    used, this will be overridden by the resolution set for that, if not set
+    to "output".
+
+Separate MOD instruments:
+    When enabled, and writing a MOD format to disk, each instrument will be
+    written individually. The instrument number shall be appended to the
+    filename.
+
+
+Output / Encoders
+-----------------
+Here you can add/remove/edit the encoders available to the device list.
+Any command-line encoder can be used, optionally using STDIN, so that no
+intermediate file writing is required.
+
+The resolution of the sample data sent to the encoder will be as set in
+the "Output" options above, unless it is overridden here.
+
+Settings for the LAME and OGGENC encoders are provided, to use them put
+the LAME.EXE or OGGENC.EXE file in the same directory as XMPlay. See the
+support site for more encoders.
+
+
+Output plugins
+--------------
+The option pages for any installed output plugins will be shown below the
+"Output" options.
+
+
+The info window
+===============
+The info window displays information on the currently loaded track. There
+are 4 modes...
+
+General:
+    Displays info on the file's name, format, size, etc...
+
+Message:
+    Displays any messages or tags contained in the file, including the
+    current track name when streaming from Shoutcast servers.
+
+Samples:
+    Displays instrument and sample texts.
+
+Vis:
+    Displays visualisations.
+
+The window can be resized by dragging the edges, or you can have XMPlay
+automatically resize the window to fit the contents by ticking the box at
+the top (2nd from left). The mouse wheel can be used to scroll up/down.
+
+Right-clicking gives the option to copy the window's text to the clipboard.
+Any URLs that are present in the text can also be opened by right-clicking.
+
+The 3rd button from the left toggles having the playlist panel duplicated
+in the info window. Right-clicking the button opens the library (see the
+"Library" section below). With "auto-resize" enabled, only the playlist
+display width is resized; the number of tracks listed is left as it is.
+
+There is an extra button in the info window version of the playlist, with
+which you can find tracks containing specific word(s) in their filename or
+tags. Right-clicking allows you to choose to have only the matched tracks
+played (the rest will be skipped).
+
+The current and total number of tracks is also displayed in the top-right.
+
+TIP: Double-clicking the visualisation toggles fullscreen mode.
+
+NOTE: Screensavers will be disabled while fullscreen vis is active.
+
+NOTE: Some visualisations support button-clicks. The middle (or 4th/5th)
+      mouse button is used to access that feature in XMPlay.
+
+
+MOD Pattern Display
+===================
+The "MOD Pattern Display" visualisation applies to MOD formats only, and
+allows you to get an idea of how the files were "tracked". For simplicity
+and clarity, not all effects are shown and a universal notation is used
+for all formats. The following entries are shown by XMPlay:
+
+note
+instrument (shown in green)
+portamento (red)
+tone up/down (red ^/v)
+vibrato (red ~)
+volume (blue)
+volume up/down (blue +/-)
+
+NOTE: All numbers are shown in hex, except the row number.
+
+Shortcuts can be set to scroll the display when all the channels do not
+fit in the display. Channels can also be muted via shortcuts. See the
+"Shortcuts" options page.
+
+TIP: Channels can be muted by middle-clicking on them.
+
+TIP: The width of the channel columns can be changed depending on the
+     number of channels. See the "MOD" section above.
+
+
+Library
+=======
+The library is a sort of glorified playlist. Whereas the playlist just
+contains each track's filename and title, the library contains a lot of
+additional information. The full list of info contained in the library
+is: filename, title, artist, album, year, track, genre, comment, file
+type, file size, length, the play count, the time of last playback, the
+age, and a user rating.
+
+The tracks in the library can be sorted by any of these values, making
+it quick and easy to locate the tracks you want to play. Click on the
+column heading to sort by that value. Clicking again will reverse the
+order.
+
+You can choose which info is shown in the library by right-clicking on
+the headings. You can also change the display order of the columns by
+dragging them, and you can change the width of each column by dragging
+the borders.
+
+Files can be added to the library in the same way as they can with the
+playlist, eg. using the add button or by drag'n'dropping them. They
+can also be added automatically when played or added to the playlist.
+See the "Playlist" section above.
+
+Probably the most convenient way to add files is to monitor directories,
+ie. the directories containing your music. When any files are added or
+deleted, they will automatically be added or removed from the library.
+Monitoring is setup in the "Library" options page.
+
+The library uses the same GUI as the extended playlist. When used here,
+all the buttons will take effect on the library, except for the random
+and loop list switches, which still apply to the playlist.
+
+Right-clicking on tracks will give options to add them to the playlist,
+replace the playlist with them, play them, queue them, select matching
+tracks, rate the tracks, view/edit track info, refresh the info, and
+remove the tracks. The playlist mouse button action settings also apply
+to the library.
+
+NOTE: Playing and queuing both add to the queue: playing inserts at the
+      front of the queue, and queuing adds to the end of it. The tracks
+      will also be added to the playlist if they are not already there.
+
+
+Track info
+==========
+The track info window is accessed via right-clicking on a track in the
+playlist or library. In this window you can see some details of the track,
+including the filename, tags, file size and playback length. The filename
+and tags can be modified.
+
+NOTE: Changes made here affect all copies of the track, ie. if there are
+      multiple copies of the track in the playlist, they will all have the
+      same modified info.
+
+When overriding tags, the track's file is not modified; the tags are just
+stored in the library. This means that any modifications will be lost upon
+closing XMPlay unless the track is in the library (or playlist).
+
+TIP: The tags of multiple tracks can be overridden by selecting them all
+     before opening the track info.
+
+
+Find tracks
+===========
+Using this window, you can search for tracks containing specific word(s)
+in their title or filename. When searching in titles, the track's tags will
+also be searched if they're available; that is if they're in the library
+or have been read during playback or for the "Track info" window.
+
+When multiple words are specified, they must all be present for a track to
+be considered a match. Words can be prefixed with '-' to require them to be
+absent rather than present. It is also possible to group words so that only
+one of the group has to be present, by joining them with '/'. For example,
+a search string of "a -b c/d" would mean that "a" must be present, "b" must
+be absent, and at least one of "c" or "d" must be present.
+
+TIP: Phrases can be used instead of single words by enclosing them in "...".
+
+When "Single phrase" is enabled, none of the processing above is performed
+and the search text is just treated as a phrase.
+
+As you type the search string, or change the search options, any matches
+will be listed below. You can click on a match to jump to it in the playlist
+and/or library. Right-clicking will bring up options to play/queue/list the
+track and view track info. Double-clicking or pressing space will also play
+the selected tracks.
+
+TIP: The search results can be sorted by title or filename by clicking the
+     column header.
+
+Include library:
+    Enables searching of the library for matches, as well as the playlist.
+
+Skip non-matching tracks:
+    XMPlay will skip over any tracks that do not match the search criteria
+    when playback advances.
+
+TIP: The "Find quick" shortcut (alt+F by default) can be used to enter a
+     search string and find matches without opening this window. The current
+     "Single phrase" and "Case-sensitive" settings are used by that, but
+     "Invert" is automatically disabled.
+
+
+Dragon droppings
+================
+Files, whole directory trees, shortcuts, and URLs can be drag'n'dropped into
+XMPlay. If they are dropped into one of the playlist panels or the queue,
+then the tracks are inserted into the position they were dropped at. If they
+are dropped elsewhere, then the playlist is cleared, and the dropped tracks
+are added and played. Holding the shift key down as you drop the tracks
+reverses this behaviour, eg. the list is cleared if the tracks are dropped
+in a playlist panel. Tracks can also be dropped into the library.
+
+The files and URLs of tracks can also be dragged from XMPlay, into other
+applications, by clicking the right button while keeping the left button
+pressed.
+
+
+Command-line
+============
+Files, directories and URLs can be opened with XMPlay by passing them in
+the command-line. There are also a few options that can be used in the
+command-line:
+
+-list:
+    Add the tracks to the list, else the list will be cleared and the new
+    tracks played (depending on the "Integration" options). When used, this
+    option should come before the files in the command-line.
+
+-play:
+    Start playback.
+
+-tray:
+    Minimize to tray.
+
+
+Plugins
+=======
+XMPlay supports input, archive, output, DSP, and visual plugins. A load
+of plugins are available at the XMPlay and support websites. To install a
+plugin, simply put it in the same directory as (or a sub-directory of) the
+XMPLAY.EXE file.
+
+NOTE: XMPlay must be restarted to enable newly installed plugins.
+
+
+Skins
+=====
+Alternative skins are available at the XMPlay and support websites. As with
+plugins, to install a skin, simply put it in the same directory as (or a
+sub-directory of) XMPLAY.EXE. To switch skins, go to the "Appearance" options
+page, or right-click on any non-button area of the main panel.
+
+NOTE: XMPlay must be restarted to enable newly installed skins.
+
+A skinning kit is also available at the XMPlay website, should you wish
+to create your own XMPlay skins.
+
+
+CUE sheets
+==========
+CUE files can be used to quickly jump to specific points (eg. start of a song
+in an album) in large files. When opening a track, XMPlay will look for a CUE
+file of the same filename (with ".CUE" extension) in the same directory (or
+archive). If one is found, it'll be loaded and the CUEs will be listed in the
+"Message" info window. The sub-song shortcuts can be used to jump between the
+CUE points. XMPlay can also update the title based on the CUE sheet; see the
+"Title format" section above.
+
+NOTE: Some formats allow CUE sheets to be embedded, which XMPlay will also
+      check for.
+
+
+Latest version
+==============
+The latest version of XMPlay can always be found at the XMPlay website:
+
+		www.un4seen.com
+
+
+Licence
+=======
+XMPlay is free for non-commercial use; if anyone tries to charge you
+for it, kick 'em where it hurts.
+
+This software is provided "as is". The author makes absolutely no warranties
+on it; you use it at your own risk. The author shall not be held responsible
+for any damage that may result from its use, including, but not limited to,
+burning your toast while being too engrossed in the XMPlay "experience".
+
+All trademarks and other registered names contained in the XMPlay package
+are the property of their respective owners.
+
+
+History
+=======
+These are the major (and not so major) changes at each version stage.
+There are also many other tweaks and bug fixes made along the way!
+
+3.6 - 22/12/2010
+----------------
+* Decoder/plugin saved settings
+* Replaygain included in amplification saved settings
+* Tag-based saved settings
+* Priority filetypes for input plugins
+* Use of the source sample resolution when writing to disk
+* Shortcut reordering
+* Playback state resetting when looping non-looped MODs
+* Playlist track number column is now optional
+* Average play count per month in library
+* Improved search support for diacritics
+* Clearing of the folder/URL/search history
+* Windows default output device ("Microsoft Sound Mapper")
+* Support for UTF-16 playlists
+* Support for opening URLs via DDE
+* Gapless support for iTunes MP3 files
+* Overriding of Explorer's "Hide extensions for known file types" setting
+* Sample resolution added to WAV/AIFF "General" info
+* WMA plugin: Sample resolution added to "General" info
+* WMA plugin: Proxy support
+* WADSP plugin: Bit borrowing for headroom to avoid clipping
+* Skinning improvements (see skinning kit)
+
+3.5.1 - 9/2/2010
+----------------
+* Rating shortcuts
+* Optional length/filetype/rating columns in playlist panel and extended playlist
+* Adjustable crossfade length for manual track changes
+* Search system tweaked some more, including a single phrase mode
+* M3U playlist saving can use the standard or extended form
+* CD plugin: MusicBrainz CDDB server option
+
+3.5 - 22/12/2009
+----------------
+* Built-in AIFF support
+* Crossfading
+* Track rating
+* Configurable SRC quality
+* More flexible search system (present/absent directives)
+* Quick find shortcut
+* Case-insensitive search support for non-ASCII characters
+* Logarithmic volume option
+* Volume muting
+* Queue toggling is now optional and dequeue option added, allowing duplicate entries
+* CUE sheets for written internet streams
+* Timestamping of separately written internet stream tracks
+* "Stop at end of track" option to temporarily disable looping & list advancing
+* Options to close XMPlay at the end of the current track/list
+* Playlist sorting by tags
+* Options to only play newly listed tracks when not already playing or after bookmarking
+* Optional moving of existing duplicate tracks
+* Optional default queuing of new tracks
+* Optional auto-sorting of new tracks by filename
+* Optional removal of original file extension when writing to disk
+* Optional replacing of filename underscores with spaces in titles
+* Title format length limiting
+* Separate title format for playlist panel
+* Replaygain pre-amp adjustment
+* Replaygain limiting according to peak level
+* Support for LAME replaygain info
+* Tracks played from library or search results are inserted at front of queue
+* Random setting optionally affects next/previous controls
+* Assignment of track actions to extra mouse buttons
+* Shortcuts to jump to top/bottom of list/library
+* Archive plugins added to input plugins list
+* Winamp input plugins sorted by filename (so order can be changed by renaming)
+* Playlist track tags retained in library
+* Playlist periodic auto-saving
+* Library backup file (XMPLAY.LIBRARY~)
+* Auto-saving of settings upon closing "Options and stuff"
+* Support for MO3 2.4
+* Optional disabling of help bubbles
+* Optional hour column in time displays
+* Improved communication with Explorer (via OLE instead of DDE)
+* CD plugin: Read speed limit option
+* CD plugin: Support for CD drives with letter A/B
+
+3.4.2 - 28/6/2007
+-----------------
+* Library menu options and shortcuts to select all tracks with matching tags
+* Reverb "time" parameter
+* Configurable internet connection timeout and pre-buffering
+* CDDB and CDTEXT info shown separately
+* Option to prefer CDDB or CDTEXT for tags
+* Updated version notifications
+
+3.4.1 - 1/5/2007
+----------------
+* Updating of saved settings
+* Amp slider range increased to +/-15dB in DSP options
+* Replaygain levels shown in "General" info
+* Shortcuts for auto-amp and to reset amplification
+* "-list" command-line option to add files to list
+* 3D spectrum speed toggling (middle-click)
+* Library display options moved to header right-click menu
+
+3.4 - 3/4/2007
+--------------
+* Output plugin system
+* Optional resampling and downmixing
+* Library directory monitoring
+* Fullscreen visualisations
+* Recursive/nested archive support
+* EQ increased to 9 bands
+* Actual filetype (not just extension) shown in playlist/library
+* Per-extension saved settings replaced by per-filetype
+* Ignoring of unwanted filetypes when adding new files
+* DSP locking (prevent overriding by saved settings)
+* Playlists in the library
+* Library mass-tagging
+* "Age" record added to library
+* Waiting for track endings to decay
+* Support for embedded CUE sheets
+* Choice of CDDB info when there are duplicates
+* CDDB info caching
+* Info window text magnification
+* Bubble text size configuration
+* Sorting of search results by filename
+* M3U playlist saving
+* Scanning for playlists in HTML pages
+* Drag'n'dropping between playlist and library
+* MOD channel muting via middle-click in pattern display
+* MOD auto-loop options
+* Year tag extraction from MODs
+* MOD signature shown in "General" info
+* Auto-amp automatically disabled when replaygain is active
+* Extended output buffer size range
+* Balance shortcuts
+* MOD interpolation/ramping/surround shortcuts
+* Random played tracking always retained (option removed)
+* Skinning improvements (see skinning kit)
+
+3.3.0.6 - 30/11/2006
+--------------------
+* Per-extension saved settings
+* CD support for restricted/limited Win2k/XP users
+* Option to lock CD door while playing
+* Search history
+* Shortcuts to extend selection
+* Version number shown in "Options and stuff" window
+
+3.3 - 22/12/2005
+----------------
+* Config moved from registry to XMPLAY.INI file
+* Show/manipulate queue in playlist panel
+* Separate resizable search window
+* Optional sorting of search results
+* Position bookmarking (save current position to resume later)
+* CD-TEXT support
+* "Recover dead tracks" option to locate missing files
+* Automatically check other drives for missing files
+* "Play count" added to library
+* Time of last play shown in track info window
+* Integration option to select/deselect all extensions
+* Quick launch bar shortcut
+* Option to save playback position on closing XMPlay
+* Shortcut to close XMPlay is now customisable
+* Shortcut to save list
+* Shortcut to toggle MOD playback mode
+* Tray title bubbles are now optional
+* "Move selected to top" sort option
+* "Only sort selected" option removed (now always on)
+* "Write to disk" continues writing after reconnection
+* Download progress shown in "General" info
+* Improved track dragging in list
+* Follow current track can also apply in extended list
+* Moving of main and info windows together
+* Options and stuff window rearranged
+* Differentiation between unplayable and missing tracks
+* Skinning improvements (see skinning kit)
+
+3.2 - 13/2/2005
+---------------
+* New "media library" (replaces "recent tracks" list)
+* Native "input" plugin system
+* CD Audio support
+* Conditional (if..then..else..) title formatting
+* Genre, comment and filename elements added to title formatting options
+* Title formatting can now also apply with Winamp plugins whenever possible
+* Support for APEv2 tags
+* ID3 genre tag support
+* Optional title updating from CUE sheets
+* Undo option (shortcut) for playlist/library modifications
+* Plugin-played formats added to integration options
+* Play/queue/info options (right-click menu) in the "Find tracks" list
+* More efficient WMA file playing with WM9 (and above) modules installed
+* Replaygain support
+* Improved MOD default amplification level calculations
+* Option to automatically write WAV/etc files to same directory as the source file
+* Tag passing to external encoders (LAME/OGGENC default command-lines updated)
+* Scrolling titles
+* Playlist entry scrolling replaced with more detailed help bubbles
+* Option to not add duplicate tracks to the playlist
+* Adjustable info window text wrapping
+* OGG "vendor" info shown in "General" info
+* Option to shrink columns in MOD pattern display depending on number of channels
+* MOD BPM/speed display option
+* Option to ignore channel muting in IT/S3M files
+* DSP volume/balance now permanently on, and changes are audible instantly
+* Dithering & noise-shaping automatically bypassed when not required
+* Fully customisable sample rate in device options
+* Option whether to allow multiple instances
+* Folder shell integration option
+* Proxy config option
+* Shortcut to show tray title bubble
+* Shortcut to clear list
+* "Device options" shortcut
+* Shortcut to select all dead tracks
+* Windows mouse wheel scrolling settings used when scrolling playlist and info window
+* Support for extended M3U playlists
+* Skinning improvements (see skinning kit)
+
+3.1 - 1/8/2004
+--------------
+* Gapless playback
+* Support for Unicode (Russian/Chinese/etc) files
+* Option to individually write each MOD instrument to disk
+* CUE sheet support
+* "XMPlay-able" file selector filter now includes plugins
+* "Refresh dead tracks" option
+* Title parameter added to external encoder options
+* Length of selected tracks is displayed (alternates with total list time)
+* Minimize shortcuts can now also restore
+* "Toggle random play order" shortcut
+* "Clean reg" option to remove registry entries
+* More accurate time-based OGG seeking
+* Skinning improvements (see skinning kit)
+
+3.0 - 24/2/2004
+---------------
+* Support for multi-channel WAV/OGG/WMA files & Winamp plugins
+* Fully customisable shortcuts...
+* ...also available via DDE (details available on request)
+* DSP plugin support
+* MOD and archive file "streaming" (ie. download and play)
+* Seeking in internet streamed OGG files while downloading
+* SSE2 optimized sinc interpolation
+* Enhanced saved settings options
+* Enhanced search option (OR/AND multiple word searches)
+* Recently played tracks list
+* Fading-out of looped files
+* Option to "auto loop" only MOD files
+* Option to sort/shuffle only selected tracks
+* Finer amplification resolution and extended range (-15 to +10 dB)
+* Auto-amp improvements
+* Icecast (OGG) stream ripping into separate files
+* Adjustable internet buffering
+* Shout/Icecast "Auto-reconnect" option
+* Always "on-top" option
+* Reverb now applies to mono playback too
+* Customisable icon for associated filetypes
+* Option to "Ignore playlists & shortcuts" when adding directories
+* Support for ID3v2.4 tags
+* Support for LAME "Info" header
+* Deleted files moved to recycle bin (if enabled)
+* Skinning improvements (see skinning kit)
+
+2.8 - 28/7/2003
+---------------
+* Device/Integration/Miscellaneous/Plugins panels removed, and...
+* ...replaced by a single integrated "Options and stuff" window
+* Enhanced search option (matches listed as you type)
+* DSP volume & balance option
+* Mono tracks are played in stereo if output is set to stereo
+* Support for high-pass filter and forward/reverse (S9E/F) IT/MPT effects
+* "Always in tray" option
+* "Restrict rendering" vis option
+* "Stop at dead track" option
+* "Clear queue" option
+* File selector "Folder history"
+* External encoder "resolution" setting
+* Amplification display unit changed to "dB"
+* Maximum buffer length increased to 2.5 seconds
+* Faster skin loading
+* Skinning changes (see skinning kit)
+
+2.7 - 17/5/2003
+---------------
+* 8 point windowed sinc interpolation (3DNow! optimized)
+* Non-interpolated mixing option
+* Support for 32/24-bit WAV files
+* Support for 32/24-bit Winamp input plugins
+* More responsive auto-amp reduction
+* Amp slider scale is now the same for all formats
+* "Dither" and "Noise shaping" options
+* MOD pattern display horizontal scrolling
+* MOD channel muting
+* Automatic scanning for track lengths
+* Resume playback at startup from where it left off (right-click close)
+* Checking for "dead" tracks at startup
+* Visualisation resizing without stretching
+* Logarithmic freq in spectrum displays (16khz range)
+* Info window can be opened while minimized to tray...
+* ..."Info window" global hotkey and tray menu option
+* Open/add files from the tray menu
+* Option to display filenames in info window playlist
+* "Stop at end of queue" option
+* Looped WAV writing (always "only once")
+* Track number added to title formatting options
+* Invert selection shortcut (I)
+* Selection of multiple blocks of tracks (using ctrl+shift+click)
+* Shortcut to rescan track titles (F9)
+* Numerical sorting (eg. "2" comes before "10")
+* "Sort by filename" now includes the path
+* WinXP time display problem fixed
+* A few more skin-related improvements (see skinning kit)
+
+2.6 - 16/1/2003
+---------------
+* 32/24-bit OGG/MPEG/MOD playback
+* Track queuing
+* Multi-track selection (move/delete/queue/skip multiple tracks)
+* Customisable track title format
+* Help bubble for long track titles
+* Title changes are displayed when minimized to tray
+* Global hotkeys for stop/seeking/volume
+* Support for "win" key in global hotkeys
+* Multi-song MOD WAV writing support
+* 24-bit WAV writing
+* 32-bit WAV writing format changed to "type 3" standard
+* Output format shown in "General" info window
+* Partial unicode support in OGG tags
+* Settings moved to HKEY_CURRENT_USER registry branch
+* A couple more skin-related improvements (see skinning kit)
+
+2.5 - 18/11/2002
+----------------
+* Multi-song MOD support
+* Support for DMO effects in IT/XM/MO3 files
+* Support for chained OGG streaming
+* Support for extended filter range in IT files
+* Support for "Invert Loop" (EFx) MOD effect
+* Global hotkeys
+* Open URLs from info window texts
+* Centered MOD pattern scrolling mode
+* Faster WAV writing
+* Improved external encoder STDIN support
+* Playlist moved from registry to XMPLAY.PLS file
+* Per-track settings moved from registry to XMPLAY.SET file
+* Icecast2 tags shown in info window
+* Support for track titles in WMA streams
+* ID3 tags shown in info window for plugin-played files too
+* EQs bands changed (now evenly spaced 2 octaves apart)
+* "Flat" EQ preset
+* XMPlay Support site link in misc panel
+* "Auto-advance" option (loop list switch sub-menu)
+* "Play listed tracks" option (list button sub-menu)
+* "Sort by extension" option (random switch sub-menu)
+* "-tray" command-line option to launch in tray
+* "-play" command-line option to start playback on launch
+* Support for multiple files and/or directories in command-line
+* Shortcut to "Add directory" (shift+Insert)
+* MP3pro files are passed onto the MP3pro plugin (if installed)
+* A few skin-related improvements (see skinning kit)
+
+2.4a - 24/7/2002
+----------------
+* OGG support updated to 1.0
+* Help bubbles for volume/amplification/EQ/reverb shortcut adjustments
+* Vibrato effects shown in MOD pattern display
+* Shortcut to stop
+* Shortcut to "Get missing times"
+* Shortcut to view skin "readme" text
+* Shortcut to reload current skin
+
+2.4 - 14/7/2002
+---------------
+* Skins
+* Built-in WAV support (including streaming)
+* Built-in WMA support (including streaming)
+* OGG support built-in (OGG/VORBIS DLLs not required)
+* ASX "playlist" support
+* Spectrum visualisations
+* Amplification & auto-amp apply to plugins now too
+* Calculation of missing track lengths
+* Support for Modplug/ADPCM compressed files
+* "Remove & delete file" option
+* "Add directory" option
+* Output directory selector (for auto-filename)
+* Copy info window text to the clipboard option
+* MO3 sample compression ratio in "General" info window
+* Basic sample details in "Samples" info window
+* Filename help bubbles in info window playlist
+* Slider levels shown in help bubbles
+* "Restart" option in tray menu
+* "Random play order" indicator
+* Track count display in playlist panel
+* "Stop" when already stopped unloads current track
+* "Unload final track" option
+* Shortcut to find track starting with x
+* Winamp plugin track info shortcut changed (due to above)
+* Minimize shortcut
+* Option to reset amplification on new tracks
+* Option to remove tracks not matching search criteria
+* Extension association removal
+* Command-line support
+* "Add to XMPlay-list" shell option
+* Info window texts retrievable via DDE (topics=info0-2)
+* Visual plugin button-click support
+
+2.3 - 28/2/2002
+---------------
+* MPEG & OGG pre-load/scanning removed
+* Seeking in internet streamed files
+* MOD pattern display visualisation
+* CODEC WAV writer removed and...
+* ...replaced by customisable external encoder settings
+* Auto-filename option for WAV/encoder writing
+* PLS/M3U playlist streaming
+* Active MOD channel count
+* "Random play order" option
+* Minimize to tray
+* Info window scroll shortcuts
+* Auto-kill virtual channels if CPU load reaches 75%
+* Comments in XM files supported
+* Localised font support
+
+2.2 - 13/1/2002
+---------------
+* Playlist searching & unmatched skipping
+* OGG modules updated to RC3
+* Detection of VBlank MODs
+* EQ/reverb/restart shortcuts
+* Current/total tracks display in playlist (info window)
+* Plugin file info menu option in playlist
+* Follow the current track marker in playlist panel
+* Adlib S3M files are ignored (so plugins can play them)
+* Error dialog explaining failed HTTP/FTP connections
+* Warning dialog for unsupported Winamp plugins
+
+2.1 - 22/12/2001
+----------------
+* Winamp input plugin support
+* Playlist panel duplicated in the info window
+* HTML webpage scanning
+* URL drag'n'dropping into XMPlay
+* Drag'n'dropping files/URLs from XMPlay to other apps
+* Write separate tracks to disk (shoutcast streams)
+* "Dynamic" auto-amp mode
+* "Auto loop" mode applies to all formats now (not only MODs)
+* 96khz MOD playback rate
+* BPM/speed display for MOD formats
+* Stereo sample support in MO3/IT/XM/S3M formats
+* Current track displayed in taskbar
+* Open file/URL dialogs combined
+* Desktop shortcut option
+* "Remove duplicate titles" option
+* "Remove dead" also removes non-existent local files not marked as "dead"
+* Random track shortcut
+
+2.0 - 1/11/2001
+---------------
+* Too many things to remember! :)
+
+
+Credits
+=======
+Ogg Vorbis decoding is based on libogg/vorbis,
+Copyright (c) 2002-2004 Xiph.org Foundation
+
+
+The "thank you" section
+=======================
+BIG thanks to Chris "Ripguy" Corrado who designed the XMPlay 3 GUI,
+Thomas Radeke who maintains the XMPlay Support Site and Nathan
+"KelticDanor" Hindley who did it before him.
+
+And thanks to the many who have given good suggestions and bug reports!
+

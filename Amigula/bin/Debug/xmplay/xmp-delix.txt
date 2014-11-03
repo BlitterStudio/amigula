@@ -1,0 +1,98 @@
+XMPlay Delix plugin test 8c - Copyright (c) 2005-2007 Sebastian Szczepaniak. 
+All rights reserved.
+
+
+What's the point?
+=================
+XMP-DELIX is a plugin for XMPlay for playing music in many various 
+(often exotic) Amiga formats. Delix acts as a wrapper plugin 
+allowing XMPlay use EaglePlayer and DeliTracker players (plugins).
+
+Supported formats (129): Action Amics Soundtool, AM Composer, AMOS Music 
+Bank, Art & Magic player, Art Of Noise (4 voices), AudioSculpture, Beathoven 
+Synthesizer, Ben Daglish player, Ben Daglish SID player, Blade Packer, Chip 
+Tracker, Cinemaware player, Core Design player, CustomMade, Darius Zendeh player, 
+Dave Lowe new player, Dave Lowe player (DAVELOWE), Dave Lowe player (UNCLEART), 
+David Whittaker player, Delta Music 1.0, Delta Music 2.0, Desire player, DigiBooster, 
+Digital Sonix & Chrome player, Digital Sound Creations, Digital Sound Studio, 
+Dirk Bialluch player, Dynamic Synthesizer, Ear Ache, Editeur Musical Sequentiel, 
+Fashion Tracker, "Forgotten Worlds" player, Fred Editor, Fred Gray player, 
+Future Composer 1.3, Future Composer 1.4, Future Composer BSI, Future Player, 
+GlueMon, Howie Davies player, Images Music System, In Stereo 1.0, In Stereo 2.0, 
+Infogrames player, JamCracker, Janko Mrsic-Flogel player, Jason C. Brooke player, 
+Jason Page player, Jeroen Tel player, Jochen Hippel player, Jochen Hippel 7V player, 
+Jochen Hippel COSO player, Jochen Hippel ST player, Kris Hatlelid player, Leggless 
+Music Editor, Magnetic Fields packer, Major Tom player, Maniacs of Noise player, 
+Mark Cooksey player, Mark Cooksey old player, Mark II Sound System, Martin Walker 
+player, MED/OctaMED (4 voices), MED/OctaMED (8 voices), Medley, Mike Davies player, 
+MMDC, Mugician, Mugician II, Music Assembler, Music Line (4 voices), MusicdiskTracker,
+NovoTrade packer, Paul Robotham player, Paul Shields player, Paul Summers player, 
+Peter Verswyvelen packer, Pierre Adane packer, PowerTracker, Professional Sound 
+Artists player, PumaTracker, Quadra Composer, Quartet player, Richard Joseph player, 
+Riff Raff player, Rob Hubbard player, Rob Hubbard ST player, Scumm player, Sean Connolly 
+player, Sean Conran player, SIDMon 1.0, SIDMon 2.0, Sierra AGI player, Silmarils 
+player, Sonic Arranger, Sonic Arranger packed, Sonix, Soprol, Sound Master, Sound 
+Player, Soundcontrol, Soundfactory, SoundFX, SoundImages, SoundMon 2.0, SoundMon 
+2.2, Special FX, Special FX ST, Speedy A1 System, Speedy System, Steve Barrett player, 
+Steve Turner player, SunTronic, SynthDream, Synthesis, SynthPack, SynTracker, TFMX, 
+TFMX 7V, TFMX Pro, The Musical Enlightenment, Thomas Hermann player, Tim Follin 
+player, TomyTracker, TronicTracker, Voodoo Supreme Synthesizer, Wally Beben player, 
+YMST and custom players. 
+
+NOTE: You must have XMPlay 3.4.0.4 or above to use this plugin.
+
+NOTE: This plugin requires XMP-ZIP plugin. You can find it on the 
+      XMPlay website (URL below).
+
+NOTE: To "install" the plugin, simply put 
+         - xmp-delix.dll, 
+         - xmp-delix.dat,
+         - xmp-zip.dll
+      in the same directory as (or a sub-directory of) XMPLAY.EXE.
+      (xmp-zip.dll does not require to be in the same directory as
+      xmp-delix.dll).
+
+
+Latest Version
+==============
+The latest version of the plugin can be found at 
+   http://dhost.info/pieknyman/
+
+The latest version of XMPlay can be found at the XMPlay website: 
+   http://www.un4seen.com/
+
+
+Credits
+=======
+This plugin uses Starscream 680x0 emulation library by Neill
+Corlett (www.neillcorlett.com).
+
+Players by:
+- Jan Blumenthal and Henryk Richter from the Eagleplayer project
+- Don Adan & Mr. Larmer of Wanted Team
+- Heikki Orsila and Michael Doering from the UADE project
+- Andreas 'Andy Silva' Szabo
+- Tomas Partl
+- Tomasz & Waldemar Piasta
+- Sunbeam/Shelter
+- MORB/CdBs Software
+- Darkness/Synergy
+- GlueMaster/Northstar
+- Mr. Styckx
+
+
+Copyright, Disclaimer, and all that other jazz
+==============================================
+This plugin is free for use with XMPlay, so if anyone tries to charge
+you for it, kick 'em where it hurts.
+
+This software is provided as-is. The author makes absolutely no warranties
+on it. You use it at your own risk. The author shall not be held responsible
+for any damage that may result from its use.
+
+
+Bug reports, Suggestions, Comments etc...
+=========================================
+If you have any of the aforementioned you can email:
+
+	pieknyman@gmail.com

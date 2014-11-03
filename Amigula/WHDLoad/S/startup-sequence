@@ -1,0 +1,8 @@
+C:SETPATCH quiet
+C:Assign > NIL: ENV: RAM:
+C:Assign > NIL: T: RAM:
+FailAt 21
+IF EXISTS S:User-Startup
+Execute S:User-Startup
+EndIF
+uae-configuration SPC_QUIT 1

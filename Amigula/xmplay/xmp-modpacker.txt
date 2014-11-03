@@ -1,0 +1,92 @@
+XMPlay MOD-packer plugin (rev.3) - (c) 2003-2004 Fraggie. All rights reserved
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+Files that you should have found in the XMP-MODPACKER "package"
+===============================================================
+XMP-MODPACKER.DLL   The plugin
+XMP-MODPACKER.TXT   This file
+FILE_ID.DIZ         BBS description file
+
+
+What's the point?
+=================
+This plugin allows XMPlay to load/play tracker music converted with several
+Amiga MOD packers. To "install" the plugin, simply put the XMP-MODPACKER.DLL 
+file in the same directory as XMPLAY.EXE is located.
+
+NOTE: You must have XMPlay 1.4 or above to use this plugin.
+
+NOTE: The "Verify new files" option must be enabled for this plugin to work.
+
+
+Supported formats
+=================
+ * ChipTracker (*.kris, *.mod)
+ * Compact ModFile (*.ac1d)
+ * NoisePacker 2.0 / 2.1 (*.np2)
+ * NoisePacker 3.0 (*.np3)
+ * PhaPacker / ProPacker 1.0 (*.pha, *.pp10)
+ * Pro-Packer 2.1 (*.pp21)
+ * Pro-Packer 3.0 (*.pp30)
+ * ProRunner 1.0 (*.prun)
+ * ProRunner 2.0 (*.pru2)
+ * The Player 4.0a / 4.0b (*.p40, *.p4x)
+ * The Player 4.1a (*.p41, *.p4x)
+ * The Player 5.0a (*.p50, *.p5x)
+ * The Player 6.0a (*.p60)
+ * The Player 6.1a (*.p61)
+ * TrackerPacker 3.0 / 3.1 (*.tp3)
+
+
+Latest version
+==============
+The latest versions of XMPlay and the plugins can always be found
+at the XMPlay website:    http://www.un4seen.com/
+
+
+Copyright, Disclaimer, and all that other jazz
+==============================================
+This plugin is free for use with XMPlay.
+
+This software is provided as-is. The author makes absolutely no
+warranties on it. You use it at your own risk. The author shall
+not be held responsible for any damage that may result from its use.
+
+All trademarks and other registered names contained in the XMP-MODPACKER
+"package" are the property of their respective owners.
+
+
+The "thank you" section
+=======================
+Thanks to Sylvain 'ASLE' Chipaux for his file format descriptions, which
+saved me a lot of time.
+
+DLL compressed with UPX.
+
+
+Bug reports, Suggestions, Comments etc...
+=========================================
+If you have any of the aforementioned you can email:
+
+        fraggie@o2.pl
+
+
+History
+=======
+Here are the changes at each revision stage.
+
+Revision 3 - 19/7/2004
+---------------------
+ * Unicode filenames support 
+ * Packer name display in Message info window mode :)
+
+Revision 2 - 4/6/2004
+---------------------
+ * fixed crash caused by The Player 4.x decoder
+ * fixed NoisePacker 2.0 detection
+ * deeper The Player 5.x/6.x detection
+ * improved songnames generating
+
+Revision 1 - 10/3/2003
+----------------------
+ * removed CRT code from the DLL

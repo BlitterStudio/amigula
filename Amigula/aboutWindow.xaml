@@ -1,0 +1,20 @@
+﻿<Window x:Name="winAbout" x:Class="Amigula.aboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About AMIGULA" Height="350" Width="300" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" UseLayoutRounding="True">
+    <Grid UseLayoutRounding="True">
+        <Button Content="OK" Margin="0,0,12,12" IsDefault="True" Click="btnOK_Click" UseLayoutRounding="True" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" MinHeight="26" MinWidth="75"/>
+        <Image VerticalAlignment="Top" Margin="10,10,10,0" Source="images/BS_logo_small.png" Stretch="None" UseLayoutRounding="True"/>
+        <Label Content="AMI.G.U.LA. (Amiga Games UAE Launcher)" VerticalAlignment="Top" Margin="10,85,10,0" FontWeight="Bold" HorizontalContentAlignment="Center" UseLayoutRounding="True"/>
+        <Label x:Name="lblVersion" Content="Version:" VerticalAlignment="Top" Margin="10,111,10,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" UseLayoutRounding="True"/>
+        <Label Content="Written by: Dimitris Panokostas" VerticalAlignment="Top" Margin="10,137,10,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" UseLayoutRounding="True"/>
+        <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,12" MinWidth="75" MinHeight="26" Padding="5,1" Click="btnFeedback_Click" UseLayoutRounding="True">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="images/letter_16.png" Width="16" Height="16" Margin="0,0,10,0"/>
+                <TextBlock>Send feedback</TextBlock>
+            </StackPanel>
+        </Button>
+        <TextBlock TextWrapping="Wrap" Text="If you have any suggestions or problems with this application, feel free to send us some feedback using the button below." VerticalAlignment="Bottom" Margin="12,0,12,60" UseLayoutRounding="True"/>
+
+    </Grid>
+</Window>

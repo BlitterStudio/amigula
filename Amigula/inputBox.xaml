@@ -1,0 +1,12 @@
+﻿<Window x:Name="inputBoxWindow" x:Class="Amigula.inputBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Please enter a new name" ResizeMode="NoResize" Topmost="True" WindowStartupLocation="CenterScreen" Width="327" Height="160">
+    <Grid>
+        <Button Content="OK" HorizontalAlignment="Left" Width="75" Margin="10,0,0,10" Height="20" VerticalAlignment="Bottom" IsDefault="True" Click="buttonOK_Click"/>
+        <Button Content="Cancel" Margin="0,0,10,10" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" IsCancel="True" Click="buttonCancel_Click"/>
+        <TextBox x:Name="txtBox" Margin="10,0,10,40" VerticalContentAlignment="Center" Height="23" VerticalAlignment="Bottom" MaxLines="1" IsUndoEnabled="True"/>
+        <TextBlock TextWrapping="Wrap" Text="This title was not matched with any entry on the website, would you like to change it and try again?" Margin="10,10,10,68"/>
+
+    </Grid>
+</Window>

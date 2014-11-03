@@ -1,0 +1,8 @@
+echo "";
+echo "GameBase/MAGE Amiga :: WHDRun 1.0 Beta 4";
+echo "Running: TimesOfLore.slave";
+echo "";
+echo "Remember to use the quit key instead of closing WinUAE!";
+echo "";
+cd dh1:TimesOfLore;
+whdload TimesOfLore.slave PRELOAD;

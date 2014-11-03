@@ -1,0 +1,310 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Amigula" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Name="mainWindow" mc:Ignorable="d" x:Class="Amigula.MainWindow" Loaded="Window_Loaded" MinWidth="735" MinHeight="378" Icon="Amigula.ico" Closing="mainWindow_Closing" UseLayoutRounding="True">
+    <Window.Resources>
+        <local:AmigulaDBDataSet x:Key="AmigulaDBDataSet"/>
+        <CollectionViewSource x:Key="gamesViewSource" Source="{Binding Games, Source={StaticResource AmigulaDBDataSet}}"/>
+        <CollectionViewSource x:Key="genreViewSource" Source="{Binding Genres, Source={StaticResource AmigulaDBDataSet}}"/>
+        <CollectionViewSource x:Key="publisherViewSource" Source="{Binding Publishers, Source={StaticResource AmigulaDBDataSet}}"/>
+        <DataTemplate x:Key="image">
+            <Image x:Name="FavImage"  Width="16" Height="16"/>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Favorite}" Value="1">
+                    <Setter TargetName="FavImage" Property="Source" Value="images/star.png"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid x:Name="mainGrid" DataContext="{StaticResource gamesViewSource}" Margin="0,0,0,-1" UseLayoutRounding="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="391*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <ListView x:Name="gamesListView" Margin="10,62,10,30" SelectionMode="Single" DisplayMemberPath="Title" SelectedValuePath="ID" IsSynchronizedWithCurrentItem="True" local:GridViewSort.AutoSort="True" UseLayoutRounding="True" ItemsSource="{Binding}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="MouseDoubleClick" Handler="gamesListView_MouseDoubleClick" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open containing folder" Click="listViewMenuItemShowInExplorer_Click">
+                        <MenuItem.Icon>
+                            <Image Source="images/folder_16.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Launch in WinUAE" Click="listViewMenuItemLaunchInWinUAE_Click">
+                        <MenuItem.Icon>
+                            <Image Source="images/checkmark.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Mark as Favorite" Click="listViewMenuItemFavorite_Click">
+                        <MenuItem.Icon>
+                            <Image Source="images/heart_16.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Unmark from Favorites" Click="listViewMenuItemUnmarkFromFavorites_Click" />
+                    <MenuItem Header="Remove game" Click="listViewMenuItemRemoveGame_Click">
+                        <MenuItem.Icon>
+                            <Image Source="images/delete_16.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn x:Name="titleColumn" Header="Title" Width="Auto" local:GridViewSort.PropertyName="Title">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Margin="-6,-1" Text="{Binding Title}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Genre" local:GridViewSort.PropertyName="Genre">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Genre}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Favorite" CellTemplate="{StaticResource image}"/>
+                    <GridViewColumn Header="UAE config" local:GridViewSort.PropertyName="UAE config">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UAEconfig}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Disks" local:GridViewSort.PropertyName="Disks">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Disks}" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Publisher" local:GridViewSort.PropertyName="Publisher">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Publisher}" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Year" local:GridViewSort.PropertyName="Year">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Year}" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Times played" local:GridViewSort.PropertyName="Times played">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TimesPlayed}" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Last played" local:GridViewSort.PropertyName="Last played">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DateLastPlayed}" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Path to file" Width="Auto" local:GridViewSort.PropertyName="Path to file">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PathToFile}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <GridSplitter Width="10" Margin="0,62,0,30" UseLayoutRounding="True"/>
+        <TabControl x:Name="tabGameContent" Grid.Column="1" Margin="0,62,0,30" IsSynchronizedWithCurrentItem="True" Panel.ZIndex="-1" UseLayoutRounding="True" HorizontalContentAlignment="Center">
+            <TabItem x:Name="tabScreenshots" Header="Screenshots" ToolTip="View screenshots for the selected game" UseLayoutRounding="True">
+                <Grid Background="#FFE5E5E5" UseLayoutRounding="True">
+                    <ScrollViewer x:Name="scollViewerImages" IsHitTestVisible="True" UseLayoutRounding="True">
+                        <Grid x:Name="gridImgContainer" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" AllowDrop="False" MaxHeight="768" MinHeight="768" UseLayoutRounding="True">
+                            <Image x:Name="imgScreenshot3" Height="256" VerticalAlignment="Top" Margin="0,522,0,-506" MinWidth="320" MinHeight="256" ScrollViewer.CanContentScroll="True" StretchDirection="UpOnly" AllowDrop="True" Drop="imgScreenshot3_Drop" DragEnter="imgScreenshot3_DragEnter" Width="320" UseLayoutRounding="True" Opacity="0.25" Source="images/Screenshot_placeholder.png">
+                                <Image.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Delete Screenshot 3" Click="deleteScreenshot3_Click">
+                                            <MenuItem.Icon>
+                                                <Image Source="images/delete_16.png"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Image.ContextMenu>
+                            </Image>
+                            <Image x:Name="imgScreenshot2" Height="256" VerticalAlignment="Top" Margin="0,261,0,-245" MinWidth="320" MinHeight="256" ScrollViewer.CanContentScroll="True" StretchDirection="UpOnly" Drop="imgScreenshot2_Drop" AllowDrop="True" DragEnter="imgScreenshot2_DragEnter" Width="320" UseLayoutRounding="True" Opacity="0.25" Source="images/Screenshot_placeholder.png">
+                                <Image.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Delete Screenshot 2" Click="deleteScreenshot2_Click">
+                                            <MenuItem.Icon>
+                                                <Image Source="images/delete_16.png"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Image.ContextMenu>
+                            </Image>
+                            <Image x:Name="imgScreenshot" Height="256" VerticalAlignment="Top" Margin="0" MinWidth="320" MinHeight="256" ScrollViewer.CanContentScroll="True" StretchDirection="UpOnly" AllowDrop="True" Drop="imgScreenshot_Drop" DragEnter="imgScreenshot_DragEnter" Width="320" UseLayoutRounding="True" Opacity="0.25" Source="images/Screenshot_placeholder.png">
+                                <Image.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Delete Screenshot 1" Click="deleteScreenshot1_Click">
+                                            <MenuItem.Icon>
+                                                <Image Source="images/delete_16.png"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Image.ContextMenu>
+                            </Image>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="tabMusic" Header="Music" ToolTip="Play music from the selected game" UseLayoutRounding="True">
+                <Grid Background="#FFE5E5E5" MinWidth="337" UseLayoutRounding="True">
+                    <TextBlock x:Name="tblockMusic" HorizontalAlignment="Left" TextWrapping="Wrap" Text="If any music if found for the selected game in the specified Music folder, it will be shown here. You can click below to playback the music track(s) in your specified music player." VerticalAlignment="Top" Margin="10,10,0,0" Height="66" Width="317" UseLayoutRounding="True"/>
+                    <Button x:Name="btnPlayMusic" Margin="10,80,10,10" UseLayoutRounding="True" VerticalAlignment="Center" HorizontalAlignment="Center" Click="btnPlayMusic_Click" Opacity="0.25">
+                        <Image x:Name="imgCassette" Source="images/cassette.png" Width="300" Height="192" Margin="5,5,5,5" UseLayoutRounding="True"/>
+                    </Button>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="tabLongplay" Header="Longplay" ToolTip="View Longplay video on Youtube" UseLayoutRounding="True" MouseLeftButtonUp="tabLongplay_Clicked">
+                <Grid Background="#FFE5E5E5" MinWidth="337" UseLayoutRounding="True">
+                    <WebBrowser x:Name="wbLongplay" UseLayoutRounding="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="tabDetails" Header="Details" ToolTip="Details about the selected game" UseLayoutRounding="True">
+                <Grid Background="#FFE5E5E5" MinWidth="337" UseLayoutRounding="True">
+                    <Separator Height="250" Margin="168,0,0,0" VerticalAlignment="Top" UseLayoutRounding="True" HorizontalContentAlignment="Stretch"/>
+                    <CheckBox x:Name="chkbxMarkedFavorite" Content="Marked as Favorite" IsChecked="{Binding Favorite}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,15,0,0" ToolTip="This game is marked as Favorite" MinHeight="26" Click="chkbxMarkedFavorite_Click" Padding="4,0,0,0" UseLayoutRounding="True"/>
+                    <TextBox x:Name="tboxYear" TextWrapping="Wrap" Text="{Binding Year}" VerticalAlignment="Top" Margin="100,155,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ToolTip="The year the game was released" HorizontalAlignment="Left" RenderTransformOrigin="0.719,1.769" MinHeight="26" MinWidth="32" Height="26" Width="37" LostFocus="tboxYear_LostFocus" UseLayoutRounding="True"/>
+                    <Label x:Name="lblYear" Content="Year of release:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,155,0,0" VerticalContentAlignment="Center" Height="26" Width="90" UseLayoutRounding="True"/>
+                    <Label x:Name="lblGenre" Content="Game Genre:" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="1.184,2.192" Margin="10,41,0,0" MinHeight="26" VerticalContentAlignment="Center" Height="26" Width="79" UseLayoutRounding="True"/>
+                    <ComboBox x:Name="cmbboxGenre" Text="{Binding Genre}" ItemsSource="{Binding Source={StaticResource genreViewSource}}" DisplayMemberPath="genre_label" SelectedValuePath="genre_id" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,67,0,0" ToolTip="select the game's Genre" VerticalContentAlignment="Center" MinHeight="26" MinWidth="127" DropDownClosed="cmbboxGenre_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
+                    <Label x:Name="lblPublisher" Content="Publisher:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,98,0,0" Height="26" Width="61" UseLayoutRounding="True"/>
+                    <ComboBox x:Name="cmbboxPublisher" Text="{Binding Publisher}" ItemsSource="{Binding Source={StaticResource publisherViewSource}}" DisplayMemberPath="Publisher_Label" SelectedValuePath="Publisher_ID" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" MinHeight="26" MinWidth="127" VerticalContentAlignment="Center" ToolTip="select the game's Publisher" DropDownClosed="cmbboxPublisher_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
+                    <Label x:Name="lblNumberOfDisks" Content="Number of disks:" VerticalAlignment="Top" Margin="0,10,64,0" Padding="5" Height="26" HorizontalAlignment="Right" Width="100" UseLayoutRounding="True"/>
+                    <TextBlock x:Name="tblkNoOfDisks" TextWrapping="Wrap" Text="{Binding Disks}" VerticalAlignment="Top" Margin="0,10,60,0" Padding="0,5" Height="26" HorizontalAlignment="Right" UseLayoutRounding="True"/>
+                    <Label x:Name="lblTimesPlayed" Content="Times played:" VerticalAlignment="Top" Margin="0,36,64,0" Padding="5" Height="26" HorizontalAlignment="Right" Width="82" UseLayoutRounding="True"/>
+                    <TextBlock x:Name="tblkTimesPlayed" TextWrapping="Wrap" Text="{Binding TimesPlayed}" VerticalAlignment="Top" Margin="0,36,60,0" HorizontalAlignment="Right" Padding="0,5" MinHeight="26" Height="26" UseLayoutRounding="True"/>
+                    <Label x:Name="lblDateLastPlayed" Content="Last played:" VerticalAlignment="Top" Margin="0,62,64,0" Padding="5" MinHeight="26" VerticalContentAlignment="Center" Height="26" HorizontalAlignment="Right" Width="72" UseLayoutRounding="True"/>
+                    <TextBlock x:Name="tblkDateLastPlayed" TextWrapping="Wrap" Text="{Binding DateLastPlayed}" VerticalAlignment="Top" Margin="0,88,10,0" Padding="0" MinHeight="26" HorizontalAlignment="Right" Height="26" UseLayoutRounding="True"/>
+                    <Button x:Name="btnHOLsearch" Content="Hall Of Light" VerticalAlignment="Top" Margin="0,170,15,0" Click="btnHOLsearch_Click" ToolTip="Search for this game title on Amiga Hall Of Light" MinWidth="80" MinHeight="26" Height="26" UseLayoutRounding="True" HorizontalAlignment="Right" Width="80"/>
+                    <Button x:Name="btnLemonAmiga" Content="LemonAmiga" VerticalAlignment="Top" Click="btnLemonAmiga_Click" ToolTip="Search for this game title on LemonAmiga" MinWidth="80" MinHeight="26" Margin="0,139,15,0" Height="26" UseLayoutRounding="True" HorizontalAlignment="Right" Width="80"/>
+                    <Label x:Name="lblWebLinks" Content="Web links:" VerticalAlignment="Top" Margin="0,153,100,0" Height="26" UseLayoutRounding="True" HorizontalAlignment="Right" Width="64"/>
+                    <Label x:Name="lblNotes" Content="Notes:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,186,0,0" Height="26" Width="44" UseLayoutRounding="True"/>
+                    <TextBox x:Name="tboxNotes" Text="{Binding Notes}" TextWrapping="Wrap" Margin="10,212,10,10" ScrollViewer.CanContentScroll="True" SpellCheck.IsEnabled="True" ToolTip="Edit notes for the selected game" LostFocus="tboxNotes_LostFocus" UseLayoutRounding="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="tabSettings" Header="UAE Settings" ToolTip="Edit settings for the selected game" UseLayoutRounding="True">
+                <Grid Background="#FFE5E5E5" MinWidth="337" UseLayoutRounding="True">
+                    <Label x:Name="lblUAEconfig" Content="UAE config:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,73,0,0" Width="70" Height="26" UseLayoutRounding="True"/>
+                    <ComboBox x:Name="comboUAEconfig" Text="{Binding UAEconfig}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="99" Margin="85,73,0,0" Height="26" ToolTip="Select UAE config file to associate with this game" DropDownOpened="comboUAEconfig_DropDownOpened" DropDownClosed="comboUAEconfig_DropDownClosed" VerticalContentAlignment="Center" UseLayoutRounding="True"/>
+                    <Button x:Name="btnNewUAEconfig" Content="New..." HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Margin="267,73,0,0" Height="26" Click="btnNewUAEconfig_Click" ToolTip="Open WinUAE to create a new configuration" UseLayoutRounding="True"/>
+                    <Button x:Name="btnEditUAEconfig" Content="Edit" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Margin="189,73,0,0" Height="26" Click="btnEditUAEconfig_Click" ToolTip="Edit selected UAE config in WinUAE" UseLayoutRounding="True"/>
+                    <TextBlock x:Name="tblockDescription" HorizontalAlignment="Left" TextWrapping="Wrap" Text="This list is automatically populated with your saved UAE configuration files, located in the default WinUAE &quot;Configurations&quot; folder." VerticalAlignment="Top" Height="58" Width="317" Margin="10,10,0,0" UseLayoutRounding="True"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <TextBox x:Name="tboxFilterGames" Height="28" Text="Search for Game" VerticalAlignment="Top" Margin="10,29,120,0" FontStyle="Italic" VerticalContentAlignment="Center" GotFocus="tboxFilterGames_GotFocus" LostFocus="tboxFilterGames_LostFocus" Background="White" ToolTip="Search for a game in the list" UseLayoutRounding="True">
+            <TextBox.Foreground>
+                <SolidColorBrush Color="Black" Opacity="0.5"/>
+            </TextBox.Foreground>
+        </TextBox>
+        <Button x:Name="btnRandom" Content="Random Game" HorizontalAlignment="Right" VerticalAlignment="Top" Width="105" Margin="0,29,10,0" Click="btnRandom_Click" ToolTip="Select a random game from the list" UseLayoutRounding="True" MinHeight="28" Padding="1"/>
+        <Button x:Name="btnFetch" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="0,29,0,0" ToolTip="Update selected game's metadata from the web" Click="btnFetch_Click" UseLayoutRounding="True" MinWidth="135" MinHeight="28" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <StackPanel Orientation="Horizontal" UseLayoutRounding="True" MinHeight="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,2">
+                <Image x:Name="imgGlobe" Source="images/globe_16.png" Width="16" Height="16" Margin="0,0,10,0" UseLayoutRounding="True"/>
+                <TextBlock x:Name="tblockUpdateFromWeb" UseLayoutRounding="True" MinHeight="16" Text="Update from Web"/>
+            </StackPanel>
+        </Button>
+        <StatusBar x:Name="statusBar" Height="25" VerticalAlignment="Bottom" MinHeight="25" Grid.ColumnSpan="2" UseLayoutRounding="True">
+            <Button x:Name="btnCancel" Width="75" Click="btnCancel_Click" VerticalAlignment="Center" Content="Cancel" Visibility="Collapsed" UseLayoutRounding="True"/>
+            <TextBlock x:Name="txtStatusText" TextWrapping="Wrap" Width="375" UseLayoutRounding="True"/>
+        </StatusBar>
+        <Menu x:Name="mainMenu" Height="24" VerticalAlignment="Top" Grid.ColumnSpan="2" UseLayoutRounding="True">
+            <MenuItem x:Name="fileMenu" Header="File" Height="24" UseLayoutRounding="True">
+                <MenuItem x:Name="fileMenu_LaunchInWinUAE" Header="Launch in WinUAE" Click="fileMenu_LaunchInWinUAE_Click" UseLayoutRounding="True" VerticalContentAlignment="Center" Padding="0,4,0,0" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/checkmark.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator UseLayoutRounding="True" Margin="0"/>
+                <MenuItem x:Name="fileMenu_RemoveGame" Header="Remove Game" VerticalContentAlignment="Center" Click="fileMenu_RemoveGame_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/delete_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator UseLayoutRounding="True" Margin="0"/>
+                <MenuItem x:Name="fileMenu_Close" Header="Close" Click="fileMenu_Close_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+            </MenuItem>
+            <MenuItem x:Name="editMenu" Header="Edit" UseLayoutRounding="True">
+                <MenuItem x:Name="editMenu_Prefs" Header="Preferences" Click="editMenu_Prefs_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinWidth="207" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/gear_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="editMenu_RescanGames" Header="(Re) Scan Games Folder" Click="editMenu_RescanGames_Click" UseLayoutRounding="True" MinWidth="207" MinHeight="24" Padding="0,4,0,0">
+                    <MenuItem.Icon>
+                        <Image Source="images/search_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator x:Name="editMenu_separator" UseLayoutRounding="True" Padding="0" Margin="0"/>
+                <MenuItem x:Name="editMenu_EmptyLib" Header="Empty Library" Click="editMenu_EmptyLib_Click" UseLayoutRounding="True" MinWidth="207" MinHeight="24" Padding="0,4,0,0">
+                    <MenuItem.Icon>
+                        <Image Source="images/trash_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem x:Name="viewMenu" Header="View" UseLayoutRounding="True">
+                <MenuItem x:Name="viewMenu_Titles" Header="Game Titles" UseLayoutRounding="True" MinWidth="144" MinHeight="24" Padding="0,4,0,0">
+                    <MenuItem.Icon>
+                        <Image Source="images/label_16.png"/>
+                    </MenuItem.Icon>
+                    <MenuItem x:Name="viewMenu_Show_GameTitles" Header="Unique Game titles" Click="viewMenu_Show_GameTitles_Click" IsCheckable="True" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                    <MenuItem x:Name="viewMenu_Show_AllFiles" Header="All Files found" Click="viewMenu_Show_AllFiles_Click" IsCheckable="True" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                </MenuItem>
+                <MenuItem x:Name="viewMenu_Favorites" Header="Favorites" UseLayoutRounding="True" MinWidth="144" MinHeight="24" Padding="0,4,0,0">
+                    <MenuItem.Icon>
+                        <Image Source="images/heart_16.png"/>
+                    </MenuItem.Icon>
+                    <MenuItem x:Name="viewMenu_Favorites_ShowOnTop" Header="Show Favorites on Top" IsCheckable="True" IsChecked="True" Click="viewMenu_Favorites_ShowOnTop_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                    <MenuItem x:Name="viewMenu_Favorites_ShowOnly" Header="Show only Favorites" IsCheckable="True" Click="viewMenu_Favorites_ShowOnly_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                </MenuItem>
+                <MenuItem x:Name="viewMenu_Statistics" Header="Sort By" UseLayoutRounding="True" MinWidth="144" MinHeight="24" Padding="0,4,0,0">
+                    <MenuItem.Icon>
+                        <Image Source="images/statistics_16.png"/>
+                    </MenuItem.Icon>
+                    <MenuItem x:Name="viewMenu_Statistics_None" Header="Title (default)" Click="viewMenu_Statistics_None_Click" IsChecked="True" IsCheckable="True" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                    <MenuItem x:Name="viewMenu_Statistics_MostPlayed" Header="Most played" IsCheckable="True" Click="viewMenu_Statistics_MostPlayed_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                    <MenuItem x:Name="viewMenu_Statistics_NeverPlayed" Header="Never played" IsCheckable="True" Click="viewMenu_Statistics_NeverPlayed_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                    <MenuItem x:Name="viewMenu_Statistics_RecentlyPlayed" Header="Recently played" HorizontalAlignment="Left" IsCheckable="True" Click="viewMenu_Statistics_RecentlyPlayed_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24"/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem x:Name="helpMenu" Header="Help" UseLayoutRounding="True">
+                <MenuItem x:Name="helpMenu_VisitWebsite" Header="Visit Website" UseLayoutRounding="True" Click="helpMenu_VisitWebsite_Click" Padding="0,4,0,0" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/globe_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="helpMenu_Support" Header="Support" UseLayoutRounding="True" Click="helpMenu_Support_Click" Padding="0,4,0,0" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/help_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="helpMenu_About" Header="About" Click="helpMenu_About_Click" UseLayoutRounding="True" Padding="0,4,0,0" MinHeight="24">
+                    <MenuItem.Icon>
+                        <Image Source="images/info_16.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+    </Grid>
+</Window>

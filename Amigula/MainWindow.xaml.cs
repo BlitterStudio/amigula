@@ -105,7 +105,7 @@ namespace Amigula
 
             // initialize the DataSet and ViewSource for the Listview
             AmigulaDBDataSet = ((AmigulaDBDataSet) (FindResource("AmigulaDBDataSet")));
-            gamesViewSource = ((CollectionViewSource) (FindResource("gamesViewSource")));
+            gamesViewSource = ((CollectionViewSource) (FindResource("GamesViewSource")));
 
             // Perform initial checks and configuration validation
             initialChecks();
@@ -146,7 +146,7 @@ namespace Amigula
                 AmigulaDBDataSetPublishersTableAdapter.Fill(AmigulaDBDataSet.Publishers);
                 // move the view to the first item in the list and show any media for it
                 gamesViewSource.View.MoveCurrentToFirst();
-                showGameMedia(gamesListView.SelectedItem);
+                showGameMedia(GamesListView.SelectedItem);
             }
             catch (Exception ex)
             {
@@ -169,14 +169,14 @@ namespace Amigula
 
             // Monitor the selected Game so we can display Screenshot and other info on the fly
 #pragma warning disable 168
-            IDisposable gameSelectionChanged = Observable.FromEventPattern<EventArgs>(gamesListView, "SelectionChanged")
+            IDisposable gameSelectionChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "SelectionChanged")
 #pragma warning restore 168
                                                          .Select(selected => ((ListView) selected.Sender).SelectedItem)
                                                          .Subscribe(showGameMedia);
 
             // Monitor the number of games if the list is refreshed
 #pragma warning disable 168
-            IDisposable numberOfGamesChanged = Observable.FromEventPattern<EventArgs>(gamesListView, "LayoutUpdated")
+            IDisposable numberOfGamesChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "LayoutUpdated")
 #pragma warning restore 168
                                                          .Subscribe(games => updateNoOfGames());
 
@@ -297,9 +297,9 @@ namespace Amigula
         /// </summary>
         private void removeGameFromDB()
         {
-            var oDataRowView = gamesListView.SelectedItem as DataRowView;
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
@@ -331,7 +331,7 @@ namespace Amigula
         /// <param name="currentgame"></param>
         private void updateGameMetadata(object currentgame)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
                 string gameTitleforURL = cleanGameTitle(currentgame, "URL");
@@ -429,7 +429,7 @@ namespace Amigula
 
                     // XPath for Genre: //table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a
                     string fetchedGenre =
-                        document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a")
+                        document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[13]/td[1]/table/tr[2]/td[2]/a")
                                 .InnerText;
                     bool genreExists = AmigulaDBDataSet.Genres.AsEnumerable()
                                                        .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
@@ -546,7 +546,7 @@ namespace Amigula
                     }
 
                     // Save the fetched information in the database
-                    if (gamesListView.SelectedIndex > -1)
+                    if (GamesListView.SelectedIndex > -1)
                     {
                         try
                         {
@@ -639,9 +639,9 @@ namespace Amigula
         /// </summary>
         private void unmarkFromFavorites()
         {
-            var oDataRowView = gamesListView.SelectedItem as DataRowView;
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
@@ -666,9 +666,9 @@ namespace Amigula
         /// </summary>
         private void markAsFavorite()
         {
-            var oDataRowView = gamesListView.SelectedItem as DataRowView;
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
@@ -694,7 +694,7 @@ namespace Amigula
         private void fillListView()
         {
             // Save the currently selected item so we can restore it after refreshing the listview
-            object tmpSelectedValue = gamesListView.SelectedValue;
+            object tmpSelectedValue = GamesListView.SelectedValue;
             switch (viewMenu_Favorites_ShowOnly.IsChecked)
             {
                 case true:
@@ -705,7 +705,7 @@ namespace Amigula
                             AmigulaDBDataSetGamesTableAdapter.FillByAllFilesFavoritesOnly(AmigulaDBDataSet.Games);
                         AmigulaDBDataSetGenresTableAdapter.Fill(AmigulaDBDataSet.Genres);
                         AmigulaDBDataSetPublishersTableAdapter.Fill(AmigulaDBDataSet.Publishers);
-                        gamesListView.SelectedValue = tmpSelectedValue;
+                        GamesListView.SelectedValue = tmpSelectedValue;
                         break;
                     }
                 case false:
@@ -716,7 +716,7 @@ namespace Amigula
                             AmigulaDBDataSetGamesTableAdapter.FillByAllFiles(AmigulaDBDataSet.Games);
                         AmigulaDBDataSetGenresTableAdapter.Fill(AmigulaDBDataSet.Genres);
                         AmigulaDBDataSetPublishersTableAdapter.Fill(AmigulaDBDataSet.Publishers);
-                        gamesListView.SelectedValue = tmpSelectedValue;
+                        GamesListView.SelectedValue = tmpSelectedValue;
                         break;
                     }
             }
@@ -938,14 +938,14 @@ namespace Amigula
             }
             else
             {
-                string gamePath = cleanGameTitle(gamesListView.SelectedItem, "Path");
+                string gamePath = cleanGameTitle(GamesListView.SelectedItem, "Path");
                 if (String.IsNullOrEmpty(gamePath) == false)
                 {
                     try
                     {
                         // Launch WinUAE from selected path giving it the selected config and game as a parameter
                         Process.Start(Settings.Default.EmulatorPath, gamePath);
-                        var oDataRowView = gamesListView.SelectedItem as DataRowView;
+                        var oDataRowView = GamesListView.SelectedItem as DataRowView;
                         if (oDataRowView != null)
                         {
                             oDataRowView.Row["TimesPlayed"] = (int) oDataRowView.Row["TimesPlayed"] + 1;
@@ -1033,7 +1033,7 @@ namespace Amigula
         private void updateNoOfGames()
         {
             // if the game Listview is not empty, count the entries and display the number in the statusbar
-            txtStatusText.Text = gamesListView.Items.Count.ToString(CultureInfo.CurrentCulture) + " games found";
+            txtStatusText.Text = GamesListView.Items.Count.ToString(CultureInfo.CurrentCulture) + " games found";
         }
 
         /// <summary>
@@ -1803,7 +1803,7 @@ namespace Amigula
         {
             if (!Settings.Default.ShowLongplayVideos) return;
             // Load longplay video
-            var oDataRowView = gamesListView.SelectedItem as DataRowView;
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
             if (oDataRowView != null)
             {
                 var LongplayTitle = oDataRowView.Row["Title"] as string;
@@ -1949,7 +1949,7 @@ namespace Amigula
         /// <param name="e"></param>
         private void listViewMenuItemShowInExplorer_Click(object sender, RoutedEventArgs e)
         {
-            var oDataRowView = gamesListView.SelectedItem as DataRowView;
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
             if (oDataRowView != null) Process.Start(Path.GetDirectoryName(oDataRowView.Row["PathToFile"] as string));
         }
 
@@ -2000,15 +2000,15 @@ namespace Amigula
         /// <param name="e"></param>
         private void comboUAEconfig_DropDownClosed(object sender, EventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
-                    AmigulaDBDataSet.Games[gamesListView.SelectedIndex].UAEconfig =
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig =
                         comboUAEconfig.SelectedValue.ToString();
                     AmigulaDBDataSetGamesTableAdapter.UpdateUAEconfig(
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].UAEconfig,
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Title);
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig,
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
                 }
                 catch (Exception ex)
                 {
@@ -2026,14 +2026,14 @@ namespace Amigula
         /// <param name="e"></param>
         private void cmbboxGenre_DropDownClosed(object sender, EventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
-                    AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Genre_ID = (int) cmbboxGenre.SelectedValue;
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID = (int) cmbboxGenre.SelectedValue;
                     AmigulaDBDataSetGamesTableAdapter.UpdateGenre(
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Genre_ID,
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Title);
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID,
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
                 }
                 catch (Exception ex)
                 {
@@ -2051,15 +2051,15 @@ namespace Amigula
         /// <param name="e"></param>
         private void cmbboxPublisher_DropDownClosed(object sender, EventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
-                    AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Publisher_ID =
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID =
                         (int) cmbboxPublisher.SelectedValue;
                     AmigulaDBDataSetGamesTableAdapter.UpdatePublisher(
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Publisher_ID,
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Title);
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID,
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
                 }
                 catch (Exception ex)
                 {
@@ -2077,14 +2077,14 @@ namespace Amigula
         /// <param name="e"></param>
         private void tboxNotes_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
-                    AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Notes = tboxNotes.Text;
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes = tboxNotes.Text;
                     AmigulaDBDataSetGamesTableAdapter.UpdateNotes(
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Notes,
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Title);
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes,
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
                 }
                 catch (Exception ex)
                 {
@@ -2101,14 +2101,14 @@ namespace Amigula
         /// <param name="e"></param>
         private void tboxYear_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 try
                 {
-                    AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Year = int.Parse(tboxYear.Text);
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year = int.Parse(tboxYear.Text);
                     AmigulaDBDataSetGamesTableAdapter.UpdateYear(
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Year,
-                        AmigulaDBDataSet.Games[gamesListView.SelectedIndex].Title);
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year,
+                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
                 }
                 catch (Exception ex)
                 {
@@ -2130,9 +2130,9 @@ namespace Amigula
                 // Note that you can have more than one file.
                 var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-                var oDataRowView = gamesListView.SelectedItem as DataRowView;
+                var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-                if (gamesListView.SelectedIndex > -1)
+                if (GamesListView.SelectedIndex > -1)
                 {
                     try
                     {
@@ -2144,7 +2144,7 @@ namespace Amigula
                                 addGameScreenshot(file, gameTitle);
                             }
                         }
-                        showGameMedia(gamesListView.SelectedItem);
+                        showGameMedia(GamesListView.SelectedItem);
                     }
                     catch (Exception ex)
                     {
@@ -2168,9 +2168,9 @@ namespace Amigula
                 // Note that you can have more than one file.
                 var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-                var oDataRowView = gamesListView.SelectedItem as DataRowView;
+                var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-                if (gamesListView.SelectedIndex > -1)
+                if (GamesListView.SelectedIndex > -1)
                 {
                     try
                     {
@@ -2182,7 +2182,7 @@ namespace Amigula
                                 addGameScreenshot(file, gameTitle);
                             }
                         }
-                        showGameMedia(gamesListView.SelectedItem);
+                        showGameMedia(GamesListView.SelectedItem);
                     }
                     catch (Exception ex)
                     {
@@ -2206,9 +2206,9 @@ namespace Amigula
                 // Note that you can have more than one file.
                 var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-                var oDataRowView = gamesListView.SelectedItem as DataRowView;
+                var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-                if (gamesListView.SelectedIndex > -1)
+                if (GamesListView.SelectedIndex > -1)
                 {
                     try
                     {
@@ -2220,7 +2220,7 @@ namespace Amigula
                                 addGameScreenshot(file, gameTitle);
                             }
                         }
-                        showGameMedia(gamesListView.SelectedItem);
+                        showGameMedia(GamesListView.SelectedItem);
                     }
                     catch (Exception ex)
                     {
@@ -2269,7 +2269,7 @@ namespace Amigula
         private void btnHOLsearch_Click(object sender, RoutedEventArgs e)
         {
             // Search for the selected game in HOL
-            lookupURL(gamesListView.SelectedItem, "HOL");
+            lookupURL(GamesListView.SelectedItem, "HOL");
         }
 
         /// <summary>
@@ -2281,7 +2281,7 @@ namespace Amigula
         {
             // Search for the selected game in LemonAmiga
             //http://www.lemonamiga.com/games/list.php?list_letter=
-            lookupURL(gamesListView.SelectedItem, "LemonAmiga");
+            lookupURL(GamesListView.SelectedItem, "LemonAmiga");
         }
 
         /// <summary>
@@ -2291,11 +2291,11 @@ namespace Amigula
         /// <param name="e"></param>
         private void btnRandom_Click(object sender, RoutedEventArgs e)
         {
-            if (gamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex > -1)
             {
                 var rand = new Random();
-                gamesListView.SelectedIndex = rand.Next(1, gamesListView.Items.Count);
-                gamesListView.ScrollIntoView(gamesListView.SelectedItem);
+                GamesListView.SelectedIndex = rand.Next(1, GamesListView.Items.Count);
+                GamesListView.ScrollIntoView(GamesListView.SelectedItem);
             }
         }
 
@@ -2377,7 +2377,7 @@ namespace Amigula
         /// <param name="e"></param>
         private void btnFetch_Click(object sender, RoutedEventArgs e)
         {
-            updateGameMetadata(gamesListView.SelectedItem);
+            updateGameMetadata(GamesListView.SelectedItem);
         }
 
         /// <summary>
@@ -2389,7 +2389,7 @@ namespace Amigula
         {
             if (!String.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
             {
-                playGameMusic(gamesListView.SelectedItem);
+                playGameMusic(GamesListView.SelectedItem);
             }
             else
                 AppNotDefined(

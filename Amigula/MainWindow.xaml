@@ -4,10 +4,10 @@
         xmlns:local="clr-namespace:Amigula" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Name="mainWindow" mc:Ignorable="d" x:Class="Amigula.MainWindow" Loaded="Window_Loaded" MinWidth="735" MinHeight="378" Icon="Amigula.ico" Closing="mainWindow_Closing" UseLayoutRounding="True">
     <Window.Resources>
         <local:AmigulaDBDataSet x:Key="AmigulaDBDataSet"/>
-        <CollectionViewSource x:Key="gamesViewSource" Source="{Binding Games, Source={StaticResource AmigulaDBDataSet}}"/>
-        <CollectionViewSource x:Key="genreViewSource" Source="{Binding Genres, Source={StaticResource AmigulaDBDataSet}}"/>
-        <CollectionViewSource x:Key="publisherViewSource" Source="{Binding Publishers, Source={StaticResource AmigulaDBDataSet}}"/>
-        <DataTemplate x:Key="image">
+        <CollectionViewSource x:Key="GamesViewSource" Source="{Binding Games, Source={StaticResource AmigulaDBDataSet}}"/>
+        <CollectionViewSource x:Key="GenreViewSource" Source="{Binding Genres, Source={StaticResource AmigulaDBDataSet}}"/>
+        <CollectionViewSource x:Key="PublisherViewSource" Source="{Binding Publishers, Source={StaticResource AmigulaDBDataSet}}"/>
+        <DataTemplate x:Key="Image">
             <Image x:Name="FavImage"  Width="16" Height="16"/>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding Favorite}" Value="1">
@@ -16,12 +16,12 @@
             </DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
-    <Grid x:Name="mainGrid" DataContext="{StaticResource gamesViewSource}" Margin="0,0,0,-1" UseLayoutRounding="True">
+    <Grid x:Name="MainGrid" DataContext="{StaticResource GamesViewSource}" Margin="0,0,0,-1" UseLayoutRounding="True">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="391*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <ListView x:Name="gamesListView" Margin="10,62,10,30" SelectionMode="Single" DisplayMemberPath="Title" SelectedValuePath="ID" IsSynchronizedWithCurrentItem="True" local:GridViewSort.AutoSort="True" UseLayoutRounding="True" ItemsSource="{Binding}">
+        <ListView x:Name="GamesListView" Margin="10,62,10,30" SelectionMode="Single" DisplayMemberPath="Title" SelectedValuePath="ID" IsSynchronizedWithCurrentItem="True" local:GridViewSort.AutoSort="True" UseLayoutRounding="True" ItemsSource="{Binding}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <EventSetter Event="MouseDoubleClick" Handler="gamesListView_MouseDoubleClick" />
@@ -56,7 +56,7 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn x:Name="titleColumn" Header="Title" Width="Auto" local:GridViewSort.PropertyName="Title">
+                    <GridViewColumn x:Name="TitleColumn" Header="Title" Width="Auto" local:GridViewSort.PropertyName="Title">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Margin="-6,-1" Text="{Binding Title}"/>
@@ -70,7 +70,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Favorite" CellTemplate="{StaticResource image}"/>
+                    <GridViewColumn Header="Favorite" CellTemplate="{StaticResource Image}"/>
                     <GridViewColumn Header="UAE config" local:GridViewSort.PropertyName="UAE config">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -123,7 +123,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <GridSplitter Width="10" Margin="0,62,0,30" UseLayoutRounding="True"/>
+        <GridSplitter Grid.Column="0" Width="10" Margin="0,62,0,30" UseLayoutRounding="True"/>
         <TabControl x:Name="tabGameContent" Grid.Column="1" Margin="0,62,0,30" IsSynchronizedWithCurrentItem="True" Panel.ZIndex="-1" UseLayoutRounding="True" HorizontalContentAlignment="Center">
             <TabItem x:Name="tabScreenshots" Header="Screenshots" ToolTip="View screenshots for the selected game" UseLayoutRounding="True">
                 <Grid Background="#FFE5E5E5" UseLayoutRounding="True">
@@ -186,9 +186,9 @@
                     <TextBox x:Name="tboxYear" TextWrapping="Wrap" Text="{Binding Year}" VerticalAlignment="Top" Margin="100,155,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ToolTip="The year the game was released" HorizontalAlignment="Left" RenderTransformOrigin="0.719,1.769" MinHeight="26" MinWidth="32" Height="26" Width="37" LostFocus="tboxYear_LostFocus" UseLayoutRounding="True"/>
                     <Label x:Name="lblYear" Content="Year of release:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,155,0,0" VerticalContentAlignment="Center" Height="26" Width="90" UseLayoutRounding="True"/>
                     <Label x:Name="lblGenre" Content="Game Genre:" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="1.184,2.192" Margin="10,41,0,0" MinHeight="26" VerticalContentAlignment="Center" Height="26" Width="79" UseLayoutRounding="True"/>
-                    <ComboBox x:Name="cmbboxGenre" Text="{Binding Genre}" ItemsSource="{Binding Source={StaticResource genreViewSource}}" DisplayMemberPath="genre_label" SelectedValuePath="genre_id" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,67,0,0" ToolTip="select the game's Genre" VerticalContentAlignment="Center" MinHeight="26" MinWidth="127" DropDownClosed="cmbboxGenre_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
+                    <ComboBox x:Name="cmbboxGenre" Text="{Binding Genre}" ItemsSource="{Binding Source={StaticResource GenreViewSource}}" DisplayMemberPath="genre_label" SelectedValuePath="genre_id" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,67,0,0" ToolTip="select the game's Genre" VerticalContentAlignment="Center" MinHeight="26" MinWidth="127" DropDownClosed="cmbboxGenre_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
                     <Label x:Name="lblPublisher" Content="Publisher:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,98,0,0" Height="26" Width="61" UseLayoutRounding="True"/>
-                    <ComboBox x:Name="cmbboxPublisher" Text="{Binding Publisher}" ItemsSource="{Binding Source={StaticResource publisherViewSource}}" DisplayMemberPath="Publisher_Label" SelectedValuePath="Publisher_ID" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" MinHeight="26" MinWidth="127" VerticalContentAlignment="Center" ToolTip="select the game's Publisher" DropDownClosed="cmbboxPublisher_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
+                    <ComboBox x:Name="cmbboxPublisher" Text="{Binding Publisher}" ItemsSource="{Binding Source={StaticResource PublisherViewSource}}" DisplayMemberPath="Publisher_Label" SelectedValuePath="Publisher_ID" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" MinHeight="26" MinWidth="127" VerticalContentAlignment="Center" ToolTip="select the game's Publisher" DropDownClosed="cmbboxPublisher_DropDownClosed" IsSynchronizedWithCurrentItem="True" Height="26" Width="127" UseLayoutRounding="True"/>
                     <Label x:Name="lblNumberOfDisks" Content="Number of disks:" VerticalAlignment="Top" Margin="0,10,64,0" Padding="5" Height="26" HorizontalAlignment="Right" Width="100" UseLayoutRounding="True"/>
                     <TextBlock x:Name="tblkNoOfDisks" TextWrapping="Wrap" Text="{Binding Disks}" VerticalAlignment="Top" Margin="0,10,60,0" Padding="0,5" Height="26" HorizontalAlignment="Right" UseLayoutRounding="True"/>
                     <Label x:Name="lblTimesPlayed" Content="Times played:" VerticalAlignment="Top" Margin="0,36,64,0" Padding="5" Height="26" HorizontalAlignment="Right" Width="82" UseLayoutRounding="True"/>
@@ -212,23 +212,25 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <TextBox x:Name="tboxFilterGames" Height="28" Text="Search for Game" VerticalAlignment="Top" Margin="10,29,120,0" FontStyle="Italic" VerticalContentAlignment="Center" GotFocus="tboxFilterGames_GotFocus" LostFocus="tboxFilterGames_LostFocus" Background="White" ToolTip="Search for a game in the list" UseLayoutRounding="True">
+        <TextBox Grid.Column="0" x:Name="tboxFilterGames" Height="28" Text="Search for Game" VerticalAlignment="Top" Margin="10,29,120,0" FontStyle="Italic" VerticalContentAlignment="Center" GotFocus="tboxFilterGames_GotFocus" LostFocus="tboxFilterGames_LostFocus" Background="White" ToolTip="Search for a game in the list" UseLayoutRounding="True">
             <TextBox.Foreground>
                 <SolidColorBrush Color="Black" Opacity="0.5"/>
             </TextBox.Foreground>
         </TextBox>
-        <Button x:Name="btnRandom" Content="Random Game" HorizontalAlignment="Right" VerticalAlignment="Top" Width="105" Margin="0,29,10,0" Click="btnRandom_Click" ToolTip="Select a random game from the list" UseLayoutRounding="True" MinHeight="28" Padding="1"/>
+        <Button Grid.Column="0" x:Name="btnRandom" Content="Random Game" HorizontalAlignment="Right" VerticalAlignment="Top" Width="105" Margin="0,29,10,0" Click="btnRandom_Click" ToolTip="Select a random game from the list" UseLayoutRounding="True" MinHeight="28" Padding="1"/>
         <Button x:Name="btnFetch" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="0,29,0,0" ToolTip="Update selected game's metadata from the web" Click="btnFetch_Click" UseLayoutRounding="True" MinWidth="135" MinHeight="28" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
             <StackPanel Orientation="Horizontal" UseLayoutRounding="True" MinHeight="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,2">
                 <Image x:Name="imgGlobe" Source="images/globe_16.png" Width="16" Height="16" Margin="0,0,10,0" UseLayoutRounding="True"/>
                 <TextBlock x:Name="tblockUpdateFromWeb" UseLayoutRounding="True" MinHeight="16" Text="Update from Web"/>
             </StackPanel>
         </Button>
-        <StatusBar x:Name="statusBar" Height="25" VerticalAlignment="Bottom" MinHeight="25" Grid.ColumnSpan="2" UseLayoutRounding="True">
+        <StatusBar x:Name="statusBar" Height="25" VerticalAlignment="Bottom" MinHeight="25" Grid.ColumnSpan="2"
+                   Grid.Column="0" UseLayoutRounding="True">
             <Button x:Name="btnCancel" Width="75" Click="btnCancel_Click" VerticalAlignment="Center" Content="Cancel" Visibility="Collapsed" UseLayoutRounding="True"/>
             <TextBlock x:Name="txtStatusText" TextWrapping="Wrap" Width="375" UseLayoutRounding="True"/>
         </StatusBar>
-        <Menu x:Name="mainMenu" Height="24" VerticalAlignment="Top" Grid.ColumnSpan="2" UseLayoutRounding="True">
+        <Menu x:Name="mainMenu" Height="24" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.Column="0"
+              UseLayoutRounding="True">
             <MenuItem x:Name="fileMenu" Header="File" Height="24" UseLayoutRounding="True">
                 <MenuItem x:Name="fileMenu_LaunchInWinUAE" Header="Launch in WinUAE" Click="fileMenu_LaunchInWinUAE_Click" UseLayoutRounding="True" VerticalContentAlignment="Center" Padding="0,4,0,0" MinHeight="24">
                     <MenuItem.Icon>

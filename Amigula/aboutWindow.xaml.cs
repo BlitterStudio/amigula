@@ -11,7 +11,7 @@ namespace Amigula
         public aboutWindow()
         {
             InitializeComponent();
-            lblVersion.Content = "Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LblVersion.Content = "Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)

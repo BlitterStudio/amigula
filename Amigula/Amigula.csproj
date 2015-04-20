@@ -15,7 +15,7 @@
     <WarningLevel>4</WarningLevel>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkProfile />
-    <PublishUrl>ftp://ftp.blitterstudio.com/files/</PublishUrl>
+    <PublishUrl>ftp://ftp.blitterstudio.com/public_html/files/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>

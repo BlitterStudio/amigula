@@ -8,22 +8,22 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Label Content="Games Library path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
-        <TextBox x:Name="tboxGamesLibPath" Height="23" VerticalAlignment="Top" Margin="10,36,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
+        <TextBox Grid.Column="0" x:Name="tboxGamesLibPath" Height="23" VerticalAlignment="Top" Margin="10,36,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
         <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,36,10,0" Height="23" Grid.Column="1" Click="btnChangeGamesPath_Click"/>
-        <Label Content="WinUAE path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,69,0,0"/>
-        <TextBox x:Name="tboxWinUAEPath" Height="23" VerticalAlignment="Top" Margin="10,95,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
+        <Label Grid.Column="0" Content="WinUAE path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,69,0,0"/>
+        <TextBox Grid.Column="0" x:Name="tboxWinUAEPath" Height="23" VerticalAlignment="Top" Margin="10,95,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
         <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,95,10,0" Height="23" Grid.Column="1" Click="btnChangeUAEPath_Click"/>
-        <Label Content="Music Player:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,128,0,0"/>
-        <TextBox x:Name="tboxMusicPlayerPath" Height="23" VerticalAlignment="Top" Margin="10,154,5,0" VerticalContentAlignment="Center"/>
+        <Label Grid.Column="0" Content="Music Player:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,128,0,0"/>
+        <TextBox Grid.Column="0" x:Name="tboxMusicPlayerPath" Height="23" VerticalAlignment="Top" Margin="10,154,5,0" VerticalContentAlignment="Center"/>
         <Button Content="Change" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="0,154,0,0" Height="23" Click="btnChangeMusicPlayerPath_Click"/>
-        <Label Content="Screenshots path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,187,0,0"/>
-        <TextBox x:Name="tboxScreenshotsPath" Height="23" VerticalAlignment="Top" Margin="10,213,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
+        <Label Grid.Column="0" Content="Screenshots path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,187,0,0"/>
+        <TextBox Grid.Column="0" x:Name="tboxScreenshotsPath" Height="23" VerticalAlignment="Top" Margin="10,213,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
         <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,213,10,0" Height="23" Grid.Column="1" Click="btnChangeScreenshotsPath_Click"/>
-        <Label Content="Music path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,246,0,0"/>
-        <TextBox x:Name="tboxMusicPath" Height="23" VerticalAlignment="Top" Margin="10,272,5,0" VerticalContentAlignment="Center"/>
+        <Label Grid.Column="0" Content="Music path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,246,0,0"/>
+        <TextBox Grid.Column="0" x:Name="tboxMusicPath" Height="23" VerticalAlignment="Top" Margin="10,272,5,0" VerticalContentAlignment="Center"/>
         <Button Content="Change" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="0,272,0,0" Height="24" Click="btnChangeMusicPath_Click"/>
         <Button Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,10,10" MinWidth="75" MinHeight="20" Height="30" IsCancel="True" Grid.Column="1" Click="btnCancel_Click"/>
-        <Button Content="Save" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="75" Margin="10,0,0,10" MinWidth="75" MinHeight="20" Height="30" IsDefault="True" Click="btnSave_Click"/>
+        <Button Grid.Column="0" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="75" Margin="10,0,0,10" MinWidth="75" MinHeight="20" Height="30" IsDefault="True" Click="btnSave_Click"/>
 
     </Grid>
 </Window>

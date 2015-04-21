@@ -183,7 +183,7 @@ namespace Amigula
         }
 
         /// <summary>
-        ///     Simple helper methods that tunrs a link string into a embed string
+        ///     Simple helper methods that turns a link string into a embed string
         ///     for a YouTube item.
         ///     turns
         ///     http://www.youtube.com/watch?v=hV6B7bGZ0_E
@@ -400,13 +400,15 @@ namespace Amigula
 
                     // Use XPath to locate the information we're going to fetch:
                     // XPath for Year: //table[@width='100%']/tr[1]/td[2]/a
-                    string fetchedYear =
-                        document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
+                    string fetchedYear = "";
+                    if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a") != null)
+                        fetchedYear = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
                     //MessageBox.Show("The game's Year is: " + fetchedYear);
 
                     // XPath for Publisher: //table[@width='100%']/tr[2]/td[4]/a
-                    string fetchedPublisher =
-                        document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
+                    string fetchedPublisher = "";
+                        if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a") != null)
+                            fetchedPublisher = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
                     bool publisherExists = AmigulaDBDataSet.Publishers.AsEnumerable()
                                                            .Any(
                                                                row =>
@@ -803,8 +805,10 @@ namespace Amigula
         {
             // If there's no emulator set in Preferences, check for AmigaForever first
             // If that is not found, check for WinUAE and if that is not found either, show a warning
-            if (String.IsNullOrEmpty(Settings.Default.EmulatorPath) ||
-                String.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
+            if (String.IsNullOrEmpty(Settings.Default.EmulatorPath)
+                // correct is OR not AND here, but I guess second check is not needed
+                //&& String.IsNullOrEmpty(Settings.Default.UAEConfigsPath)
+                )
             {
                 // Check if Amiga Forever is installed
                 getAmigaForeverRegistry();
@@ -868,6 +872,11 @@ namespace Amigula
                                 "The path to WinUAE is not defined in the preferences and I couldn't locate it automatically!\n\nWithout WinUAE, you can't run any games.\n\nDo you want to select the path now?",
                                 "Emulator");
                 }
+            } 
+            else {
+                string tmpPath=Path.Combine(Path.GetDirectoryName(Settings.Default.EmulatorPath), "Configurations");
+                if (Directory.Exists(tmpPath))
+                    Settings.Default.UAEConfigsPath = tmpPath;
             }
 
             // If there's no Music player set in Preferences and Deliplayer is found installed, prompt the user to pick that directly.

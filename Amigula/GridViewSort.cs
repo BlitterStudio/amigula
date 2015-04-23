@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -35,19 +36,15 @@ namespace Amigula
                     (o, e) =>
                     {
                         var listView = o as ItemsControl;
-                        if (listView != null)
+                        if (listView == null) return;
+                        if (GetAutoSort(listView)) return; // Don't change click handler if AutoSort enabled
+                        if (e.OldValue != null && e.NewValue == null)
                         {
-                            if (!GetAutoSort(listView)) // Don't change click handler if AutoSort enabled
-                            {
-                                if (e.OldValue != null && e.NewValue == null)
-                                {
-                                    listView.RemoveHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
-                                }
-                                if (e.OldValue == null && e.NewValue != null)
-                                {
-                                    listView.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
-                                }
-                            }
+                            listView.RemoveHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
+                        }
+                        if (e.OldValue == null && e.NewValue != null)
+                        {
+                            listView.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
                         }
                     }
                 )
@@ -74,21 +71,17 @@ namespace Amigula
                     (o, e) =>
                     {
                         var listView = o as ListView;
-                        if (listView != null)
+                        if (listView == null) return;
+                        if (GetCommand(listView) != null) return; // Don't change click handler if a command is set
+                        var oldValue = (bool)e.OldValue;
+                        var newValue = (bool)e.NewValue;
+                        if (oldValue && !newValue)
                         {
-                            if (GetCommand(listView) == null) // Don't change click handler if a command is set
-                            {
-                                var oldValue = (bool)e.OldValue;
-                                var newValue = (bool)e.NewValue;
-                                if (oldValue && !newValue)
-                                {
-                                    listView.RemoveHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
-                                }
-                                if (!oldValue && newValue)
-                                {
-                                    listView.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
-                                }
-                            }
+                            listView.RemoveHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
+                        }
+                        if (!oldValue && newValue)
+                        {
+                            listView.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(ColumnHeader_Click));
                         }
                     }
                 )
@@ -186,28 +179,22 @@ namespace Amigula
         private static void ColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             var headerClicked = e.OriginalSource as GridViewColumnHeader;
-            if (headerClicked != null && headerClicked.Column != null)
+            if (headerClicked?.Column == null) return;
+            string propertyName = GetPropertyName(headerClicked.Column);
+            if (string.IsNullOrEmpty(propertyName)) return;
+            var listView = GetAncestor<ListView>(headerClicked);
+            if (listView == null) return;
+            ICommand command = GetCommand(listView);
+            if (command != null)
             {
-                string propertyName = GetPropertyName(headerClicked.Column);
-                if (!string.IsNullOrEmpty(propertyName))
+                if (command.CanExecute(propertyName))
                 {
-                    var listView = GetAncestor<ListView>(headerClicked);
-                    if (listView != null)
-                    {
-                        ICommand command = GetCommand(listView);
-                        if (command != null)
-                        {
-                            if (command.CanExecute(propertyName))
-                            {
-                                command.Execute(propertyName);
-                            }
-                        }
-                        else if (GetAutoSort(listView))
-                        {
-                            ApplySort(listView.Items, propertyName, listView, headerClicked);
-                        }
-                    }
+                    command.Execute(propertyName);
                 }
+            }
+            else if (GetAutoSort(listView))
+            {
+                ApplySort(listView.Items, propertyName, listView, headerClicked);
             }
         }
 
@@ -268,13 +255,10 @@ namespace Amigula
         {
             AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer(columnHeader);
             Adorner[] adorners = adornerLayer.GetAdorners(columnHeader);
-            if (adorners != null)
+            if (adorners == null) return;
+            foreach (SortGlyphAdorner adorner in adorners.OfType<SortGlyphAdorner>())
             {
-                foreach (Adorner adorner in adorners)
-                {
-                    if (adorner is SortGlyphAdorner)
-                        adornerLayer.Remove(adorner);
-                }
+                adornerLayer.Remove(adorner);
             }
         }
 

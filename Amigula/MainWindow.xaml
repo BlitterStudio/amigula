@@ -56,64 +56,64 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn x:Name="TitleColumn" Header="Title" Width="Auto" local:GridViewSort.PropertyName="Title">
+                    <GridViewColumn x:Name="TitleColumn" Header="Title" local:GridViewSort.PropertyName="Title">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Margin="-6,-1" Text="{Binding Title}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Genre" local:GridViewSort.PropertyName="Genre">
+                    <GridViewColumn x:Name="Genre" Header="Genre" local:GridViewSort.PropertyName="Genre">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Genre}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Favorite" CellTemplate="{StaticResource Image}"/>
-                    <GridViewColumn Header="UAE config" local:GridViewSort.PropertyName="UAE config">
+                    <GridViewColumn x:Name="Favorite" Header="Favorite" CellTemplate="{StaticResource Image}"/>
+                    <GridViewColumn x:Name="UaeConfig" Header="UAE config" local:GridViewSort.PropertyName="UaeConfig">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding UAEconfig}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Disks" local:GridViewSort.PropertyName="Disks">
+                    <GridViewColumn x:Name="Disks" Header="Disks" local:GridViewSort.PropertyName="Disks">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Disks}" TextAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Publisher" local:GridViewSort.PropertyName="Publisher">
+                    <GridViewColumn x:Name="Publisher" Header="Publisher" local:GridViewSort.PropertyName="Publisher">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Publisher}" TextAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Year" local:GridViewSort.PropertyName="Year">
+                    <GridViewColumn x:Name="Year" Header="Year" local:GridViewSort.PropertyName="Year">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Year}" TextAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Times played" local:GridViewSort.PropertyName="Times played">
+                    <GridViewColumn x:Name="TimesPlayed" Header="Times played" local:GridViewSort.PropertyName="TimesPlayed">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding TimesPlayed}" TextAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Last played" local:GridViewSort.PropertyName="Last played">
+                    <GridViewColumn x:Name="DateLastPlayed" Header="Last played" local:GridViewSort.PropertyName="DateLastPlayed">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding DateLastPlayed}" TextAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Path to file" local:GridViewSort.PropertyName="Path to file">
+                    <GridViewColumn x:Name="PathToFile" Header="Path to file" local:GridViewSort.PropertyName="PathToFile">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding PathToFile}"/>

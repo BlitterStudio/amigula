@@ -7,10 +7,7 @@ namespace Amigula
     /// </summary>
     public partial class inputBox
     {
-        public string TextValue
-        {
-            get { return txtBox.Text; }
-        }
+        public string TextValue => txtBox.Text;
 
         public inputBox(ref string value)
         {

@@ -230,15 +230,11 @@ namespace Amigula
                                               StringComparison.Ordinal)
                                       select process).FirstOrDefault();
 
-            if (runningProcess != null)
-            {
-                SafeNativeMethods.ShowWindow(runningProcess.MainWindowHandle, SW_SHOWMAXIMIZED);
-                SafeNativeMethods.SetForegroundWindow(runningProcess.MainWindowHandle);
+            if (runningProcess == null) return true;
+            SafeNativeMethods.ShowWindow(runningProcess.MainWindowHandle, SW_SHOWMAXIMIZED);
+            SafeNativeMethods.SetForegroundWindow(runningProcess.MainWindowHandle);
 
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -272,24 +268,22 @@ namespace Amigula
             MessageBoxResult result =
                 MessageBox.Show("Are you sure? This will DELETE the following file from the Screenshots folder:\n\n" +
                                 img, "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            if (result != MessageBoxResult.Yes) return;
+            // Delete the screenshot file selected, based on the p value (1-3)
+            switch (p)
             {
-                // Delete the screenshot file selected, based on the p value (1-3)
-                switch (p)
-                {
-                    case 1:
-                        imgScreenshot.Source = null;
-                        break;
-                    case 2:
-                        imgScreenshot2.Source = null;
-                        break;
-                    case 3:
-                        imgScreenshot3.Source = null;
-                        break;
-                }
-
-                File.Delete(img);
+                case 1:
+                    imgScreenshot.Source = null;
+                    break;
+                case 2:
+                    imgScreenshot2.Source = null;
+                    break;
+                case 3:
+                    imgScreenshot3.Source = null;
+                    break;
             }
+
+            File.Delete(img);
         }
 
         /// <summary>
@@ -299,29 +293,27 @@ namespace Amigula
         {
             var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
+                if (viewMenu_Show_GameTitles.IsChecked)
                 {
-                    if (viewMenu_Show_GameTitles.IsChecked)
-                    {
-                        if (oDataRowView != null)
-                            AmigulaDBDataSetGamesTableAdapter.DeleteBasedOnTitle(oDataRowView.Row["Title"] as string);
-                    }
-                    else
-                    {
-                        if (oDataRowView != null)
-                            AmigulaDBDataSetGamesTableAdapter.DeleteQuery((long) oDataRowView.Row["ID"],
-                                                                          oDataRowView["PathToFile"] as string);
-                    }
-                    fillListView();
+                    if (oDataRowView != null)
+                        AmigulaDBDataSetGamesTableAdapter.DeleteBasedOnTitle(oDataRowView.Row["Title"] as string);
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show(
-                        "An exception has occured while trying to remove this game from the Database!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (oDataRowView != null)
+                        AmigulaDBDataSetGamesTableAdapter.DeleteQuery((long) oDataRowView.Row["ID"],
+                            oDataRowView["PathToFile"] as string);
                 }
+                fillListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to remove this game from the Database!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -331,254 +323,247 @@ namespace Amigula
         /// <param name="currentgame"></param>
         private void updateGameMetadata(object currentgame)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
+            string gameTitleforURL = cleanGameTitle(currentgame, "URL");
+            var oDataRowView = currentgame as DataRowView;
+
+            // open a web connection to HOL, get all the links for the selected title in order to find the game's unique ID
+            var webGet = new HtmlWeb();
+            HtmlDocument document;
+
+            string gamelink = null;
+            string gameTitle = null;
+
+            bool tryagain = true;
+            while (tryagain)
             {
-                const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
-                string gameTitleforURL = cleanGameTitle(currentgame, "URL");
-                var oDataRowView = currentgame as DataRowView;
-
-                // open a web connection to HOL, get all the links for the selected title in order to find the game's unique ID
-                var webGet = new HtmlWeb();
-                HtmlDocument document;
-
-                string gamelink = null;
-                string gameTitle = null;
-
-                bool tryagain = true;
-                while (tryagain)
-                {
-                    document = webGet.Load(targetURL + gameTitleforURL);
-                    var linksOnPage = from lnks in document.DocumentNode.Descendants()
-                                      where lnks.Name == "a" &&
-                                            lnks.Attributes["href"] != null &&
-                                            lnks.InnerText.Trim().Length > 0
-                                      select new
-                                          {
-                                              Url = lnks.Attributes["href"].Value,
-                                              Text = lnks.InnerText
-                                          };
-                    // Now we have to check which of the parsed links contains the link to the game's unique ID page
-                    // It should look like the following example, for "SWIV":
-                    // { Url = "http://hol.abime.net/2240", Text = "SWIV" }
-
-                    // Since our title still has "%20" instead of spaces, we need to replace those
-                    gameTitle = gameTitleforURL.Replace("%20", " ").TrimEnd(' ');
-
-                    try
+                document = webGet.Load(targetURL + gameTitleforURL);
+                var linksOnPage = from lnks in document.DocumentNode.Descendants()
+                    where lnks.Name == "a" &&
+                          lnks.Attributes["href"] != null &&
+                          lnks.InnerText.Trim().Length > 0
+                    select new
                     {
-                        gamelink =
-                            linksOnPage.First(
-                                entry =>
+                        Url = lnks.Attributes["href"].Value,
+                        Text = lnks.InnerText
+                    };
+                // Now we have to check which of the parsed links contains the link to the game's unique ID page
+                // It should look like the following example, for "SWIV":
+                // { Url = "http://hol.abime.net/2240", Text = "SWIV" }
+
+                // Since our title still has "%20" instead of spaces, we need to replace those
+                gameTitle = gameTitleforURL.Replace("%20", " ").TrimEnd(' ');
+
+                try
+                {
+                    gamelink =
+                        linksOnPage.First(
+                            entry =>
                                 entry.ToString().IndexOf("Text = " + gameTitle, StringComparison.OrdinalIgnoreCase) >= 0)
-                                       .ToString();
-                        tryagain = false;
-                    }
-                        // if the title was not found in the search at all, we need to handle this.
-                        // Display a message to the user, allow them to refine the title searched with another one and try again
-                    catch (Exception)
-                    {
-                        var inputBoxDialog = new inputBox(ref gameTitle);
-                        bool? result = inputBoxDialog.ShowDialog();
-                        //MessageBox.Show("The result received was: " + result.ToString() + "\nThe current text is: " + inputBoxDialog.TextValue);
-                        gameTitle = inputBoxDialog.TextValue;
-                        if (result == true)
-                        {
-                            tryagain = true;
-                            gameTitleforURL = gameTitle.Replace(" ", "%20");
-                        }
-                        else tryagain = false;
-                    }
+                            .ToString();
+                    tryagain = false;
                 }
-
-                // if we've found a link
-                if (gamelink != null)
+                    // if the title was not found in the search at all, we need to handle this.
+                    // Display a message to the user, allow them to refine the title searched with another one and try again
+                catch (Exception)
                 {
-                    // open that game's unique ID page
-                    string gameurl = gamelink.Substring(gamelink.IndexOf("http", StringComparison.Ordinal),
-                                                        gamelink.IndexOf(",", StringComparison.Ordinal) - gamelink.IndexOf("http", StringComparison.Ordinal));
-                    document = webGet.Load(gameurl);
-
-                    // Use XPath to locate the information we're going to fetch:
-                    // XPath for Year: //table[@width='100%']/tr[1]/td[2]/a
-                    string fetchedYear = "";
-                    if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a") != null)
-                        fetchedYear = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
-                    //MessageBox.Show("The game's Year is: " + fetchedYear);
-
-                    // XPath for Publisher: //table[@width='100%']/tr[2]/td[4]/a
-                    string fetchedPublisher = "";
-                        if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a") != null)
-                            fetchedPublisher = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
-                    bool publisherExists = AmigulaDBDataSet.Publishers.AsEnumerable()
-                                                           .Any(
-                                                               row =>
-                                                               fetchedPublisher == row.Field<String>("Publisher_Label"));
-
-                    if (!publisherExists)
+                    var inputBoxDialog = new inputBox(ref gameTitle);
+                    bool? result = inputBoxDialog.ShowDialog();
+                    //MessageBox.Show("The result received was: " + result.ToString() + "\nThe current text is: " + inputBoxDialog.TextValue);
+                    gameTitle = inputBoxDialog.TextValue;
+                    if (result == true)
                     {
-                        try
+                        tryagain = true;
+                        gameTitleforURL = gameTitle.Replace(" ", "%20");
+                    }
+                    else tryagain = false;
+                }
+            }
+
+            // if we've found a link
+            if (gamelink == null) return;
+            // open that game's unique ID page
+            string gameurl = gamelink.Substring(gamelink.IndexOf("http", StringComparison.Ordinal), gamelink.IndexOf(",", StringComparison.Ordinal) - gamelink.IndexOf("http", StringComparison.Ordinal));
+            document = webGet.Load(gameurl);
+
+            // Use XPath to locate the information we're going to fetch:
+            // XPath for Year: //table[@width='100%']/tr[1]/td[2]/a
+            string fetchedYear = "";
+            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a") != null)
+                fetchedYear = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
+            //MessageBox.Show("The game's Year is: " + fetchedYear);
+
+            // XPath for Publisher: //table[@width='100%']/tr[2]/td[4]/a
+            string fetchedPublisher = "";
+            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a") != null)
+                fetchedPublisher = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
+            bool publisherExists = AmigulaDBDataSet.Publishers.AsEnumerable()
+                .Any(
+                    row =>
+                        fetchedPublisher == row.Field<string>("Publisher_Label"));
+
+            if (!publisherExists)
+            {
+                try
+                {
+                    AmigulaDBDataSetPublishersTableAdapter.InsertPublisher(fetchedPublisher);
+                    AmigulaDBDataSetPublishersTableAdapter.Fill(AmigulaDBDataSet.Publishers);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "An exception has occured while trying to add a new Publisher\n\n" + ex.Message,
+                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            // XPath for Genre: //table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a
+            string fetchedGenre =
+                document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[13]/td[1]/table/tr[2]/td[2]/a")
+                    .InnerText;
+            bool genreExists = AmigulaDBDataSet.Genres.AsEnumerable()
+                .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
+
+            if (!genreExists)
+            {
+                try
+                {
+                    AmigulaDBDataSetGenresTableAdapter.InsertGenre(fetchedGenre);
+                    AmigulaDBDataSetGenresTableAdapter.Fill(AmigulaDBDataSet.Genres);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "An exception has occured while trying to add a new Genre\n\n" + ex.Message,
+                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            // if there's no screenshot found locally, try to fetch one from the website
+            // XPath for title image: /html/body/div[2]/table[2]/tr/tr/td/a/img
+
+            if (imgScreenshot.Source == null)
+            {
+                //MessageBox.Show("No picture found in slot 1");
+                try
+                {
+                    string remoteScreenshot = null;
+                    if (document.DocumentNode.SelectSingleNode("//table[2]/tr/td/a/img") != null)
+                    {
+                        remoteScreenshot =
+                            document.DocumentNode.SelectSingleNode("//table[2]/tr/td/a/img").Attributes[0].Value;
+                    }
+                    else if (document.DocumentNode.SelectSingleNode("//table[2]/tr/tr/td/a/img") != null)
+                    {
+                        remoteScreenshot =
+                            document.DocumentNode.SelectSingleNode("//table[2]/tr/tr/td/a/img").Attributes[0]
+                                .Value;
+                    }
+                    // Download the image locally to the user's Temp folder
+                    if (!string.IsNullOrEmpty(remoteScreenshot))
+                    {
+                        var webClient = new WebClient();
+                        webClient.DownloadFile(remoteScreenshot, Path.Combine(Path.GetTempPath(), "sshot.png"));
+                        addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "An exception has occured while trying to add a new Screenshot\n\n" + ex.Message,
+                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            if (imgScreenshot2.Source == null || imgScreenshot3.Source == null)
+            {
+                try
+                {
+                    document = webGet.Load(gameurl + @"/screenshot");
+
+                    if (imgScreenshot2.Source == null)
+                    {
+                        string remoteScreenshot = null;
+
+                        if (
+                            document.DocumentNode.SelectSingleNode(
+                                "//div[@align='center']/table[5]/tr[2]/td/a/img") != null)
                         {
-                            AmigulaDBDataSetPublishersTableAdapter.InsertPublisher(fetchedPublisher);
-                            AmigulaDBDataSetPublishersTableAdapter.Fill(AmigulaDBDataSet.Publishers);
+                            remoteScreenshot =
+                                document.DocumentNode.SelectSingleNode(
+                                    "//div[@align='center']/table[5]/tr[2]/td/a/img").Attributes[0].Value;
                         }
-                        catch (Exception ex)
+                        // Download the image locally to the user's Temp folder
+                        if (!string.IsNullOrEmpty(remoteScreenshot))
                         {
-                            MessageBox.Show(
-                                "An exception has occured while trying to add a new Publisher\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                            var webClient = new WebClient();
+                            webClient.DownloadFile(
+                                remoteScreenshot.Replace("pic_preview", "pic_full").Replace(".jpg", ".png"),
+                                Path.Combine(Path.GetTempPath(), "sshot.png"));
+                            addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
                         }
                     }
 
-                    // XPath for Genre: //table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a
-                    string fetchedGenre =
-                        document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[13]/td[1]/table/tr[2]/td[2]/a")
-                                .InnerText;
-                    bool genreExists = AmigulaDBDataSet.Genres.AsEnumerable()
-                                                       .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
-
-                    if (!genreExists)
+                    if (imgScreenshot3.Source == null)
                     {
-                        try
+                        string remoteScreenshot = null;
+
+                        if (
+                            document.DocumentNode.SelectSingleNode(
+                                "//div[@align='center']/table[5]/tr[2]/td[2]/a/img") != null)
                         {
-                            AmigulaDBDataSetGenresTableAdapter.InsertGenre(fetchedGenre);
-                            AmigulaDBDataSetGenresTableAdapter.Fill(AmigulaDBDataSet.Genres);
+                            remoteScreenshot =
+                                document.DocumentNode.SelectSingleNode(
+                                    "//div[@align='center']/table[5]/tr[2]/td[2]/a/img").Attributes[0].Value;
                         }
-                        catch (Exception ex)
+                        // Download the image locally to the user's Temp folder
+                        if (!string.IsNullOrEmpty(remoteScreenshot))
                         {
-                            MessageBox.Show(
-                                "An exception has occured while trying to add a new Genre\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-
-                    // if there's no screenshot found locally, try to fetch one from the website
-                    // XPath for title image: /html/body/div[2]/table[2]/tr/tr/td/a/img
-
-                    if (imgScreenshot.Source == null)
-                    {
-                        //MessageBox.Show("No picture found in slot 1");
-                        try
-                        {
-                            string remoteScreenshot = null;
-                            if (document.DocumentNode.SelectSingleNode("//table[2]/tr/td/a/img") != null)
-                            {
-                                remoteScreenshot =
-                                    document.DocumentNode.SelectSingleNode("//table[2]/tr/td/a/img").Attributes[0].Value;
-                            }
-                            else if (document.DocumentNode.SelectSingleNode("//table[2]/tr/tr/td/a/img") != null)
-                            {
-                                remoteScreenshot =
-                                    document.DocumentNode.SelectSingleNode("//table[2]/tr/tr/td/a/img").Attributes[0]
-                                        .Value;
-                            }
-                            // Download the image locally to the user's Temp folder
-                            if (!String.IsNullOrEmpty(remoteScreenshot))
-                            {
-                                var webClient = new WebClient();
-                                webClient.DownloadFile(remoteScreenshot, Path.Combine(Path.GetTempPath(), "sshot.png"));
-                                addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to add a new Screenshot\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-
-                    if (imgScreenshot2.Source == null || imgScreenshot3.Source == null)
-                    {
-                        try
-                        {
-                            document = webGet.Load(gameurl + @"/screenshot");
-
-                            if (imgScreenshot2.Source == null)
-                            {
-                                string remoteScreenshot = null;
-
-                                if (
-                                    document.DocumentNode.SelectSingleNode(
-                                        "//div[@align='center']/table[5]/tr[2]/td/a/img") != null)
-                                {
-                                    remoteScreenshot =
-                                        document.DocumentNode.SelectSingleNode(
-                                            "//div[@align='center']/table[5]/tr[2]/td/a/img").Attributes[0].Value;
-                                }
-                                // Download the image locally to the user's Temp folder
-                                if (!String.IsNullOrEmpty(remoteScreenshot))
-                                {
-                                    var webClient = new WebClient();
-                                    webClient.DownloadFile(
-                                        remoteScreenshot.Replace("pic_preview", "pic_full").Replace(".jpg", ".png"),
-                                        Path.Combine(Path.GetTempPath(), "sshot.png"));
-                                    addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
-                                }
-                            }
-
-                            if (imgScreenshot3.Source == null)
-                            {
-                                string remoteScreenshot = null;
-
-                                if (
-                                    document.DocumentNode.SelectSingleNode(
-                                        "//div[@align='center']/table[5]/tr[2]/td[2]/a/img") != null)
-                                {
-                                    remoteScreenshot =
-                                        document.DocumentNode.SelectSingleNode(
-                                            "//div[@align='center']/table[5]/tr[2]/td[2]/a/img").Attributes[0].Value;
-                                }
-                                // Download the image locally to the user's Temp folder
-                                if (!String.IsNullOrEmpty(remoteScreenshot))
-                                {
-                                    var webClient = new WebClient();
-                                    webClient.DownloadFile(
-                                        remoteScreenshot.Replace("pic_preview", "pic_full").Replace(".jpg", ".png"),
-                                        Path.Combine(Path.GetTempPath(), "sshot.png"));
-                                    addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to add a new Screenshot\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-
-                    // Save the fetched information in the database
-                    if (GamesListView.SelectedIndex > -1)
-                    {
-                        try
-                        {
-                            // get the ID for the Genre label
-                            EnumerableRowCollection<int> genre_id = from row in AmigulaDBDataSet.Genres.AsEnumerable()
-                                                                    where
-                                                                        row.Field<String>("Genre_Label") == fetchedGenre
-                                                                    select row.Field<int>("Genre_ID");
-
-                            // get the ID for the Publisher label
-                            EnumerableRowCollection<int> publisher_id =
-                                from row in AmigulaDBDataSet.Publishers.AsEnumerable()
-                                where row.Field<String>("Publisher_Label") == fetchedPublisher
-                                select row.Field<int>("Publisher_ID");
-
-                            AmigulaDBDataSetGamesTableAdapter.UpdateMetadata(genre_id.First(), int.Parse(fetchedYear),
-                                                                             publisher_id.First(),
-                                                                             oDataRowView.Row["Notes"] as string,
-                                                                             oDataRowView.Row["Title"] as string);
-                            fillListView();
-                            //showGameMedia(currentgame);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to update the metadata!\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                            var webClient = new WebClient();
+                            webClient.DownloadFile(
+                                remoteScreenshot.Replace("pic_preview", "pic_full").Replace(".jpg", ".png"),
+                                Path.Combine(Path.GetTempPath(), "sshot.png"));
+                            addGameScreenshot(Path.Combine(Path.GetTempPath(), "sshot.png"), gameTitle);
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "An exception has occured while trying to add a new Screenshot\n\n" + ex.Message,
+                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            // Save the fetched information in the database
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
+            {
+                // get the ID for the Genre label
+                EnumerableRowCollection<int> genre_id = from row in AmigulaDBDataSet.Genres.AsEnumerable()
+                    where
+                        row.Field<string>("Genre_Label") == fetchedGenre
+                    select row.Field<int>("Genre_ID");
+
+                // get the ID for the Publisher label
+                EnumerableRowCollection<int> publisher_id =
+                    from row in AmigulaDBDataSet.Publishers.AsEnumerable()
+                    where row.Field<string>("Publisher_Label") == fetchedPublisher
+                    select row.Field<int>("Publisher_ID");
+
+                AmigulaDBDataSetGamesTableAdapter.UpdateMetadata(genre_id.First(), int.Parse(fetchedYear),
+                    publisher_id.First(),
+                    oDataRowView.Row["Notes"] as string,
+                    oDataRowView.Row["Title"] as string);
+                fillListView();
+                //showGameMedia(currentgame);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to update the metadata!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -643,23 +628,21 @@ namespace Amigula
         {
             var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
+                if (oDataRowView != null)
                 {
-                    if (oDataRowView != null)
-                    {
-                        oDataRowView.Row["Favorite"] = 0;
-                        AmigulaDBDataSetGamesTableAdapter.UpdateFavoriteStatus(0, oDataRowView.Row["Title"] as string);
-                    }
-                    fillListView();
+                    oDataRowView.Row["Favorite"] = 0;
+                    AmigulaDBDataSetGamesTableAdapter.UpdateFavoriteStatus(0, oDataRowView.Row["Title"] as string);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                fillListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -670,23 +653,21 @@ namespace Amigula
         {
             var oDataRowView = GamesListView.SelectedItem as DataRowView;
 
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
+                if (oDataRowView != null)
                 {
-                    if (oDataRowView != null)
-                    {
-                        oDataRowView.Row["Favorite"] = 1;
-                        AmigulaDBDataSetGamesTableAdapter.UpdateFavoriteStatus(1, oDataRowView.Row["Title"] as string);
-                    }
-                    fillListView();
+                    oDataRowView.Row["Favorite"] = 1;
+                    AmigulaDBDataSetGamesTableAdapter.UpdateFavoriteStatus(1, oDataRowView.Row["Title"] as string);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                fillListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -754,15 +735,13 @@ namespace Amigula
                                                                            "WinUAE\\Configurations");
                             Settings.Default.Save();
                         }
-                        if (patRegistry != null && (afKey == "Path" && patRegistry.GetValue(afKey) != null))
-                        {
-                            Settings.Default.EmulatorPath = Path.Combine(patRegistry.GetValue(afKey).ToString(),
-                                                                         "WinUAE\\winuae.exe");
-                            Settings.Default.Save();
-                        }
+                        if (patRegistry == null || (afKey != "Path" || patRegistry.GetValue(afKey) == null)) continue;
+                        Settings.Default.EmulatorPath = Path.Combine(patRegistry.GetValue(afKey).ToString(),
+                            "WinUAE\\winuae.exe");
+                        Settings.Default.Save();
                     }
                 }
-            if (patRegistry != null) patRegistry.Close();
+            patRegistry?.Close();
         }
 
         /// <summary>
@@ -770,7 +749,7 @@ namespace Amigula
         /// </summary>
         private static void refreshUAEconfigs()
         {
-            if (!String.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
+            if (!string.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
             {
                 try
                 {
@@ -805,7 +784,7 @@ namespace Amigula
         {
             // If there's no emulator set in Preferences, check for AmigaForever first
             // If that is not found, check for WinUAE and if that is not found either, show a warning
-            if (String.IsNullOrEmpty(Settings.Default.EmulatorPath)
+            if (string.IsNullOrEmpty(Settings.Default.EmulatorPath)
                 // correct is OR not AND here, but I guess second check is not needed
                 //&& String.IsNullOrEmpty(Settings.Default.UAEConfigsPath)
                 )
@@ -814,8 +793,8 @@ namespace Amigula
                 getAmigaForeverRegistry();
 
                 // If AmigaForever was not found, do a secondary check for WinUAE itself
-                if (String.IsNullOrEmpty(Settings.Default.EmulatorPath) ||
-                    String.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
+                if (string.IsNullOrEmpty(Settings.Default.EmulatorPath) ||
+                    string.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
                 {
                     if (
                         Directory.Exists(
@@ -881,7 +860,7 @@ namespace Amigula
 
             // If there's no Music player set in Preferences and Deliplayer is found installed, prompt the user to pick that directly.
             // Otherwise, default back to the bundled player
-            if (String.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
+            if (string.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
             {
                 if (
                     Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
@@ -912,8 +891,8 @@ namespace Amigula
             }
 
             // If GameBase Amiga folder is found in the default location (C:\GameBase\GameBase Amiga), use it automatically for Screenshots, Music, etc.
-            if (String.IsNullOrEmpty(Settings.Default.ScreenshotsPath) ||
-                (String.IsNullOrEmpty(Settings.Default.MusicPath)))
+            if (string.IsNullOrEmpty(Settings.Default.ScreenshotsPath) ||
+                (string.IsNullOrEmpty(Settings.Default.MusicPath)))
             {
                 if (Directory.Exists("C:\\GameBase\\GameBase Amiga"))
                 {
@@ -938,7 +917,7 @@ namespace Amigula
         /// </summary>
         private void launchInUAE()
         {
-            if (String.IsNullOrEmpty(Settings.Default.EmulatorPath))
+            if (string.IsNullOrEmpty(Settings.Default.EmulatorPath))
             {
                 // if there WinUAE path is empty, then display a warning message and allow the user to select it now
                 AppNotDefined(
@@ -948,22 +927,20 @@ namespace Amigula
             else
             {
                 string gamePath = cleanGameTitle(GamesListView.SelectedItem, "Path");
-                if (String.IsNullOrEmpty(gamePath) == false)
+                if (string.IsNullOrEmpty(gamePath) == false)
                 {
                     try
                     {
                         // Launch WinUAE from selected path giving it the selected config and game as a parameter
                         Process.Start(Settings.Default.EmulatorPath, gamePath);
                         var oDataRowView = GamesListView.SelectedItem as DataRowView;
-                        if (oDataRowView != null)
-                        {
-                            oDataRowView.Row["TimesPlayed"] = (int) oDataRowView.Row["TimesPlayed"] + 1;
-                            oDataRowView.Row["DateLastPlayed"] = DateTime.Now;
-                            AmigulaDBDataSetGamesTableAdapter.UpdateTimesPlayed((int) oDataRowView.Row["TimesPlayed"],
-                                                                                (DateTime)
-                                                                                oDataRowView.Row["DateLastPlayed"],
-                                                                                oDataRowView.Row["Title"] as string);
-                        }
+                        if (oDataRowView == null) return;
+                        oDataRowView.Row["TimesPlayed"] = (int) oDataRowView.Row["TimesPlayed"] + 1;
+                        oDataRowView.Row["DateLastPlayed"] = DateTime.Now;
+                        AmigulaDBDataSetGamesTableAdapter.UpdateTimesPlayed((int) oDataRowView.Row["TimesPlayed"],
+                            (DateTime)
+                                oDataRowView.Row["DateLastPlayed"],
+                            oDataRowView.Row["Title"] as string);
                     }
                     catch (Exception ex)
                     {
@@ -1056,34 +1033,30 @@ namespace Amigula
             // After that, allow the user to set the path to the application and save it in the Settings.
             MessageBoxResult result = MessageBox.Show(messageText, "No Application Specified", MessageBoxButton.YesNo,
                                                       MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            if (result != MessageBoxResult.Yes) return;
+            var selectFile = new OpenFileDialog
             {
-                var selectFile = new OpenFileDialog
-                    {
-                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                        DefaultExt = ".exe",
-                        Filter = "Executable files (*.exe)|*.exe"
-                    };
-                //selectFile.FileName = appHandler;
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                DefaultExt = ".exe",
+                Filter = "Executable files (*.exe)|*.exe"
+            };
+            //selectFile.FileName = appHandler;
 
-                // Show open file dialog box
-                bool? AppResult = selectFile.ShowDialog();
+            // Show open file dialog box
+            bool? AppResult = selectFile.ShowDialog();
 
-                // Process open file dialog box results 
-                if (AppResult == true)
-                {
-                    // Select file
-                    if (appHandler == "Emulator")
-                    {
-                        Settings.Default.EmulatorPath = selectFile.FileName;
-                    }
-                    if (appHandler == "MusicPlayer")
-                    {
-                        Settings.Default.MusicPlayerPath = selectFile.FileName;
-                    }
-                    Settings.Default.Save();
-                }
+            // Process open file dialog box results 
+            if (AppResult != true) return;
+            // Select file
+            if (appHandler == "Emulator")
+            {
+                Settings.Default.EmulatorPath = selectFile.FileName;
             }
+            if (appHandler == "MusicPlayer")
+            {
+                Settings.Default.MusicPlayerPath = selectFile.FileName;
+            }
+            Settings.Default.Save();
         }
 
         /// <summary>
@@ -1105,118 +1078,116 @@ namespace Amigula
 
             var oDataRowView = currentgame as DataRowView;
             string selectedGame = "";
-            if (oDataRowView != null)
+            if (oDataRowView == null) return selectedGame;
+            switch (cleanupType)
             {
-                switch (cleanupType)
+                case "Screenshot":
                 {
-                    case "Screenshot":
+                    selectedGame = oDataRowView.Row["Title"] as string;
+                    int n;
+                    string gameSubFolder = null;
+
+                    // Get the first letter of the game, to get the subfolder from that.
+                    // if the first letter is a number, the subfolder should be set to "0"
+                    if (selectedGame != null && int.TryParse(selectedGame.Substring(0, 1), out n)) gameSubFolder = "0\\";
+                    else if (selectedGame != null) gameSubFolder = selectedGame.Substring(0, 1) + "\\";
+
+                    // Use RegEx to clean up anything in () or []
+                    selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
+
+                    // if there's version information (e.g. v1.2) in the filename exclude it as well
+                    //if (selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) > 1 && 
+                    //    int.TryParse(selectedGame.Substring(selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) + 2, 1), out n))
+                    if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                    {
+                        selectedGame = selectedGame.Substring(0,
+                            selectedGame.IndexOf(" v",
+                                StringComparison
+                                    .OrdinalIgnoreCase));
+                    }
+
+                    // now try to match the filename to the title selected, adding ".png" at the end
+                    // this is far from perfect, needs improvement!
+                    if (selectedGame.Length > 0)
+                        selectedGame = Regex.Replace(selectedGame, " $", "").Replace(" ", "_") + ".png";
+                    // join the subfolder and game filename together before returning it
+                    selectedGame = gameSubFolder + selectedGame;
+                    break;
+                }
+                case "Path":
+                {
+                    // prepare the string for passing it to WinUAE as a parameter
+                    // a configuration file must be passed to WinUAE besides the actual filename
+                    var selectedGamePath = oDataRowView.Row["PathToFile"] as string;
+                    var selectedUAEconfig = oDataRowView.Row["UAEconfig"] as string;
+
+                    // new variable to hold a list of all the game disks, with full path-filenames
+                    SortedList<int, string> gameDisksFullPath = identifyGameDisks(selectedGamePath);
+
+                    // variable to hold the "diskimageX=" values in the UAE config, one for each disk found
+                    var diskImageX = new SortedList<int, string>();
+
+                    // If there are more than 1 disks for this game
+                    if (gameDisksFullPath.Count > 1)
+                    {
+                        // then for each disk found, we need to add an entry in the UAE config file to pass it to the DiskSwapper
+                        for (int i = 0; i < gameDisksFullPath.Count; i++)
                         {
-                            selectedGame = oDataRowView.Row["Title"] as string;
-                            int n;
-                            string gameSubFolder = null;
-
-                            // Get the first letter of the game, to get the subfolder from that.
-                            // if the first letter is a number, the subfolder should be set to "0"
-                            if (selectedGame != null && int.TryParse(selectedGame.Substring(0, 1), out n)) gameSubFolder = "0\\";
-                            else if (selectedGame != null) gameSubFolder = selectedGame.Substring(0, 1) + "\\";
-
-                            // Use RegEx to clean up anything in () or []
-                            selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
-
-                            // if there's version information (e.g. v1.2) in the filename exclude it as well
-                            //if (selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) > 1 && 
-                            //    int.TryParse(selectedGame.Substring(selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) + 2, 1), out n))
-                            if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
-                            {
-                                selectedGame = selectedGame.Substring(0,
-                                                                      selectedGame.IndexOf(" v",
-                                                                                           StringComparison
-                                                                                               .OrdinalIgnoreCase));
-                            }
-
-                            // now try to match the filename to the title selected, adding ".png" at the end
-                            // this is far from perfect, needs improvement!
-                            if (selectedGame.Length > 0)
-                                selectedGame = Regex.Replace(selectedGame, " $", "").Replace(" ", "_") + ".png";
-                            // join the subfolder and game filename together before returning it
-                            selectedGame = gameSubFolder + selectedGame;
-                            break;
+                            // replace any entry of diskimageX=* (where X=number and *=anything)
+                            diskImageX[i] = "diskimage" + i + "=.*";
+                            // text to be placed in the UAE config for the DiskSwapper
+                            gameDisksFullPath[i] = "diskimage" + i + "=" + gameDisksFullPath[i];
                         }
-                    case "Path":
+                        // cleanup any extra entries of diskimageX in the config file
+                        for (int i = gameDisksFullPath.Count; i < 20; i++)
                         {
-                            // prepare the string for passing it to WinUAE as a parameter
-                            // a configuration file must be passed to WinUAE besides the actual filename
-                            var selectedGamePath = oDataRowView.Row["PathToFile"] as string;
-                            var selectedUAEconfig = oDataRowView.Row["UAEconfig"] as string;
-
-                            // new variable to hold a list of all the game disks, with full path-filenames
-                            SortedList<int, string> gameDisksFullPath = identifyGameDisks(selectedGamePath);
-
-                            // variable to hold the "diskimageX=" values in the UAE config, one for each disk found
-                            var diskImageX = new SortedList<int, string>();
-
-                            // If there are more than 1 disks for this game
-                            if (gameDisksFullPath.Count > 1)
-                            {
-                                // then for each disk found, we need to add an entry in the UAE config file to pass it to the DiskSwapper
-                                for (int i = 0; i < gameDisksFullPath.Count; i++)
-                                {
-                                    // replace any entry of diskimageX=* (where X=number and *=anything)
-                                    diskImageX[i] = "diskimage" + i + "=.*";
-                                    // text to be placed in the UAE config for the DiskSwapper
-                                    gameDisksFullPath[i] = "diskimage" + i + "=" + gameDisksFullPath[i];
-                                }
-                                // cleanup any extra entries of diskimageX in the config file
-                                for (int i = gameDisksFullPath.Count; i < 20; i++)
-                                {
-                                    diskImageX[i] = "diskimage" + i + "=.*";
-                                    gameDisksFullPath[i] = "diskimage" + i + "=";
-                                }
-                                // open the UAE config, check if it contains any entries for "diskimage="
-                                // if it does, replace them with the current disks of the selected game
-                                // if it doesn't, append those lines to the config file
-                                if (selectedUAEconfig == "default")
-                                    ReplaceInFile("configs\\" + selectedUAEconfig + ".uae", diskImageX,
-                                                  gameDisksFullPath);
-                                else
-                                    ReplaceInFile(
-                                        Path.Combine(Settings.Default.UAEConfigsPath, selectedUAEconfig) + ".uae",
-                                        diskImageX, gameDisksFullPath);
-                            }
-
-                            // finally, pass it over as a parameter to UAE below
-                            // if the config file doesn't exist, WinUAE should still startup with the full GUI so it should be safe no to check for it
-                            if (selectedUAEconfig == "default")
-                                selectedGame = "-f \"" +
-                                               Path.Combine(Environment.CurrentDirectory,
-                                                            "configs\\" + selectedUAEconfig + ".uae") + "\"" + " -0 \"" +
-                                               selectedGamePath + "\"";
-                            else
-                                selectedGame = "-f \"" +
-                                               Path.Combine(Environment.CurrentDirectory,
-                                                            Path.Combine(Settings.Default.UAEConfigsPath,
-                                                                         selectedUAEconfig) + ".uae") + "\"" + " -0 \"" +
-                                               selectedGamePath + "\"";
-                            break;
+                            diskImageX[i] = "diskimage" + i + "=.*";
+                            gameDisksFullPath[i] = "diskimage" + i + "=";
                         }
-                    case "URL":
-                        {
-                            // prepare the string for passing it to a URL as a parameter
-                            // Replace any spaces with "%20" and try to clean up the title
-                            selectedGame = oDataRowView.Row["Title"] as string;
-                            // Use RegEx to clean up anything in () or []
-                            selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
-                            // if there's version information (e.g. v1.2) in the filename exclude it as well
-                            if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
-                            {
-                                selectedGame = selectedGame.Substring(0,
-                                                                      selectedGame.IndexOf(" v",
-                                                                                           StringComparison
-                                                                                               .OrdinalIgnoreCase));
-                            }
-                            if (selectedGame.Length > 0) selectedGame = selectedGame.TrimEnd(' ').Replace(" ", "%20");
-                            break;
-                        }
+                        // open the UAE config, check if it contains any entries for "diskimage="
+                        // if it does, replace them with the current disks of the selected game
+                        // if it doesn't, append those lines to the config file
+                        if (selectedUAEconfig == "default")
+                            ReplaceInFile("configs\\" + selectedUAEconfig + ".uae", diskImageX,
+                                gameDisksFullPath);
+                        else
+                            ReplaceInFile(
+                                Path.Combine(Settings.Default.UAEConfigsPath, selectedUAEconfig) + ".uae",
+                                diskImageX, gameDisksFullPath);
+                    }
+
+                    // finally, pass it over as a parameter to UAE below
+                    // if the config file doesn't exist, WinUAE should still startup with the full GUI so it should be safe no to check for it
+                    if (selectedUAEconfig == "default")
+                        selectedGame = "-f \"" +
+                                       Path.Combine(Environment.CurrentDirectory,
+                                           "configs\\" + selectedUAEconfig + ".uae") + "\"" + " -0 \"" +
+                                       selectedGamePath + "\"";
+                    else
+                        selectedGame = "-f \"" +
+                                       Path.Combine(Environment.CurrentDirectory,
+                                           Path.Combine(Settings.Default.UAEConfigsPath,
+                                               selectedUAEconfig) + ".uae") + "\"" + " -0 \"" +
+                                       selectedGamePath + "\"";
+                    break;
+                }
+                case "URL":
+                {
+                    // prepare the string for passing it to a URL as a parameter
+                    // Replace any spaces with "%20" and try to clean up the title
+                    selectedGame = oDataRowView.Row["Title"] as string;
+                    // Use RegEx to clean up anything in () or []
+                    selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
+                    // if there's version information (e.g. v1.2) in the filename exclude it as well
+                    if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                    {
+                        selectedGame = selectedGame.Substring(0,
+                            selectedGame.IndexOf(" v",
+                                StringComparison
+                                    .OrdinalIgnoreCase));
+                    }
+                    if (selectedGame.Length > 0) selectedGame = selectedGame.TrimEnd(' ').Replace(" ", "%20");
+                    break;
                 }
             }
             return selectedGame;
@@ -1266,14 +1237,14 @@ namespace Amigula
                 //MessageBox.Show("Found case 1. <game> Disk1.zip, <game> Disk2.zip etc.\n\nSelected game was Disk " + n.ToString());
                 var gameDisksFullPath = new SortedList<int, string>();
                 n = 0;
-                int DiskNumber = 1;
+                int diskNumber = 1;
                 do
                 {
                     //gameDisksFullPath[n] = selectedGamePath.Replace("Disk1","Disk"+n);
-                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + DiskNumber + ".");
+                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + diskNumber + ".");
                     n++;
-                    DiskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + DiskNumber + ".")));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + diskNumber + ".")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"Disk(\d{2})\....$") &&
@@ -1285,16 +1256,16 @@ namespace Amigula
                 //MessageBox.Show("Found case 1. <game> Disk1.zip, <game> Disk2.zip etc.\n\nSelected game was Disk " + n.ToString());
                 var gameDisksFullPath = new SortedList<int, string>();
                 n = 0;
-                int DiskNumber = 1;
+                int diskNumber = 1;
                 do
                 {
                     //gameDisksFullPath[n] = selectedGamePath.Replace("Disk1","Disk"+n);
                     gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk(\d{2})\.",
-                                                         "Disk" + DiskNumber.ToString(CultureInfo.InvariantCulture) + ".");
+                                                         "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + ".");
                     n++;
-                    DiskNumber++;
+                    diskNumber++;
                 } while (
-                    File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{2})\.", "Disk" + DiskNumber.ToString(CultureInfo.InvariantCulture) + ".")));
+                    File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{2})\.", "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + ".")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"Disk\s(\d{1})\sof") &&
@@ -1306,14 +1277,14 @@ namespace Amigula
                 //MessageBox.Show("case 2. <game> (Disk 1 of 2).zip, <game> (Disk 2 of 2).zip etc.");
                 var gameDisksFullPath = new SortedList<int, string>();
                 n = 0;
-                int DiskNumber = 1;
+                int diskNumber = 1;
                 do
                 {
                     gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof",
-                                                         "Disk " + DiskNumber + " of");
+                                                         "Disk " + diskNumber + " of");
                     n++;
-                    DiskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof", "Disk " + DiskNumber + " of")));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof", "Disk " + diskNumber + " of")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"Disk\s(\d{2})\sof\s(\d{2})") &&
@@ -1325,16 +1296,16 @@ namespace Amigula
                 //MessageBox.Show("case 3. <game> (Disk 01 of 11).zip, <game> (Disk 02 of 11).zip etc.");
                 var gameDisksFullPath = new SortedList<int, string>();
                 n = 0;
-                int DiskNumber = 1;
+                int diskNumber = 1;
                 do
                 {
                     gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk\s(\d{2})\sof",
-                                                         "Disk " + DiskNumber.ToString("00") + " of");
+                                                         "Disk " + diskNumber.ToString("00") + " of");
                     n++;
-                    DiskNumber++;
+                    diskNumber++;
                 } while (
                     File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{2})\sof",
-                                              "Disk " + DiskNumber.ToString("00") + " of")));
+                                              "Disk " + diskNumber.ToString("00") + " of")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"-(\d{1})\....$"))
@@ -1343,20 +1314,19 @@ namespace Amigula
                 //MessageBox.Show("case 4. <game>-1.zip, <game>-2.zip etc.");
                 var gameDisksFullPath = new SortedList<int, string>();
                 n = 0;
-                int DiskNumber = 1;
+                int diskNumber = 1;
                 do
                 {
-                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + DiskNumber + ".");
+                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + diskNumber + ".");
                     n++;
-                    DiskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + DiskNumber + ".")));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + diskNumber + ".")));
                 return gameDisksFullPath;
             }
             else
             {
                 // if all else fails, return the one disked game back
-                var gameDisksFullPath = new SortedList<int, string>();
-                gameDisksFullPath[n] = selectedGamePath;
+                var gameDisksFullPath = new SortedList<int, string> {[n] = selectedGamePath};
                 return gameDisksFullPath;
             }
         }
@@ -1400,7 +1370,7 @@ namespace Amigula
         private static void playGameMusic(object currentgame)
         {
             // Display the music found for the selected game (if found)
-            if (!String.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
+            if (!string.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
             {
                 if (File.Exists(Settings.Default.MusicPlayerPath))
                 {
@@ -1408,25 +1378,21 @@ namespace Amigula
                     string gameMusicFile = cleanGameTitle(currentgame, "Screenshot")
                         .Replace("_", " ")
                         .Replace(".png", ".zip");
-                    if (String.IsNullOrEmpty(gameMusicFile) == false)
+                    if (string.IsNullOrEmpty(gameMusicFile)) return;
+                    // check if the filename exists first, otherwise there's nothing to do
+                    if (!File.Exists(Path.Combine(Settings.Default.MusicPath, gameMusicFile))) return;
+                    //MessageBox.Show("About to launch:\n" + Properties.Settings.Default.MusicPlayerPath + " " + "\"" + Properties.Settings.Default.MusicPath + "\\" + gameMusicFile +"\"");
+                    // launch the Music Player to listen to it
+                    try
                     {
-                        // check if the filename exists first, otherwise there's nothing to do
-                        if (File.Exists(Path.Combine(Settings.Default.MusicPath, gameMusicFile)))
-                        {
-                            //MessageBox.Show("About to launch:\n" + Properties.Settings.Default.MusicPlayerPath + " " + "\"" + Properties.Settings.Default.MusicPath + "\\" + gameMusicFile +"\"");
-                            // launch the Music Player to listen to it
-                            try
-                            {
-                                Process.Start(Settings.Default.MusicPlayerPath,
-                                              "\"" + Path.Combine(Settings.Default.MusicPath, gameMusicFile) + "\"");
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(
-                                    "An Exception has occured while trying to launch the music player with the music file:\n\n" +
-                                    ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
+                        Process.Start(Settings.Default.MusicPlayerPath,
+                            "\"" + Path.Combine(Settings.Default.MusicPath, gameMusicFile) + "\"");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            "An Exception has occured while trying to launch the music player with the music file:\n\n" +
+                            ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
                 else
@@ -1450,7 +1416,7 @@ namespace Amigula
         private void showGameMedia(object currentgame)
         {
             // Display the screenshot for the selected game
-            if (!String.IsNullOrEmpty(Settings.Default.ScreenshotsPath))
+            if (!string.IsNullOrEmpty(Settings.Default.ScreenshotsPath))
             {
                 // call cleanGameTitle to cleanup the title and add the png extension to it
                 string gameImageFile = cleanGameTitle(currentgame, "Screenshot");
@@ -1466,7 +1432,7 @@ namespace Amigula
                 imgScreenshot3.Source =
                     new BitmapImage(
                         new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
-                if (!String.IsNullOrEmpty(gameImageFile))
+                if (!string.IsNullOrEmpty(gameImageFile))
                 {
                     // check if the filename exists first, otherwise there's nothing to display
                     if (File.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile)))
@@ -1649,13 +1615,13 @@ namespace Amigula
             // for music files, replace the underscores with spaces and the extension with .ZIP
             // this area should be improved!
             // Display the screenshot for the selected game
-            if (!String.IsNullOrEmpty(Settings.Default.MusicPath))
+            if (!string.IsNullOrEmpty(Settings.Default.MusicPath))
             {
                 // call cleanGameTitle to cleanup the title and add the png extension to it
                 string gameMusicFile = cleanGameTitle(currentgame, "Screenshot")
                     .Replace("_", " ")
                     .Replace(".png", ".zip");
-                if (!String.IsNullOrEmpty(gameMusicFile))
+                if (!string.IsNullOrEmpty(gameMusicFile))
                 {
                     // check if the filename exists first, otherwise there's nothing to do
                     if (File.Exists(Path.Combine(Settings.Default.MusicPath, gameMusicFile)))
@@ -1685,20 +1651,18 @@ namespace Amigula
         /// <param name="searchFilter">The search pattern to use</param>
         private void filterListItems(string searchFilter)
         {
-            if (searchFilter != "Search for Game")
+            if (searchFilter == "Search for Game") return;
+            // Filter the list dynamically when the user enters something in the Filter textbox
+            var cv = (BindingListCollectionView) CollectionViewSource.GetDefaultView(AmigulaDBDataSet.Games);
+            try
             {
-                // Filter the list dynamically when the user enters something in the Filter textbox
-                var cv = (BindingListCollectionView) CollectionViewSource.GetDefaultView(AmigulaDBDataSet.Games);
-                try
-                {
-                    cv.CustomFilter = string.Format(CultureInfo.InvariantCulture, "TITLE LIKE '%{0}%'",
-                                                    searchFilter.Replace("'", "''"));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An exception has occured while trying to filter the games:\n\n" + ex.Message,
-                                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                cv.CustomFilter = string.Format(CultureInfo.InvariantCulture, "TITLE LIKE '%{0}%'",
+                    searchFilter.Replace("'", "''"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An exception has occured while trying to filter the games:\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1813,16 +1777,12 @@ namespace Amigula
             if (!Settings.Default.ShowLongplayVideos) return;
             // Load longplay video
             var oDataRowView = GamesListView.SelectedItem as DataRowView;
-            if (oDataRowView != null)
-            {
-                var LongplayTitle = oDataRowView.Row["Title"] as string;
-                List<YouTubeInfo> videos = LoadVideosKey("Amiga Longplay " + LongplayTitle);
-                if (videos.Any())
-                {
-                    var video = new Uri(GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
-                    wbLongplay.Source = video;
-                }
-            }
+            if (oDataRowView == null) return;
+            var LongplayTitle = oDataRowView.Row["Title"] as string;
+            List<YouTubeInfo> videos = LoadVideosKey("Amiga Longplay " + LongplayTitle);
+            if (!videos.Any()) return;
+            var video = new Uri(GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
+            wbLongplay.Source = video;
         }
 
         #region Is64BitOperatingSystem (IsWow64Process)
@@ -1892,12 +1852,10 @@ namespace Amigula
         private void tboxFilterGames_GotFocus(object sender, RoutedEventArgs e)
         {
             // Clear the textbox only if the user hadn't already typed something there
-            if (tboxFilterGames.Text == "Search for Game")
-            {
-                tboxFilterGames.Clear();
-                tboxFilterGames.Foreground.Opacity = 1;
-                tboxFilterGames.FontStyle = FontStyles.Normal;
-            }
+            if (tboxFilterGames.Text != "Search for Game") return;
+            tboxFilterGames.Clear();
+            tboxFilterGames.Foreground.Opacity = 1;
+            tboxFilterGames.FontStyle = FontStyles.Normal;
         }
 
         /// <summary>
@@ -1908,12 +1866,10 @@ namespace Amigula
         private void tboxFilterGames_LostFocus(object sender, RoutedEventArgs e)
         {
             // Only if the user hasn't typed anything there, or the textbox is empty
-            if (String.IsNullOrEmpty(tboxFilterGames.Text))
-            {
-                tboxFilterGames.Text = "Search for Game";
-                tboxFilterGames.Foreground.Opacity = 0.5;
-                tboxFilterGames.FontStyle = FontStyles.Italic;
-            }
+            if (!string.IsNullOrEmpty(tboxFilterGames.Text)) return;
+            tboxFilterGames.Text = "Search for Game";
+            tboxFilterGames.Foreground.Opacity = 0.5;
+            tboxFilterGames.FontStyle = FontStyles.Italic;
         }
 
         /// <summary>
@@ -2009,22 +1965,20 @@ namespace Amigula
         /// <param name="e"></param>
         private void comboUAEconfig_DropDownClosed(object sender, EventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
-                {
-                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig =
-                        comboUAEconfig.SelectedValue.ToString();
-                    AmigulaDBDataSetGamesTableAdapter.UpdateUAEconfig(
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig,
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to save the selected UAE config!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig =
+                    comboUAEconfig.SelectedValue.ToString();
+                AmigulaDBDataSetGamesTableAdapter.UpdateUAEconfig(
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].UAEconfig,
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to save the selected UAE config!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2035,21 +1989,19 @@ namespace Amigula
         /// <param name="e"></param>
         private void cmbboxGenre_DropDownClosed(object sender, EventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
-                {
-                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID = (int) cmbboxGenre.SelectedValue;
-                    AmigulaDBDataSetGamesTableAdapter.UpdateGenre(
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID,
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to save the selected genre!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID = (int) cmbboxGenre.SelectedValue;
+                AmigulaDBDataSetGamesTableAdapter.UpdateGenre(
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Genre_ID,
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to save the selected genre!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2060,22 +2012,20 @@ namespace Amigula
         /// <param name="e"></param>
         private void cmbboxPublisher_DropDownClosed(object sender, EventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
-                {
-                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID =
-                        (int) cmbboxPublisher.SelectedValue;
-                    AmigulaDBDataSetGamesTableAdapter.UpdatePublisher(
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID,
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to save the selected Publisher!\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID =
+                    (int) cmbboxPublisher.SelectedValue;
+                AmigulaDBDataSetGamesTableAdapter.UpdatePublisher(
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Publisher_ID,
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to save the selected Publisher!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2086,20 +2036,18 @@ namespace Amigula
         /// <param name="e"></param>
         private void tboxNotes_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
-                {
-                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes = tboxNotes.Text;
-                    AmigulaDBDataSetGamesTableAdapter.UpdateNotes(
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes,
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An exception has occured while trying to save the Notes!\n\n" + ex.Message,
-                                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes = tboxNotes.Text;
+                AmigulaDBDataSetGamesTableAdapter.UpdateNotes(
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Notes,
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An exception has occured while trying to save the Notes!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2110,20 +2058,18 @@ namespace Amigula
         /// <param name="e"></param>
         private void tboxYear_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                try
-                {
-                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year = int.Parse(tboxYear.Text);
-                    AmigulaDBDataSetGamesTableAdapter.UpdateYear(
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year,
-                        AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An exception has occured while trying to save the Year!\n\n" + ex.Message,
-                                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year = int.Parse(tboxYear.Text);
+                AmigulaDBDataSetGamesTableAdapter.UpdateYear(
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Year,
+                    AmigulaDBDataSet.Games[GamesListView.SelectedIndex].Title);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An exception has occured while trying to save the Year!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2134,34 +2080,30 @@ namespace Amigula
         /// <param name="e"></param>
         private void imgScreenshot_Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            // Note that you can have more than one file.
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                // Note that you can have more than one file.
-                var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
-
-                var oDataRowView = GamesListView.SelectedItem as DataRowView;
-
-                if (GamesListView.SelectedIndex > -1)
+                if (oDataRowView != null)
                 {
-                    try
+                    var gameTitle = oDataRowView.Row["Title"] as string;
+                    foreach (string file in files)
                     {
-                        if (oDataRowView != null)
-                        {
-                            var gameTitle = oDataRowView.Row["Title"] as string;
-                            foreach (string file in files)
-                            {
-                                addGameScreenshot(file, gameTitle);
-                            }
-                        }
-                        showGameMedia(GamesListView.SelectedItem);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                            "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                        addGameScreenshot(file, gameTitle);
                     }
                 }
+                showGameMedia(GamesListView.SelectedItem);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2172,34 +2114,30 @@ namespace Amigula
         /// <param name="e"></param>
         private void imgScreenshot2_Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            // Note that you can have more than one file.
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                // Note that you can have more than one file.
-                var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
-
-                var oDataRowView = GamesListView.SelectedItem as DataRowView;
-
-                if (GamesListView.SelectedIndex > -1)
+                if (oDataRowView != null)
                 {
-                    try
+                    var gameTitle = oDataRowView.Row["Title"] as string;
+                    foreach (string file in files)
                     {
-                        if (oDataRowView != null)
-                        {
-                            var gameTitle = oDataRowView.Row["Title"] as string;
-                            foreach (string file in files)
-                            {
-                                addGameScreenshot(file, gameTitle);
-                            }
-                        }
-                        showGameMedia(GamesListView.SelectedItem);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                            "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                        addGameScreenshot(file, gameTitle);
                     }
                 }
+                showGameMedia(GamesListView.SelectedItem);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2210,34 +2148,30 @@ namespace Amigula
         /// <param name="e"></param>
         private void imgScreenshot3_Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            // Note that you can have more than one file.
+            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+
+            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+
+            if (GamesListView.SelectedIndex <= -1) return;
+            try
             {
-                // Note that you can have more than one file.
-                var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
-
-                var oDataRowView = GamesListView.SelectedItem as DataRowView;
-
-                if (GamesListView.SelectedIndex > -1)
+                if (oDataRowView != null)
                 {
-                    try
+                    var gameTitle = oDataRowView.Row["Title"] as string;
+                    foreach (string file in files)
                     {
-                        if (oDataRowView != null)
-                        {
-                            var gameTitle = oDataRowView.Row["Title"] as string;
-                            foreach (string file in files)
-                            {
-                                addGameScreenshot(file, gameTitle);
-                            }
-                        }
-                        showGameMedia(GamesListView.SelectedItem);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                            "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                        addGameScreenshot(file, gameTitle);
                     }
                 }
+                showGameMedia(GamesListView.SelectedItem);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2300,12 +2234,10 @@ namespace Amigula
         /// <param name="e"></param>
         private void btnRandom_Click(object sender, RoutedEventArgs e)
         {
-            if (GamesListView.SelectedIndex > -1)
-            {
-                var rand = new Random();
-                GamesListView.SelectedIndex = rand.Next(1, GamesListView.Items.Count);
-                GamesListView.ScrollIntoView(GamesListView.SelectedItem);
-            }
+            if (GamesListView.SelectedIndex <= -1) return;
+            var rand = new Random();
+            GamesListView.SelectedIndex = rand.Next(1, GamesListView.Items.Count);
+            GamesListView.ScrollIntoView(GamesListView.SelectedItem);
         }
 
         /// <summary>
@@ -2315,36 +2247,36 @@ namespace Amigula
         /// <param name="e"></param>
         private void btnEditUAEconfig_Click(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrEmpty(comboUAEconfig.SelectedValue.ToString()))
-                if (comboUAEconfig.SelectedValue.ToString() == "default")
+            if (string.IsNullOrEmpty(comboUAEconfig.SelectedValue.ToString())) return;
+            if (comboUAEconfig.SelectedValue.ToString() == "default")
+            {
+                try
                 {
-                    try
-                    {
-                        Process.Start(Path.Combine(Environment.CurrentDirectory,
-                                                   "configs\\" + comboUAEconfig.SelectedValue + ".uae"));
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "An exception has occured while trying to launch WinUAE!\nPlease check your paths in Preferences!\n\n" +
-                            ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    Process.Start(Path.Combine(Environment.CurrentDirectory,
+                        "configs\\" + comboUAEconfig.SelectedValue + ".uae"));
                 }
-                else
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        Process.Start(
-                            Path.Combine(Settings.Default.UAEConfigsPath, comboUAEconfig.SelectedValue.ToString()) +
-                            ".uae");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "An exception has occured while trying to launch WinUAE!\nPlease check your paths in Preferences!\n\n" +
-                            ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    MessageBox.Show(
+                        "An exception has occured while trying to launch WinUAE!\nPlease check your paths in Preferences!\n\n" +
+                        ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+            else
+            {
+                try
+                {
+                    Process.Start(
+                        Path.Combine(Settings.Default.UAEConfigsPath, comboUAEconfig.SelectedValue.ToString()) +
+                        ".uae");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "An exception has occured while trying to launch WinUAE!\nPlease check your paths in Preferences!\n\n" +
+                        ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         /// <summary>
@@ -2396,7 +2328,7 @@ namespace Amigula
         /// <param name="e"></param>
         private void btnPlayMusic_Click(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
+            if (!string.IsNullOrEmpty(Settings.Default.MusicPlayerPath))
             {
                 playGameMusic(GamesListView.SelectedItem);
             }
@@ -2428,7 +2360,7 @@ namespace Amigula
         /// <param name="e"></param>
         private void editMenu_RescanGames_Click(object sender, RoutedEventArgs e)
         {
-            if (String.IsNullOrEmpty(Settings.Default.LibraryPath) == false)
+            if (string.IsNullOrEmpty(Settings.Default.LibraryPath) == false)
                 try
                 {
                     // Call the ProcessDirectory method to handle the selected path
@@ -2445,11 +2377,9 @@ namespace Amigula
                     MessageBox.Show(
                         "You don't have a Games Folder selected in Preferences!\nDo you want to select one now?",
                         "No Games Folder found", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    var prefs = new Preferences();
-                    prefs.Show();
-                }
+                if (result != MessageBoxResult.Yes) return;
+                var prefs = new Preferences();
+                prefs.Show();
             }
         }
 

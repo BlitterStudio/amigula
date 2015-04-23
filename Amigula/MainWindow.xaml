@@ -113,7 +113,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Path to file" Width="Auto" local:GridViewSort.PropertyName="Path to file">
+                    <GridViewColumn Header="Path to file" local:GridViewSort.PropertyName="Path to file">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding PathToFile}"/>

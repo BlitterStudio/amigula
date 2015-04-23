@@ -243,16 +243,14 @@ namespace Amigula
                     RemoveSortGlyph(currentSortedColumnHeader);
                 }
             }
-            if (!string.IsNullOrEmpty(propertyName))
-            {
-                view.SortDescriptions.Add(new SortDescription(propertyName, direction));
-                if (GetShowSortGlyph(listView))
-                    AddSortGlyph(
-                        sortedColumnHeader,
-                        direction,
-                        direction == ListSortDirection.Ascending ? GetSortGlyphAscending(listView) : GetSortGlyphDescending(listView));
-                SetSortedColumnHeader(listView, sortedColumnHeader);
-            }
+            if (string.IsNullOrEmpty(propertyName)) return;
+            view.SortDescriptions.Add(new SortDescription(propertyName, direction));
+            if (GetShowSortGlyph(listView))
+                AddSortGlyph(
+                    sortedColumnHeader,
+                    direction,
+                    direction == ListSortDirection.Ascending ? GetSortGlyphAscending(listView) : GetSortGlyphDescending(listView));
+            SetSortedColumnHeader(listView, sortedColumnHeader);
         }
 
         private static void AddSortGlyph(GridViewColumnHeader columnHeader, ListSortDirection direction, ImageSource sortGlyph)

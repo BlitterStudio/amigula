@@ -5,11 +5,11 @@ namespace Amigula
     /// <summary>
     /// Interaction logic for inputBox.xaml
     /// </summary>
-    public partial class inputBox
+    public partial class InputBox
     {
         public string TextValue => txtBox.Text;
 
-        public inputBox(ref string value)
+        public InputBox(ref string value)
         {
             InitializeComponent();
             txtBox.Text = value;

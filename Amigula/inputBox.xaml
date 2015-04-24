@@ -1,4 +1,4 @@
-﻿<Window x:Name="inputBoxWindow" x:Class="Amigula.inputBox"
+﻿<Window x:Name="inputBoxWindow" x:Class="Amigula.InputBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Please enter a new name" ResizeMode="NoResize" Topmost="True" WindowStartupLocation="CenterScreen" Width="327" Height="160">

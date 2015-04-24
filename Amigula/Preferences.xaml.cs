@@ -23,7 +23,7 @@ namespace Amigula
             tboxMusicPath.Text = Properties.Settings.Default.MusicPath;
         }
 
-        private void selectUAEFolder()
+        private void SelectUaeFolder()
         {
             var selectFile = new OpenFileDialog
                 {
@@ -47,7 +47,7 @@ namespace Amigula
             }
         }
 
-        private void selectGamesFolder()
+        private void SelectGamesFolder()
         {
             var selectFolder = new System.Windows.Forms.FolderBrowserDialog();
             try
@@ -66,7 +66,7 @@ namespace Amigula
             finally { selectFolder.Dispose(); }
         }
 
-        private void selectScreenshotsFolder()
+        private void SelectScreenshotsFolder()
         {
             var selectFolder = new System.Windows.Forms.FolderBrowserDialog();
             try
@@ -85,7 +85,7 @@ namespace Amigula
             finally { selectFolder.Dispose(); }
         }
 
-        private void selectMusicPlayerFolder()
+        private void SelectMusicPlayerFolder()
         {
             var selectFile = new OpenFileDialog
                 {
@@ -109,7 +109,7 @@ namespace Amigula
             }
         }
 
-        private void selectMusicFolder()
+        private void SelectMusicFolder()
         {
             var selectFolder = new System.Windows.Forms.FolderBrowserDialog();
             try 
@@ -133,17 +133,17 @@ namespace Amigula
 
         private void btnChangeScreenshotsPath_Click(object sender, RoutedEventArgs e)
         {
-            selectScreenshotsFolder();
+            SelectScreenshotsFolder();
         }
 
         private void btnChangeUAEPath_Click(object sender, RoutedEventArgs e)
         {
-            selectUAEFolder();
+            SelectUaeFolder();
         }
 
         private void btnChangeGamesPath_Click(object sender, RoutedEventArgs e)
         {
-            selectGamesFolder();
+            SelectGamesFolder();
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -164,12 +164,12 @@ namespace Amigula
 
         private void btnChangeMusicPath_Click(object sender, RoutedEventArgs e)
         {
-            selectMusicFolder();
+            SelectMusicFolder();
         }
 
         private void btnChangeMusicPlayerPath_Click(object sender, RoutedEventArgs e)
         {
-            selectMusicPlayerFolder();
+            SelectMusicPlayerFolder();
         }
 
     }

@@ -157,10 +157,8 @@ namespace Amigula
             // Set the search field as observable for live filtering
             // When text is changed, call filterListItems() asynchronously
 
-#pragma warning disable 168
+            // ReSharper disable once UnusedVariable
             IDisposable gameFilterChanged = Observable.FromEventPattern<EventArgs>(tboxFilterGames, "TextChanged")
-#pragma warning restore 168
-
                                                       .Select(searched => ((TextBox) searched.Sender).Text)
                                                       .DistinctUntilChanged()
                                                       .Throttle(TimeSpan.FromMilliseconds(250))
@@ -168,18 +166,15 @@ namespace Amigula
                                                       .Subscribe(FilterListItems);
 
             // Monitor the selected Game so we can display Screenshot and other info on the fly
-#pragma warning disable 168
+            // ReSharper disable once UnusedVariable
             IDisposable gameSelectionChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "SelectionChanged")
-#pragma warning restore 168
                                                          .Select(selected => ((ListView) selected.Sender).SelectedItem)
                                                          .Subscribe(ShowGameMedia);
 
             // Monitor the number of games if the list is refreshed
-#pragma warning disable 168
+            // ReSharper disable once UnusedVariable
             IDisposable numberOfGamesChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "LayoutUpdated")
-#pragma warning restore 168
                                                          .Subscribe(games => UpdateNoOfGames());
-
         }
 
         /// <summary>
@@ -2367,6 +2362,9 @@ namespace Amigula
         /// <param name="e"></param>
         private void editMenu_EmptyLib_Click(object sender, RoutedEventArgs e)
         {
+            MessageBoxResult result =
+                MessageBox.Show("Are you sure? This will DELETE all the entries from your database\n\n", "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
             // Empty the games library DataSet and Database
             _amigulaDbDataSet.Clear();
             try

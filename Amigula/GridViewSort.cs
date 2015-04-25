@@ -179,7 +179,8 @@ namespace Amigula
         private static void ColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             var headerClicked = e.OriginalSource as GridViewColumnHeader;
-            if (headerClicked != null && headerClicked.Column == null) return;
+            if (headerClicked == null) return;
+            if (headerClicked.Column == null) return;            
             string propertyName = GetPropertyName(headerClicked.Column);
             if (string.IsNullOrEmpty(propertyName)) return;
             var listView = GetAncestor<ListView>(headerClicked);

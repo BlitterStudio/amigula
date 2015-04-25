@@ -741,7 +741,7 @@ namespace Amigula
                         Settings.Default.Save();
                     }
                 }
-            patRegistry?.Close();
+            if (patRegistry != null) patRegistry.Close();
         }
 
         /// <summary>
@@ -1302,7 +1302,8 @@ namespace Amigula
             else
             {
                 // if all else fails, return the one disked game back
-                var gameDisksFullPath = new SortedList<int, string> {[n] = selectedGamePath};
+                var gameDisksFullPath = new SortedList<int, string>();
+                gameDisksFullPath[n] = selectedGamePath;
                 return gameDisksFullPath;
             }
         }

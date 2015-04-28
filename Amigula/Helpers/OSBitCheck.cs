@@ -12,7 +12,7 @@ namespace Amigula.Helpers
         ///     The function returns true if the operating system is 64-bit;
         ///     otherwise, it returns false.
         /// </returns>
-        private static bool Is64BitOperatingSystem()
+        public static bool Is64BitOperatingSystem()
         {
             if (IntPtr.Size == 8) // 64-bit programs run only on Win64
             {

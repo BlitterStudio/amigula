@@ -145,6 +145,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\GridViewSort.cs" />
+    <Compile Include="Helpers\YoutubeHelper.cs" />
     <Page Include="aboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -169,7 +171,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GridViewSort.cs" />
     <Compile Include="inputBox.xaml.cs">
       <DependentUpon>inputBox.xaml</DependentUpon>
     </Compile>

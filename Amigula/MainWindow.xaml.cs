@@ -20,6 +20,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using Amigula.AmigulaDBDataSetTableAdapters;
+using Amigula.Helpers;
 using Amigula.Properties;
 using HtmlAgilityPack;
 using Microsoft.Win32;
@@ -56,17 +57,13 @@ namespace Amigula
     /// </summary>
     public sealed partial class MainWindow
     {
-        // set up some variables globally since we'll use them from several areas
         private static List<string> _uaeConfigViewSource;
-        // Initialize our progress bar
         private static readonly ProgressBar ProgBar = new ProgressBar();
-        private readonly AmigulaDBDataSet _amigulaDbDataSet;
+        private AmigulaDBDataSet _amigulaDbDataSet;
         private readonly GamesTableAdapter _amigulaDbDataSetGamesTableAdapter = new GamesTableAdapter();
         private readonly GenresTableAdapter _amigulaDbDataSetGenresTableAdapter = new GenresTableAdapter();
         private readonly PublishersTableAdapter _amigulaDbDataSetPublishersTableAdapter = new PublishersTableAdapter();
-        private readonly CollectionViewSource _gamesViewSource;
-
-        // A list to hold the UAE configs found
+        private CollectionViewSource _gamesViewSource;
 
         public MainWindow()
         {
@@ -76,43 +73,35 @@ namespace Amigula
                 return;
             }
 
-            // initialize the Window position and state
-            try
-            {
-                Top = Settings.Default.Top;
-                Left = Settings.Default.Left;
-                Height = Settings.Default.Height;
-                Width = Settings.Default.Width;
-                WindowState = Settings.Default.WindowSetting;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An exception has occured while trying to position the window!\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            RestoreSettingsForMainWindowPosition();
+            CenterMainWindowIfNoSettingsFound();
 
-            // if no saved position is found, default back to the center of the screen
-// ReSharper disable CompareOfFloatsByEqualityOperator
-            if (Top == 0 && Left == 0)
-// ReSharper restore CompareOfFloatsByEqualityOperator
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-
-            // show the version information on the window titlebar
-            Title = Assembly.GetExecutingAssembly().GetName().Name + " v" +
-                    Assembly.GetExecutingAssembly().GetName().Version;
+            SetWindowTitleText();
 
             InitializeComponent();
+            InitializeDataSet();
+            InitializeViewSource();
 
-            // initialize the DataSet and ViewSource for the Listview
-            _amigulaDbDataSet = ((AmigulaDBDataSet) (FindResource("AmigulaDBDataSet")));
-            _gamesViewSource = ((CollectionViewSource) (FindResource("GamesViewSource")));
-
-            // Perform initial checks and configuration validation
             InitialChecks();
 
-            // Retrieve the list of available UAE configs and fill the list with them
-            // so that the combobox displays them.
             RefreshUaEconfigs();
+            BindUaeConfigItemSource();
+        }
+
+        /// <summary>
+        /// Centers the main window if no settings found.
+        /// </summary>
+        private void CenterMainWindowIfNoSettingsFound()
+        {
+            if (Top == 0 && Left == 0)
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        /// <summary>
+        /// Binds the uae configuration item source.
+        /// </summary>
+        private void BindUaeConfigItemSource()
+        {
             try
             {
                 comboUAEconfig.ItemsSource = _uaeConfigViewSource;
@@ -125,89 +114,166 @@ namespace Amigula
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Sets the window title text.
+        /// </summary>
+        private void SetWindowTitleText()
         {
-            // Load data into the Games table
+            Title = Assembly.GetExecutingAssembly().GetName().Name + " v" +
+                    Assembly.GetExecutingAssembly().GetName().Version;
+        }
+
+        /// <summary>
+        /// Initializes the view source.
+        /// </summary>
+        private void InitializeViewSource()
+        {
+            _gamesViewSource = ((CollectionViewSource) (FindResource("GamesViewSource")));
+        }
+
+        /// <summary>
+        /// Initializes the data set.
+        /// </summary>
+        private void InitializeDataSet()
+        {
+            _amigulaDbDataSet = ((AmigulaDBDataSet) (FindResource("AmigulaDBDataSet")));
+        }
+
+        /// <summary>
+        /// Places the main window.
+        /// </summary>
+        private void RestoreSettingsForMainWindowPosition()
+        {
             try
             {
-                if (Settings.Default.ShowTitlesOption)
-                {
-                    _amigulaDbDataSetGamesTableAdapter.FillByTitle(_amigulaDbDataSet.Games);
-                    viewMenu_Show_GameTitles.IsChecked = true;
-                    viewMenu_Show_AllFiles.IsChecked = false;
-                }
-                else
-                {
-                    _amigulaDbDataSetGamesTableAdapter.FillByAllFiles(_amigulaDbDataSet.Games);
-                    viewMenu_Show_AllFiles.IsChecked = true;
-                    viewMenu_Show_GameTitles.IsChecked = false;
-                }
-                _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
-                _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
-                // move the view to the first item in the list and show any media for it
-                _gamesViewSource.View.MoveCurrentToFirst();
-                ShowGameMedia(GamesListView.SelectedItem);
+                Top = Settings.Default.Top;
+                Left = Settings.Default.Left;
+                Height = Settings.Default.Height;
+                Width = Settings.Default.Width;
+                WindowState = Settings.Default.WindowSetting;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An exception has occured while trying to position the window!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Loaded event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (Settings.Default.ShowTitlesOption)
+            {
+                PopulateGameListByTitle();
+            }
+            else
+            {
+                PopulateGameListByFilename();
+            }
+
+            PopulateGenreList();
+            PopulatePublisherList();
+
+            _gamesViewSource.View.MoveCurrentToFirst();
+            ShowGameMedia(GamesListView.SelectedItem);
+
+            InitializeSeachField();
+            InitializeSelectedGameMonitoring();
+            InitializeGameCounter();
+        }
+
+        /// <summary>
+        /// Initializes the game counter.
+        /// </summary>
+        private void InitializeGameCounter()
+        {
+            // ReSharper disable once UnusedVariable
+            IDisposable numberOfGamesChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "LayoutUpdated")
+                .Subscribe(games => UpdateNoOfGames());
+        }
+
+        /// <summary>
+        /// Initializes the selected game monitoring.
+        /// </summary>
+        private void InitializeSelectedGameMonitoring()
+        {
+            // ReSharper disable once UnusedVariable
+            IDisposable gameSelectionChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "SelectionChanged")
+                .Select(selected => ((ListView) selected.Sender).SelectedItem)
+                .Subscribe(ShowGameMedia);
+        }
+
+        /// <summary>
+        /// Initializes the seach field.
+        /// </summary>
+        private void InitializeSeachField()
+        {
+            // ReSharper disable once UnusedVariable
+            IDisposable gameFilterChanged = Observable.FromEventPattern<EventArgs>(tboxFilterGames, "TextChanged")
+                .Select(searched => ((TextBox) searched.Sender).Text)
+                .DistinctUntilChanged()
+                .Throttle(TimeSpan.FromMilliseconds(250))
+                .ObserveOn(tboxFilterGames)
+                .Subscribe(FilterListItems);
+        }
+
+        /// <summary>
+        /// Populates the publisher list.
+        /// </summary>
+        private void PopulatePublisherList()
+        {
+            _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
+        }
+
+        /// <summary>
+        /// Populates the genre list.
+        /// </summary>
+        private void PopulateGenreList()
+        {
+            _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
+        }
+
+        /// <summary>
+        /// Populates the game list by filename.
+        /// </summary>
+        private void PopulateGameListByFilename()
+        {
+            try
+            {
+                _amigulaDbDataSetGamesTableAdapter.FillByAllFiles(_amigulaDbDataSet.Games);
+                viewMenu_Show_AllFiles.IsChecked = true;
+                viewMenu_Show_GameTitles.IsChecked = false;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("An exception occured while trying to read from the database:\n\n" + ex.Message,
                                 "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            // Set the search field as observable for live filtering
-            // When text is changed, call filterListItems() asynchronously
-
-            // ReSharper disable once UnusedVariable
-            IDisposable gameFilterChanged = Observable.FromEventPattern<EventArgs>(tboxFilterGames, "TextChanged")
-                                                      .Select(searched => ((TextBox) searched.Sender).Text)
-                                                      .DistinctUntilChanged()
-                                                      .Throttle(TimeSpan.FromMilliseconds(250))
-                                                      .ObserveOn(tboxFilterGames)
-                                                      .Subscribe(FilterListItems);
-
-            // Monitor the selected Game so we can display Screenshot and other info on the fly
-            // ReSharper disable once UnusedVariable
-            IDisposable gameSelectionChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "SelectionChanged")
-                                                         .Select(selected => ((ListView) selected.Sender).SelectedItem)
-                                                         .Subscribe(ShowGameMedia);
-
-            // Monitor the number of games if the list is refreshed
-            // ReSharper disable once UnusedVariable
-            IDisposable numberOfGamesChanged = Observable.FromEventPattern<EventArgs>(GamesListView, "LayoutUpdated")
-                                                         .Subscribe(games => UpdateNoOfGames());
         }
 
         /// <summary>
-        ///     Simple helper methods that turns a link string into a embed string
-        ///     for a YouTube item.
-        ///     turns
-        ///     http://www.youtube.com/watch?v=hV6B7bGZ0_E
-        ///     into
-        ///     http://www.youtube.com/v/hV6B7bGZ0_E
+        /// Populates the game list by title.
         /// </summary>
-        private static string GetEmbedUrlFromLink(string link)
+        private void PopulateGameListByTitle()
         {
             try
             {
-                //string embedUrl = link.Replace("watch?v=", "v/").Replace("&feature=youtube_gdata", "");
-                string embedUrl = link.Replace("watch?v=", "embed/").Replace("&feature=youtube_gdata", "");
-                return embedUrl;
+                _amigulaDbDataSetGamesTableAdapter.FillByTitle(_amigulaDbDataSet.Games);
+                viewMenu_Show_GameTitles.IsChecked = true;
+                viewMenu_Show_AllFiles.IsChecked = false;
             }
-            catch
+            catch (Exception ex)
             {
-                return link;
+                MessageBox.Show("An exception occured while trying to read from the database:\n\n" + ex.Message,
+                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        #region Data
-
-        private const string Search = "http://gdata.youtube.com/feeds/api/videos?q={0}&alt=rss&&max-results=1&v=2";
-
-        #endregion
-
         #region Functions
-
-        private const int SwShowmaximized = 3;
 
         /// <summary>
         ///     Make sure there is no other instance of the application running
@@ -216,7 +282,6 @@ namespace Amigula
         private static bool EnsureSingleInstance()
         {
             Process currentProcess = Process.GetCurrentProcess();
-
             Process runningProcess = (from process in Process.GetProcesses()
                                       where
                                           process.Id != currentProcess.Id &&
@@ -226,10 +291,25 @@ namespace Amigula
                                       select process).FirstOrDefault();
 
             if (runningProcess == null) return true;
-            SafeNativeMethods.ShowWindow(runningProcess.MainWindowHandle, SwShowmaximized);
-            SafeNativeMethods.SetForegroundWindow(runningProcess.MainWindowHandle);
 
+            ShowMainWindow(runningProcess);
+            BringMainWindowToForeground(runningProcess);
             return false;
+        }
+
+        private static void ShowMainWindow(Process runningProcess)
+        {
+            const int swShowmaximized = 3;
+            SafeNativeMethods.ShowWindow(runningProcess.MainWindowHandle, swShowmaximized);
+        }
+
+        /// <summary>
+        /// Brings the main window to foreground.
+        /// </summary>
+        /// <param name="runningProcess">The running process.</param>
+        private static void BringMainWindowToForeground(Process runningProcess)
+        {
+            SafeNativeMethods.SetForegroundWindow(runningProcess.MainWindowHandle);
         }
 
         /// <summary>
@@ -238,7 +318,41 @@ namespace Amigula
         /// <param name="p">The number identifying the screenshot to delete</param>
         private void DeleteGameScreenshot(int p)
         {
-            string img = null;
+            var img = GetImagePath(p);
+            if (!ConfirmUserAction(img)) return;
+
+            EmptyImagePlaceholder(p);
+            File.Delete(img);
+        }
+
+        /// <summary>
+        /// Empties the image placeholder.
+        /// </summary>
+        /// <param name="p">The p.</param>
+        private void EmptyImagePlaceholder(int p)
+        {
+            switch (p)
+            {
+                case 1:
+                    imgScreenshot.Source = null;
+                    break;
+                case 2:
+                    imgScreenshot2.Source = null;
+                    break;
+                case 3:
+                    imgScreenshot3.Source = null;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image path.
+        /// </summary>
+        /// <param name="p">The p.</param>
+        /// <returns></returns>
+        private string GetImagePath(int p)
+        {
+            string img = "";
             try
             {
                 switch (p)
@@ -257,28 +371,22 @@ namespace Amigula
             catch (Exception ex)
             {
                 MessageBox.Show("An exception has occured while trying get the screenshot's path!\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            return img;
+        }
 
+        /// <summary>
+        /// Confirms the user action.
+        /// </summary>
+        /// <param name="img">The img.</param>
+        /// <returns></returns>
+        private static bool ConfirmUserAction(string img)
+        {
             MessageBoxResult result =
                 MessageBox.Show("Are you sure? This will DELETE the following file from the Screenshots folder:\n\n" +
                                 img, "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-            // Delete the screenshot file selected, based on the p value (1-3)
-            switch (p)
-            {
-                case 1:
-                    imgScreenshot.Source = null;
-                    break;
-                case 2:
-                    imgScreenshot2.Source = null;
-                    break;
-                case 3:
-                    imgScreenshot3.Source = null;
-                    break;
-            }
-
-            if (img != null) File.Delete(img);
+            return result == MessageBoxResult.Yes;
         }
 
         /// <summary>
@@ -319,6 +427,7 @@ namespace Amigula
         private void UpdateGameMetadata(object currentgame)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+
             const string targetUrl = @"http://hol.abime.net/hol_search.php?find=";
             string gameTitleforUrl = CleanGameTitle(currentgame, "URL");
             var oDataRowView = currentgame as DataRowView;
@@ -376,68 +485,69 @@ namespace Amigula
                 }
             }
 
-            // if we've found a link
             if (gamelink == null) return;
-            // open that game's unique ID page
-            string gameurl = gamelink.Substring(gamelink.IndexOf("http", StringComparison.Ordinal), gamelink.IndexOf(",", StringComparison.Ordinal) - gamelink.IndexOf("http", StringComparison.Ordinal));
+
+            var gameurl = GetGameUrl(gamelink);
             document = webGet.Load(gameurl);
 
-            // Use XPath to locate the information we're going to fetch:
-            // XPath for Year: //table[@width='100%']/tr[1]/td[2]/a
-            string fetchedYear = "";
-            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a") != null)
-                fetchedYear = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
-            //MessageBox.Show("The game's Year is: " + fetchedYear);
+            var fetchedYear = GetFetchedYear(document);
+            var fetchedPublisher = GetFetchedPublisher(document);
 
-            // XPath for Publisher: //table[@width='100%']/tr[2]/td[4]/a
-            string fetchedPublisher = "";
-            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a") != null)
-                fetchedPublisher = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
-            bool publisherExists = _amigulaDbDataSet.Publishers.AsEnumerable()
-                .Any(
-                    row =>
-                        fetchedPublisher == row.Field<string>("Publisher_Label"));
-
+            var publisherExists = DoesPublisherExistInDatabase(fetchedPublisher);
             if (!publisherExists)
             {
-                try
-                {
-                    _amigulaDbDataSetPublishersTableAdapter.InsertPublisher(fetchedPublisher);
-                    _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to add a new Publisher\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AddPublisherToDatabase(fetchedPublisher);
             }
 
-            // XPath for Genre: //table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a
-            string fetchedGenre =
-                document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[13]/td[1]/table/tr[2]/td[2]/a")
-                    .InnerText;
-            bool genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
-                .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
+            var fetchedGenre = GetFetchedGenre(document);
 
+            var genreExists = DoesGenreExistInDatabase(fetchedGenre);
             if (!genreExists)
             {
-                try
-                {
-                    _amigulaDbDataSetGenresTableAdapter.InsertGenre(fetchedGenre);
-                    _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to add a new Genre\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                AddGenreInDatabase(fetchedGenre);
             }
 
-            // if there's no screenshot found locally, try to fetch one from the website
-            // XPath for title image: /html/body/div[2]/table[2]/tr/tr/td/a/img
+            GetScreenshotsIfNeeded(document, gameTitle, webGet, gameurl);
 
+            // Save the fetched information in the database
+            if (GamesListView.SelectedIndex <= -1) return;
+            SaveFetchedInformationInDatabase(fetchedGenre, fetchedPublisher, fetchedYear, oDataRowView);
+        }
+
+        private void SaveFetchedInformationInDatabase(string fetchedGenre, string fetchedPublisher, string fetchedYear,
+            DataRowView oDataRowView)
+        {
+            try
+            {
+                // get the ID for the Genre label
+                EnumerableRowCollection<int> genreId = from row in _amigulaDbDataSet.Genres.AsEnumerable()
+                    where
+                        row.Field<string>("Genre_Label") == fetchedGenre
+                    select row.Field<int>("Genre_ID");
+
+                // get the ID for the Publisher label
+                EnumerableRowCollection<int> publisherId =
+                    from row in _amigulaDbDataSet.Publishers.AsEnumerable()
+                    where row.Field<string>("Publisher_Label") == fetchedPublisher
+                    select row.Field<int>("Publisher_ID");
+
+                _amigulaDbDataSetGamesTableAdapter.UpdateMetadata(genreId.First(), int.Parse(fetchedYear),
+                    publisherId.First(),
+                    oDataRowView.Row["Notes"] as string,
+                    oDataRowView.Row["Title"] as string);
+                FillListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to update the metadata!\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void GetScreenshotsIfNeeded(HtmlDocument document, string gameTitle, HtmlWeb webGet, string gameurl)
+        {
+            // XPath for title image: /html/body/div[2]/table[2]/tr/tr/td/a/img
             if (imgScreenshot.Source == null)
             {
                 //MessageBox.Show("No picture found in slot 1");
@@ -530,36 +640,87 @@ namespace Amigula
                         "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
 
-            // Save the fetched information in the database
-            if (GamesListView.SelectedIndex <= -1) return;
+        private void AddGenreInDatabase(string fetchedGenre)
+        {
             try
             {
-                // get the ID for the Genre label
-                EnumerableRowCollection<int> genre_id = from row in _amigulaDbDataSet.Genres.AsEnumerable()
-                    where
-                        row.Field<string>("Genre_Label") == fetchedGenre
-                    select row.Field<int>("Genre_ID");
-
-                // get the ID for the Publisher label
-                EnumerableRowCollection<int> publisher_id =
-                    from row in _amigulaDbDataSet.Publishers.AsEnumerable()
-                    where row.Field<string>("Publisher_Label") == fetchedPublisher
-                    select row.Field<int>("Publisher_ID");
-
-                _amigulaDbDataSetGamesTableAdapter.UpdateMetadata(genre_id.First(), int.Parse(fetchedYear),
-                    publisher_id.First(),
-                    oDataRowView.Row["Notes"] as string,
-                    oDataRowView.Row["Title"] as string);
-                FillListView();
-                //showGameMedia(currentgame);
+                _amigulaDbDataSetGenresTableAdapter.InsertGenre(fetchedGenre);
+                _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "An exception has occured while trying to update the metadata!\n\n" + ex.Message,
+                    "An exception has occured while trying to add a new Genre\n\n" + ex.Message,
                     "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool DoesGenreExistInDatabase(string fetchedGenre)
+        {
+            bool genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
+                .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
+            return genreExists;
+        }
+
+        private static string GetFetchedGenre(HtmlDocument document)
+        {
+            // XPath for Genre: //table[@width='100%']/tr[12]/td/table/tr[2]/td[2]/a
+            string fetchedGenre =
+                document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[13]/td[1]/table/tr[2]/td[2]/a")
+                    .InnerText;
+            return fetchedGenre;
+        }
+
+        private void AddPublisherToDatabase(string fetchedPublisher)
+        {
+            try
+            {
+                _amigulaDbDataSetPublishersTableAdapter.InsertPublisher(fetchedPublisher);
+                _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to add a new Publisher\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private bool DoesPublisherExistInDatabase(string fetchedPublisher)
+        {
+            bool publisherExists = _amigulaDbDataSet.Publishers.AsEnumerable()
+                .Any(
+                    row =>
+                        fetchedPublisher == row.Field<string>("Publisher_Label"));
+            return publisherExists;
+        }
+
+        private static string GetFetchedPublisher(HtmlDocument document)
+        {
+            // XPath for Publisher: //table[@width='100%']/tr[2]/td[4]/a
+            string fetchedPublisher = "";
+            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a") != null)
+                fetchedPublisher = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[2]/td[4]/a").InnerText;
+            return fetchedPublisher;
+        }
+
+        private static string GetFetchedYear(HtmlDocument document)
+        {
+            // XPath for Year: //table[@width='100%']/tr[1]/td[2]/a
+            string fetchedYear = "";
+            if (document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a") != null)
+                fetchedYear = document.DocumentNode.SelectSingleNode("//table[@width='100%']/tr[1]/td[2]/a").InnerText;
+            //MessageBox.Show("The game's Year is: " + fetchedYear);
+            return fetchedYear;
+        }
+
+        private static string GetGameUrl(string gamelink)
+        {
+            string gameurl = gamelink.Substring(gamelink.IndexOf("http", StringComparison.Ordinal),
+                gamelink.IndexOf(",", StringComparison.Ordinal) - gamelink.IndexOf("http", StringComparison.Ordinal));
+            return gameurl;
         }
 
         /// <summary>
@@ -567,15 +728,19 @@ namespace Amigula
         /// </summary>
         /// <param name="screenshotFilename">The full path and filename for the screenshot</param>
         /// <param name="gameTitle">The game's title</param>
-        private void AddGameScreenshot(string screenshotFilename, string gameTitle)
+        private static void AddGameScreenshot(string screenshotFilename, string gameTitle)
         {
             int n;
-            string gameSubFolder;
 
             // Get the first letter of the game, to get the subfolder from that.
             // if the first letter is a number, the subfolder should be set to "0"
-            if (int.TryParse(gameTitle.Substring(0, 1), out n)) gameSubFolder = "0\\";
-            else gameSubFolder = gameTitle.Substring(0, 1) + "\\";
+            var gameSubFolder = int.TryParse(gameTitle.Substring(0, 1), out n) ? "0\\" : gameTitle.Substring(0, 1) + "\\";
+
+            CopyScreenshotToFolder(screenshotFilename, gameTitle, gameSubFolder);
+        }
+
+        private static void CopyScreenshotToFolder(string screenshotFilename, string gameTitle, string gameSubFolder)
+        {
             try
             {
                 if (!Directory.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder)))
@@ -584,27 +749,27 @@ namespace Amigula
                 {
                     if (
                         !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                  gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))
+                            gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))
                     {
                         File.Copy(screenshotFilename,
-                                  Path.Combine(Settings.Default.ScreenshotsPath,
-                                               gameSubFolder + gameTitle.Replace(" ", "_") + ".png"));
+                            Path.Combine(Settings.Default.ScreenshotsPath,
+                                gameSubFolder + gameTitle.Replace(" ", "_") + ".png"));
                     }
                     else if (
                         !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                  gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png")))
+                            gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png")))
                     {
                         File.Copy(screenshotFilename,
-                                  Path.Combine(Settings.Default.ScreenshotsPath,
-                                               gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png"));
+                            Path.Combine(Settings.Default.ScreenshotsPath,
+                                gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png"));
                     }
                     else if (
                         !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                  gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png")))
+                            gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png")))
                     {
                         File.Copy(screenshotFilename,
-                                  Path.Combine(Settings.Default.ScreenshotsPath,
-                                               gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png"));
+                            Path.Combine(Settings.Default.ScreenshotsPath,
+                                gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png"));
                     }
                 }
             }
@@ -672,32 +837,33 @@ namespace Amigula
         private void FillListView()
         {
             // Save the currently selected item so we can restore it after refreshing the listview
-            object tmpSelectedValue = GamesListView.SelectedValue;
-            switch (viewMenu_Favorites_ShowOnly.IsChecked)
-            {
-                case true:
-                    {
-                        if (viewMenu_Show_GameTitles.IsChecked)
-                            _amigulaDbDataSetGamesTableAdapter.FillByTitleFavoritesOnly(_amigulaDbDataSet.Games);
-                        else
-                            _amigulaDbDataSetGamesTableAdapter.FillByAllFilesFavoritesOnly(_amigulaDbDataSet.Games);
-                        _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
-                        _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
-                        GamesListView.SelectedValue = tmpSelectedValue;
-                        break;
-                    }
-                case false:
-                    {
-                        if (viewMenu_Show_GameTitles.IsChecked)
-                            _amigulaDbDataSetGamesTableAdapter.FillByTitle(_amigulaDbDataSet.Games);
-                        else
-                            _amigulaDbDataSetGamesTableAdapter.FillByAllFiles(_amigulaDbDataSet.Games);
-                        _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
-                        _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
-                        GamesListView.SelectedValue = tmpSelectedValue;
-                        break;
-                    }
-            }
+            var tmpSelectedValue = GamesListView.SelectedValue;
+            if (viewMenu_Favorites_ShowOnly.IsChecked)
+                PopulateGameListWithFavoritesOnly(tmpSelectedValue);
+            else
+                PopulateGameList(tmpSelectedValue);
+        }
+
+        private void PopulateGameList(object tmpSelectedValue)
+        {
+            if (viewMenu_Show_GameTitles.IsChecked)
+                _amigulaDbDataSetGamesTableAdapter.FillByTitle(_amigulaDbDataSet.Games);
+            else
+                _amigulaDbDataSetGamesTableAdapter.FillByAllFiles(_amigulaDbDataSet.Games);
+            _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
+            _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
+            GamesListView.SelectedValue = tmpSelectedValue;
+        }
+
+        private void PopulateGameListWithFavoritesOnly(object tmpSelectedValue)
+        {
+            if (viewMenu_Show_GameTitles.IsChecked)
+                _amigulaDbDataSetGamesTableAdapter.FillByTitleFavoritesOnly(_amigulaDbDataSet.Games);
+            else
+                _amigulaDbDataSetGamesTableAdapter.FillByAllFilesFavoritesOnly(_amigulaDbDataSet.Games);
+            _amigulaDbDataSetGenresTableAdapter.Fill(_amigulaDbDataSet.Genres);
+            _amigulaDbDataSetPublishersTableAdapter.Fill(_amigulaDbDataSet.Publishers);
+            GamesListView.SelectedValue = tmpSelectedValue;
         }
 
         /// <summary>
@@ -706,16 +872,15 @@ namespace Amigula
         /// <returns></returns>
         private static void GetAmigaForeverRegistry()
         {
-            // Detect whether we're running on a 64-bit OS, change the registry scope accordingly
-            string rootKey = Is64BitOperatingSystem() ? "SOFTWARE\\Wow6432Node\\CLoanto\\Amiga Forever" : "SOFTWARE\\CLoanto\\Amiga Forever";
+            var rootKey = RegistryRootKey;
+            var afKeys = AmigaForeverKeys;
 
-            // These are the keys we're interested in, if Amiga Forever is installed
-            // AmigaFiles: where the WinUAE configuration files will be
-            // Path: where AmigaForever binaries (WinUAE) is installed
-            var afKeys = new[] {"AmigaFiles", "Path"};
+            ReadKeysFromRegistry(rootKey, afKeys);
+        }
 
-            //rootKey += "\\" + subKey;
-            RegistryKey patRegistry = Registry.LocalMachine.OpenSubKey(rootKey);
+        private static void ReadKeysFromRegistry(string rootKey, string[] afKeys)
+        {
+            var patRegistry = Registry.LocalMachine.OpenSubKey(rootKey);
             if (patRegistry != null)
                 foreach (string subKeyName in patRegistry.GetSubKeyNames())
                 {
@@ -727,7 +892,7 @@ namespace Amigula
                         if (patRegistry != null && (afKey == "AmigaFiles" && patRegistry.GetValue(afKey) != null))
                         {
                             Settings.Default.UAEConfigsPath = Path.Combine(patRegistry.GetValue(afKey).ToString(),
-                                                                           "WinUAE\\Configurations");
+                                "WinUAE\\Configurations");
                             Settings.Default.Save();
                         }
                         if (patRegistry == null || (afKey != "Path" || patRegistry.GetValue(afKey) == null)) continue;
@@ -739,6 +904,30 @@ namespace Amigula
             if (patRegistry != null) patRegistry.Close();
         }
 
+        private static string[] AmigaForeverKeys
+        {
+            // These are the keys we're interested in, if Amiga Forever is installed
+            // AmigaFiles: where the WinUAE configuration files will be
+            // Path: where AmigaForever binaries (WinUAE) is installed
+            get
+            {
+                var afKeys = new[] {"AmigaFiles", "Path"};
+                return afKeys;
+            }
+        }
+
+        private static string RegistryRootKey
+        {
+            get
+            {
+                // Detect whether we're running on a 64-bit OS, change the registry scope accordingly
+                string rootKey = Is64BitOperatingSystem()
+                    ? "SOFTWARE\\Wow6432Node\\CLoanto\\Amiga Forever"
+                    : "SOFTWARE\\CLoanto\\Amiga Forever";
+                return rootKey;
+            }
+        }
+
         /// <summary>
         ///     Scan the configs folder for UAE config files and populate the ViewSource for the combobox
         /// </summary>
@@ -746,30 +935,42 @@ namespace Amigula
         {
             if (!string.IsNullOrEmpty(Settings.Default.UAEConfigsPath))
             {
-                try
-                {
-                    IEnumerable<string> configFiles = Directory.EnumerateFiles(Settings.Default.UAEConfigsPath, "*.uae");
-                    _uaeConfigViewSource = configFiles.ToList();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        "An exception has occured while trying to locate the UAE config files:\n\n" + ex.Message,
-                        "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-                // cleanup the contents and remove the path and extension information
-                for (int i = 0; i < _uaeConfigViewSource.Count; i++)
-                {
-                    _uaeConfigViewSource[i] = Path.GetFileNameWithoutExtension(_uaeConfigViewSource[i]);
-                }
-                // insert the value "default" as the first in the list
-                _uaeConfigViewSource.Insert(0, "default");
+                CheckIfUaeConfigsExist();
+                CleanupUaeConfigContents();
+                InsertDefaultValueInUaeConfigs();
             }
             else
                 MessageBox.Show(
                     "It looks like the WinUAE Configurations folder could not be located in your system!\nPlease make sure you have one available at least under the WinUAE folder in Program Files.",
                     "No Configurations found", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
+        private static void CheckIfUaeConfigsExist()
+        {
+            try
+            {
+                IEnumerable<string> configFiles = Directory.EnumerateFiles(Settings.Default.UAEConfigsPath, "*.uae");
+                _uaeConfigViewSource = configFiles.ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to locate the UAE config files:\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static void InsertDefaultValueInUaeConfigs()
+        {
+            _uaeConfigViewSource.Insert(0, "default");
+        }
+
+        private static void CleanupUaeConfigContents()
+        {
+            for (int i = 0; i < _uaeConfigViewSource.Count; i++)
+            {
+                _uaeConfigViewSource[i] = Path.GetFileNameWithoutExtension(_uaeConfigViewSource[i]);
+            }
         }
 
         /// <summary>
@@ -1685,9 +1886,9 @@ namespace Amigula
             AmigulaDBDataSet.PublishersRow gamePublisher = _amigulaDbDataSet.Publishers.FirstOrDefault();
 
             // Use Rx to pick the scanned files from the IEnumerable collection, fill them in the DataSet and finally save the DataSet in the DB
-#pragma warning disable 168
+
+            // ReSharper disable once UnusedVariable
             IDisposable files = Directory.EnumerateFiles(targetDirectory, "*.*", SearchOption.AllDirectories)
-#pragma warning restore 168
                                          .Where(s => extensions.Contains(Path.GetExtension(s)))
                                          .ToObservable(TaskPoolScheduler.Default)
                                          .TakeUntil(cancelClicked)
@@ -1751,9 +1952,9 @@ namespace Amigula
             var oDataRowView = GamesListView.SelectedItem as DataRowView;
             if (oDataRowView == null) return;
             var longplayTitle = oDataRowView.Row["Title"] as string;
-            List<YouTubeInfo> videos = LoadVideosKey("Amiga Longplay " + longplayTitle);
+            List<YoutubeHelper.YouTubeInfo> videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
             if (!videos.Any()) return;
-            var video = new Uri(GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
+            var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
             wbLongplay.Source = video;
         }
 
@@ -2609,51 +2810,5 @@ namespace Amigula
             }
             return false;
         }
-
-        private class YouTubeInfo
-        {
-            #region Data
-
-            public string LinkUrl { get; set; }
-            public string EmbedUrl { get; set; }
-
-            #endregion
-        }
-
-        #region Load Videos From Feed
-
-        /// <summary>
-        ///     Returns a List<see cref="YouTubeInfo">YouTubeInfo</see> which represent
-        ///     the YouTube videos that matched the keyWord input parameter
-        /// </summary>
-        private static List<YouTubeInfo> LoadVideosKey(string keyWord)
-        {
-            try
-            {
-                XElement xraw = XElement.Load(string.Format(Search, keyWord));
-                XElement xroot = XElement.Parse(xraw.ToString());
-                var xElement = xroot.Element("channel");
-                if (xElement != null)
-                {
-                    IEnumerable<YouTubeInfo> links = (from item in xElement.Descendants("item")
-                                                      let element = item.Element("link")
-                                                      where element != null
-                                                      select new YouTubeInfo
-                                                          {
-                                                              LinkUrl = element.Value,
-                                                              EmbedUrl = GetEmbedUrlFromLink(element.Value),
-                                                          }).Take(1);
-
-                    return links.ToList();
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, "ERROR");
-            }
-            return null;
-        }
-
-        #endregion
     }
 }

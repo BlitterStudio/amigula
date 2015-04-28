@@ -921,7 +921,7 @@ namespace Amigula
             get
             {
                 // Detect whether we're running on a 64-bit OS, change the registry scope accordingly
-                string rootKey = Is64BitOperatingSystem()
+                string rootKey = OSBitCheck.Is64BitOperatingSystem()
                     ? "SOFTWARE\\Wow6432Node\\CLoanto\\Amiga Forever"
                     : "SOFTWARE\\CLoanto\\Amiga Forever";
                 return rootKey;
@@ -1071,18 +1071,18 @@ namespace Amigula
                         Settings.Default.MusicPlayerPath =
                             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
                                          "Deliplayer2\\DeliPlayer.exe");
-                        Settings.Default.Save();
+                        SaveDefaultSettings();
                     }
                     else
                     {
                         Settings.Default.MusicPlayerPath = ".\\xmplay\\xmplay.exe";
-                        Settings.Default.Save();
+                        SaveDefaultSettings();
                     }
                 }
                 else
                 {
                     Settings.Default.MusicPlayerPath = ".\\xmplay\\xmplay.exe";
-                    Settings.Default.Save();
+                    SaveDefaultSettings();
                 }
             }
 
@@ -1100,12 +1100,17 @@ namespace Amigula
                     {
                         Settings.Default.ScreenshotsPath = "C:\\GameBase\\GameBase Amiga\\Screenshots";
                         Settings.Default.MusicPath = "C:\\GameBase\\GameBase Amiga\\Music";
-                        Settings.Default.Save();
+                        SaveDefaultSettings();
                     }
                 }
             }
             // Check if www.youtube.com is reachable, enable Longplay feature if it is, disable it otherwise
             Settings.Default.ShowLongplayVideos = RemoteFileExists("http://www.youtube.com");
+        }
+
+        private static void SaveDefaultSettings()
+        {
+            Settings.Default.Save();
         }
 
         /// <summary>
@@ -1124,27 +1129,7 @@ namespace Amigula
             {
                 string gamePath = CleanGameTitle(GamesListView.SelectedItem, "Path");
                 if (string.IsNullOrEmpty(gamePath) == false)
-                {
-                    try
-                    {
-                        // Launch WinUAE from selected path giving it the selected config and game as a parameter
-                        Process.Start(Settings.Default.EmulatorPath, gamePath);
-                        var oDataRowView = GamesListView.SelectedItem as DataRowView;
-                        if (oDataRowView == null) return;
-                        oDataRowView.Row["TimesPlayed"] = (int) oDataRowView.Row["TimesPlayed"] + 1;
-                        oDataRowView.Row["DateLastPlayed"] = DateTime.Now;
-                        _amigulaDbDataSetGamesTableAdapter.UpdateTimesPlayed((int) oDataRowView.Row["TimesPlayed"],
-                            (DateTime)
-                                oDataRowView.Row["DateLastPlayed"],
-                            oDataRowView.Row["Title"] as string);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            "Sorry, an exception has occured while trying to update the database statistics!\n\n" +
-                            ex.Message);
-                    }
-                }
+                    LaunchUaeWithConfigAndGame(gamePath);
                 else
                     MessageBox.Show(
                         "Sorry, the selected game\n" + gamePath +
@@ -1153,36 +1138,51 @@ namespace Amigula
             }
         }
 
-        private static void ReplaceInFile(string filePath, IDictionary<int, string> searchText,
-                                         IDictionary<int, string> replaceText)
+        private void LaunchUaeWithConfigAndGame(string gamePath)
         {
-            if (!File.Exists(filePath)) return;
+            // Launch WinUAE from selected path giving it the selected config and game as a parameter
+            Process.Start(Settings.Default.EmulatorPath, gamePath);
+            var oDataRowView = SelectedGameRowView;
+            if (oDataRowView == null) return;
+            IncreaseTimesPlayedCounter(oDataRowView);
+            UpdateDateLastPlayed(oDataRowView);
+            UpdateTimesPlayedAndDateLastPlayedInTable(oDataRowView);
+        }
+
+        private void UpdateTimesPlayedAndDateLastPlayedInTable(DataRowView oDataRowView)
+        {
             try
             {
-                var reader = new StreamReader(filePath);
-                string content = reader.ReadToEnd();
-                reader.Close();
-
-                if (searchText.Count == replaceText.Count)
-                {
-                    for (int i = 0; i < searchText.Count; i++)
-                    {
-                        if (Regex.IsMatch(content, searchText[i]))
-                            content = Regex.Replace(content, searchText[i], replaceText[i]);
-                        else
-                            content += "\r\n" + replaceText[i];
-                    }
-                }
-                var writer = new StreamWriter(filePath);
-                writer.Write(content);
-                writer.Close();
+                _amigulaDbDataSetGamesTableAdapter.UpdateTimesPlayed((int) oDataRowView.Row["TimesPlayed"],
+                    (DateTime)
+                        oDataRowView.Row["DateLastPlayed"],
+                    oDataRowView.Row["Title"] as string);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                            "Sorry, an exception has occured while trying to read/write to a file!\n\n" +
-                            ex.Message);
-            }          
+                    "Sorry, an exception has occured while trying to update the database statistics!\n\n" +
+                    ex.Message);
+            }
+        }
+
+        private static void UpdateDateLastPlayed(DataRowView oDataRowView)
+        {
+            oDataRowView.Row["DateLastPlayed"] = DateTime.Now;
+        }
+
+        private static void IncreaseTimesPlayedCounter(DataRowView oDataRowView)
+        {
+            oDataRowView.Row["TimesPlayed"] = (int) oDataRowView.Row["TimesPlayed"] + 1;
+        }
+
+        private DataRowView SelectedGameRowView
+        {
+            get
+            {
+                var oDataRowView = GamesListView.SelectedItem as DataRowView;
+                return oDataRowView;
+            }
         }
 
         /// <summary>
@@ -1212,13 +1212,11 @@ namespace Amigula
                 DefaultExt = ".exe",
                 Filter = "Executable files (*.exe)|*.exe"
             };
-            //selectFile.FileName = appHandler;
 
-            // Show open file dialog box
-            bool? AppResult = selectFile.ShowDialog();
+            bool? appResult = selectFile.ShowDialog();
 
             // Process open file dialog box results 
-            if (AppResult != true) return;
+            if (appResult != true) return;
             // Select file
             if (appHandler == "Emulator")
             {
@@ -1228,7 +1226,8 @@ namespace Amigula
             {
                 Settings.Default.MusicPlayerPath = selectFile.FileName;
             }
-            Settings.Default.Save();
+
+            SaveDefaultSettings();
         }
 
         /// <summary>
@@ -1320,10 +1319,10 @@ namespace Amigula
                         // if it does, replace them with the current disks of the selected game
                         // if it doesn't, append those lines to the config file
                         if (selectedUaeConfig == "default")
-                            ReplaceInFile("configs\\" + selectedUaeConfig + ".uae", diskImageX,
+                            FilesHelper.ReplaceInFile("configs\\" + selectedUaeConfig + ".uae", diskImageX,
                                 gameDisksFullPath);
                         else
-                            ReplaceInFile(
+                            FilesHelper.ReplaceInFile(
                                 Path.Combine(Settings.Default.UAEConfigsPath, selectedUaeConfig) + ".uae",
                                 diskImageX, gameDisksFullPath);
                     }
@@ -1516,22 +1515,20 @@ namespace Amigula
             // HOL - search for the game in HOL
             // LemonAmiga - search for the game in LemonAmiga
             string gameTitleforUrl = CleanGameTitle(currentgame, "URL");
-            if (String.IsNullOrEmpty(gameTitleforUrl) == false)
+            if (String.IsNullOrEmpty(gameTitleforUrl)) return;
+            switch (URLsite)
             {
-                switch (URLsite)
+                case "HOL":
                 {
-                    case "HOL":
-                        {
-                            const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
-                            Process.Start(targetURL + gameTitleforUrl);
-                            break;
-                        }
-                    case "LemonAmiga":
-                        {
-                            const string targetURL = @"http://www.lemonamiga.com/games/list.php?list_letter=";
-                            Process.Start(targetURL + gameTitleforUrl);
-                            break;
-                        }
+                    const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
+                    Process.Start(targetURL + gameTitleforUrl);
+                    break;
+                }
+                case "LemonAmiga":
+                {
+                    const string targetURL = @"http://www.lemonamiga.com/games/list.php?list_letter=";
+                    Process.Start(targetURL + gameTitleforUrl);
+                    break;
                 }
             }
         }
@@ -1589,47 +1586,29 @@ namespace Amigula
         private void ShowGameMedia(object currentgame)
         {
             // Display the screenshot for the selected game
+            const int opacity = 1;
+            const double defaultOpacity = 0.25;
+
             if (!string.IsNullOrEmpty(Settings.Default.ScreenshotsPath))
             {
                 // call cleanGameTitle to cleanup the title and add the png extension to it
                 string gameImageFile = CleanGameTitle(currentgame, "Screenshot");
-                imgScreenshot.Opacity = 0.25;
-                imgScreenshot2.Opacity = 0.25;
-                imgScreenshot3.Opacity = 0.25;
-                imgScreenshot.Source =
-                    new BitmapImage(
-                        new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
-                imgScreenshot2.Source =
-                    new BitmapImage(
-                        new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
-                imgScreenshot3.Source =
-                    new BitmapImage(
-                        new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
+                
+                imgScreenshot.Opacity = defaultOpacity;
+                imgScreenshot2.Opacity = defaultOpacity;
+                imgScreenshot3.Opacity = defaultOpacity;
+
+                ShowDefaultScreenshotPlaceholders();
                 if (!string.IsNullOrEmpty(gameImageFile))
                 {
                     // check if the filename exists first, otherwise there's nothing to display
                     if (File.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile)))
                     {
-                        // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot.Source = gameScreenshot;
-                        imgScreenshot.Opacity = 1;
+                        imgScreenshot.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 256;
                     }
@@ -1639,27 +1618,11 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_1.png"))))
                     {
-                        // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                     gameImageFile.Replace(".png", "_1.png")));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
-                        imgScreenshot2.Opacity = 1;
+                        imgScreenshot2.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 512;
                     }
@@ -1669,27 +1632,11 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_2.png"))))
                     {
-                        // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                     gameImageFile.Replace(".png", "_2.png")));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;
-                        imgScreenshot3.Opacity = 1;
+                        imgScreenshot3.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 768;
                     }
@@ -1700,26 +1647,11 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "_.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                     gameImageFile.Replace(".png", "_.png")));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot.Source = gameScreenshot;
-                        imgScreenshot.Opacity = 1;
+                        imgScreenshot.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 256;
                     }
@@ -1730,26 +1662,11 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "__1.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                     gameImageFile.Replace(".png", "__1.png")));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
-                        imgScreenshot2.Opacity = 1;
+                        imgScreenshot2.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 512;
                     }
@@ -1759,27 +1676,11 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "__2.png"))))
                     {
-                        // initialize a new image source
-                        var gameScreenshot = new BitmapImage();
-                        try
-                        {
-                            gameScreenshot.BeginInit();
-                            gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
-                            gameScreenshot.UriSource =
-                                new Uri(Path.Combine(Settings.Default.ScreenshotsPath,
-                                                     gameImageFile.Replace(".png", "__2.png")));
-                            gameScreenshot.EndInit();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
-                                "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;
-                        imgScreenshot3.Opacity = 1;
+                        imgScreenshot3.Opacity = opacity;
                         // resize the container
                         //gridImgContainer.Height = 768;
                     }
@@ -1800,12 +1701,12 @@ namespace Amigula
                     if (File.Exists(Path.Combine(Settings.Default.MusicPath, gameMusicFile)))
                     {
                         btnPlayMusic.IsEnabled = true;
-                        btnPlayMusic.Opacity = 1;
+                        btnPlayMusic.Opacity = opacity;
                     }
                     else
                     {
                         btnPlayMusic.IsEnabled = false;
-                        btnPlayMusic.Opacity = 0.25;
+                        btnPlayMusic.Opacity = defaultOpacity;
                     }
                 }
             }
@@ -1816,6 +1717,40 @@ namespace Amigula
                 DisplayLongplay();
             }
 
+        }
+
+        private static BitmapImage LoadGameScreenshot(string gameImageFile)
+        {
+            // initialize a new image source
+            var gameScreenshot = new BitmapImage();
+            try
+            {
+                gameScreenshot.BeginInit();
+                gameScreenshot.CacheOption = BitmapCacheOption.OnLoad;
+                gameScreenshot.UriSource =
+                    new Uri(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile));
+                gameScreenshot.EndInit();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
+                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            return gameScreenshot;
+        }
+
+        private void ShowDefaultScreenshotPlaceholders()
+        {
+            imgScreenshot.Source =
+                new BitmapImage(
+                    new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
+            imgScreenshot2.Source =
+                new BitmapImage(
+                    new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
+            imgScreenshot3.Source =
+                new BitmapImage(
+                    new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"images\Screenshot_placeholder.png")));
         }
 
         /// <summary>
@@ -1850,17 +1785,8 @@ namespace Amigula
 
             // Empty current DataSet to avoid duplicate entries
             _amigulaDbDataSet.Clear();
-            //try
-            //{
-            //    AmigulaDBDataSetGamesTableAdapter.DeleteAllQuery();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("An exception has occured while trying to empty the database:\n\n" + ex.Message, "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
 
             // Process the list of files found in the directory. 
-            // Supported filename extensions
             var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
                     ".zip",
@@ -1870,28 +1796,22 @@ namespace Amigula
                     ".ipf"
                 };
 
-            // prepare the progress bar
-            ProgBar.Height = 15;
-            ProgBar.Width = 100;
-            ProgBar.IsIndeterminate = true;
+            SetProgressbarProperties();
             statusBar.Items.Add(ProgBar);
+
             // Show the Cancel button to allow the user to abort the process
             btnCancel.Visibility = Visibility.Visible;
 
-            // Set the Cancel click event as an observable so we can monitor it
-            IObservable<EventPattern<EventArgs>> cancelClicked = Observable.FromEventPattern<EventArgs>(btnCancel,
-                                                                                                        "Click");
+            var cancelFileScanning = CancelClicked;
 
             AmigulaDBDataSet.GenresRow gameGenre = _amigulaDbDataSet.Genres.FirstOrDefault();
             AmigulaDBDataSet.PublishersRow gamePublisher = _amigulaDbDataSet.Publishers.FirstOrDefault();
-
-            // Use Rx to pick the scanned files from the IEnumerable collection, fill them in the DataSet and finally save the DataSet in the DB
 
             // ReSharper disable once UnusedVariable
             IDisposable files = Directory.EnumerateFiles(targetDirectory, "*.*", SearchOption.AllDirectories)
                                          .Where(s => extensions.Contains(Path.GetExtension(s)))
                                          .ToObservable(TaskPoolScheduler.Default)
-                                         .TakeUntil(cancelClicked)
+                                         .TakeUntil(cancelFileScanning)
                                          .Do(x =>
                                              {
                                                  try
@@ -1938,8 +1858,24 @@ namespace Amigula
                                                             btnCancel.Visibility = Visibility.Collapsed;
                                                             FillListView();
                                                         });
+        }
 
-            // Cleanup of any files that exist in the database, but no longer exist in the filesystem
+        private IObservable<EventPattern<EventArgs>> CancelClicked
+        {
+            get
+            {
+                // Set the Cancel click event as an observable so we can monitor it
+                IObservable<EventPattern<EventArgs>> cancelClicked = Observable.FromEventPattern<EventArgs>(btnCancel,
+                    "Click");
+                return cancelClicked;
+            }
+        }
+
+        private static void SetProgressbarProperties()
+        {
+            ProgBar.Height = 15;
+            ProgBar.Width = 100;
+            ProgBar.IsIndeterminate = true;
         }
 
         /// <summary>
@@ -1957,51 +1893,6 @@ namespace Amigula
             var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
             wbLongplay.Source = video;
         }
-
-        #region Is64BitOperatingSystem (IsWow64Process)
-
-        /// <summary>
-        ///     The function determines whether the current operating system is a
-        ///     64-bit operating system.
-        /// </summary>
-        /// <returns>
-        ///     The function returns true if the operating system is 64-bit;
-        ///     otherwise, it returns false.
-        /// </returns>
-        private static bool Is64BitOperatingSystem()
-        {
-            if (IntPtr.Size == 8) // 64-bit programs run only on Win64
-            {
-                return true;
-            }
-            // Detect whether the current process is a 32-bit process 
-            // running on a 64-bit system.
-            bool flag;
-            return ((DoesWin32MethodExist("kernel32.dll", "IsWow64Process") &&
-                     SafeNativeMethods.IsWow64Process(SafeNativeMethods.GetCurrentProcess(), out flag)) && flag);
-        }
-
-        /// <summary>
-        ///     The function determins whether a method exists in the export
-        ///     table of a certain module.
-        /// </summary>
-        /// <param name="moduleName">The name of the module</param>
-        /// <param name="methodName">The name of the method</param>
-        /// <returns>
-        ///     The function returns true if the method specified by methodName
-        ///     exists in the export table of the module specified by moduleName.
-        /// </returns>
-        private static bool DoesWin32MethodExist(string moduleName, string methodName)
-        {
-            IntPtr moduleHandle = SafeNativeMethods.GetModuleHandle(moduleName);
-            if (moduleHandle == IntPtr.Zero)
-            {
-                return false;
-            }
-            return (SafeNativeMethods.GetProcAddress(moduleHandle, methodName) != IntPtr.Zero);
-        }
-
-        #endregion
 
         #endregion
 
@@ -2062,12 +1953,17 @@ namespace Amigula
         /// <param name="e"></param>
         private void mainWindow_Closing(object sender, CancelEventArgs e)
         {
+            GetCurrentWindowSettings();
+            SaveDefaultSettings();
+        }
+
+        private void GetCurrentWindowSettings()
+        {
             Settings.Default.Top = Top;
             Settings.Default.Left = Left;
             Settings.Default.Height = Height;
             Settings.Default.Width = Width;
             Settings.Default.WindowSetting = WindowState;
-            Settings.Default.Save();
         }
 
         /// <summary>
@@ -2087,7 +1983,7 @@ namespace Amigula
         /// <param name="e"></param>
         private void listViewMenuItemShowInExplorer_Click(object sender, RoutedEventArgs e)
         {
-            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+            var oDataRowView = SelectedGameRowView;
             if (oDataRowView != null) Process.Start(Path.GetDirectoryName(oDataRowView.Row["PathToFile"] as string));
         }
 
@@ -2139,6 +2035,11 @@ namespace Amigula
         private void comboUAEconfig_DropDownClosed(object sender, EventArgs e)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+            SaveSelectedUaeConfig();
+        }
+
+        private void SaveSelectedUaeConfig()
+        {
             try
             {
                 _amigulaDbDataSet.Games[GamesListView.SelectedIndex].UAEconfig =
@@ -2163,6 +2064,11 @@ namespace Amigula
         private void cmbboxGenre_DropDownClosed(object sender, EventArgs e)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+            SaveGameGenre();
+        }
+
+        private void SaveGameGenre()
+        {
             try
             {
                 _amigulaDbDataSet.Games[GamesListView.SelectedIndex].Genre_ID = (int) cmbboxGenre.SelectedValue;
@@ -2186,6 +2092,11 @@ namespace Amigula
         private void cmbboxPublisher_DropDownClosed(object sender, EventArgs e)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+            SaveGamePublisher();
+        }
+
+        private void SaveGamePublisher()
+        {
             try
             {
                 _amigulaDbDataSet.Games[GamesListView.SelectedIndex].Publisher_ID =
@@ -2210,6 +2121,11 @@ namespace Amigula
         private void tboxNotes_LostFocus(object sender, RoutedEventArgs e)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+            SaveGameNotes();
+        }
+
+        private void SaveGameNotes()
+        {
             try
             {
                 _amigulaDbDataSet.Games[GamesListView.SelectedIndex].Notes = tboxNotes.Text;
@@ -2232,6 +2148,11 @@ namespace Amigula
         private void tboxYear_LostFocus(object sender, RoutedEventArgs e)
         {
             if (GamesListView.SelectedIndex <= -1) return;
+            SaveGameYear();
+        }
+
+        private void SaveGameYear()
+        {
             try
             {
                 _amigulaDbDataSet.Games[GamesListView.SelectedIndex].Year = int.Parse(tboxYear.Text);
@@ -2257,9 +2178,16 @@ namespace Amigula
             // Note that you can have more than one file.
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+            var oDataRowView = SelectedGameRowView;
 
             if (GamesListView.SelectedIndex <= -1) return;
+
+            SaveGameScreenshot(oDataRowView, files);
+            ShowGameMedia(GamesListView.SelectedItem);           
+        }
+
+        private static void SaveGameScreenshot(DataRowView oDataRowView, string[] files)
+        {
             try
             {
                 if (oDataRowView != null)
@@ -2270,7 +2198,6 @@ namespace Amigula
                         AddGameScreenshot(file, gameTitle);
                     }
                 }
-                ShowGameMedia(GamesListView.SelectedItem);
             }
             catch (Exception ex)
             {
@@ -2291,27 +2218,11 @@ namespace Amigula
             // Note that you can have more than one file.
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+            var oDataRowView = SelectedGameRowView;
 
             if (GamesListView.SelectedIndex <= -1) return;
-            try
-            {
-                if (oDataRowView != null)
-                {
-                    var gameTitle = oDataRowView.Row["Title"] as string;
-                    foreach (string file in files)
-                    {
-                        AddGameScreenshot(file, gameTitle);
-                    }
-                }
-                ShowGameMedia(GamesListView.SelectedItem);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            SaveGameScreenshot(oDataRowView, files);
+            ShowGameMedia(GamesListView.SelectedItem);
         }
 
         /// <summary>
@@ -2325,27 +2236,11 @@ namespace Amigula
             // Note that you can have more than one file.
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
 
-            var oDataRowView = GamesListView.SelectedItem as DataRowView;
+            var oDataRowView = SelectedGameRowView;
 
             if (GamesListView.SelectedIndex <= -1) return;
-            try
-            {
-                if (oDataRowView != null)
-                {
-                    var gameTitle = oDataRowView.Row["Title"] as string;
-                    foreach (string file in files)
-                    {
-                        AddGameScreenshot(file, gameTitle);
-                    }
-                }
-                ShowGameMedia(GamesListView.SelectedItem);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "An exception has occured while trying to set this game as a Favorite!\n\n" + ex.Message,
-                    "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            SaveGameScreenshot(oDataRowView, files);
+            ShowGameMedia(GamesListView.SelectedItem);
         }
 
         private void imgScreenshot_DragEnter(object sender, DragEventArgs e)
@@ -2606,11 +2501,6 @@ namespace Amigula
         /// <param name="e"></param>
         private void helpMenu_About_Click(object sender, RoutedEventArgs e)
         {
-            // Process.Start("mailto:dimitris@blitterstudio.com?subject=Amigula feedback");
-            //MessageBox.Show("AMI.G.U.LA. (AMIga Games Uae LAuncher) - v" + 
-            //    System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + 
-            //    " beta" + "\n\nDeveloped by Dimitris Panokostas\nContact: dimitris@blitterstudio.com", 
-            //    "Amigula information", MessageBoxButton.OK, MessageBoxImage.Information);
             var aboutWindow = new aboutWindow();
             aboutWindow.ShowDialog();
         }
@@ -2632,12 +2522,8 @@ namespace Amigula
         /// <param name="e"></param>
         private void fileMenu_Close_Click(object sender, RoutedEventArgs e)
         {
-            Settings.Default.Top = Top;
-            Settings.Default.Left = Left;
-            Settings.Default.Height = Height;
-            Settings.Default.Width = Width;
-            Settings.Default.WindowSetting = WindowState;
-            Settings.Default.Save();
+            GetCurrentWindowSettings();
+            SaveDefaultSettings();
             Close();
         }
 

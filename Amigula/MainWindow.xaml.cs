@@ -18,7 +18,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 using Amigula.AmigulaDBDataSetTableAdapters;
 using Amigula.Helpers;
 using Amigula.Properties;
@@ -55,7 +54,7 @@ namespace Amigula
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    public sealed partial class MainWindow
+    public partial class MainWindow : IDisposable
     {
         private static List<string> _uaeConfigViewSource;
         private static readonly ProgressBar ProgBar = new ProgressBar();
@@ -65,6 +64,50 @@ namespace Amigula
         private readonly PublishersTableAdapter _amigulaDbDataSetPublishersTableAdapter = new PublishersTableAdapter();
         private CollectionViewSource _gamesViewSource;
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="MainWindow"/> class.
+        /// </summary>
+        ~MainWindow() 
+        {
+            // Finalizer calls Dispose(false)
+            Dispose(false);
+        }
+
+        // The bulk of the clean-up code is implemented in Dispose(bool)
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing) 
+            {
+                // free managed resources
+                if (_amigulaDbDataSetGamesTableAdapter != null)
+                {
+                    _amigulaDbDataSetGamesTableAdapter.Dispose();
+                }
+
+                if (_amigulaDbDataSetGenresTableAdapter != null)
+                {
+                    _amigulaDbDataSetGenresTableAdapter.Dispose();
+                }
+
+                if (_amigulaDbDataSetPublishersTableAdapter != null)
+                {
+                    _amigulaDbDataSetPublishersTableAdapter.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
             if (!EnsureSingleInstance())
@@ -1787,14 +1830,7 @@ namespace Amigula
             _amigulaDbDataSet.Clear();
 
             // Process the list of files found in the directory. 
-            var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ".zip",
-                    ".adz",
-                    ".adf",
-                    ".dms",
-                    ".ipf"
-                };
+            var extensions = ValidFilenameExtensions;
 
             SetProgressbarProperties();
             statusBar.Items.Add(ProgBar);
@@ -1804,8 +1840,8 @@ namespace Amigula
 
             var cancelFileScanning = CancelClicked;
 
-            AmigulaDBDataSet.GenresRow gameGenre = _amigulaDbDataSet.Genres.FirstOrDefault();
-            AmigulaDBDataSet.PublishersRow gamePublisher = _amigulaDbDataSet.Publishers.FirstOrDefault();
+            var gameGenre = _amigulaDbDataSet.Genres.FirstOrDefault();
+            var gamePublisher = _amigulaDbDataSet.Publishers.FirstOrDefault();
 
             // ReSharper disable once UnusedVariable
             IDisposable files = Directory.EnumerateFiles(targetDirectory, "*.*", SearchOption.AllDirectories)
@@ -1814,41 +1850,12 @@ namespace Amigula
                                          .TakeUntil(cancelFileScanning)
                                          .Do(x =>
                                              {
-                                                 try
-                                                 {
-                                                     // Check if the path to file already exists in the database, skip inserting it if it does
-                                                     if (_amigulaDbDataSetGamesTableAdapter.FileExists(x) == 0)
-                                                     {
-                                                         _amigulaDbDataSet.Games.AddGamesRow(
-                                                             Regex.Replace(Path.GetFileNameWithoutExtension(x),
-                                                                           @"Disk\s(\d{1})\sof\s(\d{1})|Disk-(\d{1})|Disk(\d{1})$|Disk(\d{2})$|Disk[A-Za-z]$|-(\d{1})$|[\[(].+?[\])]|_",
-                                                                           ""), x, "default", IdentifyGameDisks(x).Count,
-                                                             GetGameYear(x), 0, DateTime.Today, 0, gameGenre,
-                                                             gamePublisher, "");
-                                                     }
-                                                 }
-                                                 catch (Exception ex)
-                                                 {
-                                                     MessageBox.Show(
-                                                         "An exception has occured while entering the games in the database:\n\n" +
-                                                         ex.Message, "An exception has occured", MessageBoxButton.OK,
-                                                         MessageBoxImage.Error);
-                                                 }
+                                                 AddGamesRow(x, gameGenre, gamePublisher);
                                              })
                                          .TakeLast(1)
                                          .Do(_ =>
                                              {
-                                                 try
-                                                 {
-                                                     _amigulaDbDataSetGamesTableAdapter.Update(_amigulaDbDataSet.Games);
-                                                 }
-                                                 catch (Exception ex)
-                                                 {
-                                                     MessageBox.Show(
-                                                         "An exception has occured while trying to save the changes in the database:\n\n" +
-                                                         ex.Message, "An exception has occured", MessageBoxButton.OK,
-                                                         MessageBoxImage.Error);
-                                                 }
+                                                 UpdateGamesDatabase();
                                              })
                                          .ObserveOnDispatcher()
                                          .Subscribe(y => { },
@@ -1858,6 +1865,61 @@ namespace Amigula
                                                             btnCancel.Visibility = Visibility.Collapsed;
                                                             FillListView();
                                                         });
+        }
+
+        private static HashSet<string> ValidFilenameExtensions
+        {
+            get
+            {
+                var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ".zip",
+                    ".adz",
+                    ".adf",
+                    ".dms",
+                    ".ipf"
+                };
+                return extensions;
+            }
+        }
+
+        private void UpdateGamesDatabase()
+        {
+            try
+            {
+                _amigulaDbDataSetGamesTableAdapter.Update(_amigulaDbDataSet.Games);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while trying to save the changes in the database:\n\n" +
+                    ex.Message, "An exception has occured", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void AddGamesRow(string x, AmigulaDBDataSet.GenresRow gameGenre, AmigulaDBDataSet.PublishersRow gamePublisher)
+        {
+            try
+            {
+                // Check if the path to file already exists in the database, skip inserting it if it does
+                if (_amigulaDbDataSetGamesTableAdapter.FileExists(x) == 0)
+                {
+                    _amigulaDbDataSet.Games.AddGamesRow(
+                        Regex.Replace(Path.GetFileNameWithoutExtension(x),
+                            @"Disk\s(\d{1})\sof\s(\d{1})|Disk-(\d{1})|Disk(\d{1})$|Disk(\d{2})$|Disk[A-Za-z]$|-(\d{1})$|[\[(].+?[\])]|_",
+                            ""), x, "default", IdentifyGameDisks(x).Count,
+                        GetGameYear(x), 0, DateTime.Today, 0, gameGenre,
+                        gamePublisher, "");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "An exception has occured while entering the games in the database:\n\n" +
+                    ex.Message, "An exception has occured", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private IObservable<EventPattern<EventArgs>> CancelClicked
@@ -1885,9 +1947,8 @@ namespace Amigula
         {
             if (!Settings.Default.ShowLongplayVideos) return;
             // Load longplay video
-            var oDataRowView = GamesListView.SelectedItem as DataRowView;
-            if (oDataRowView == null) return;
-            var longplayTitle = oDataRowView.Row["Title"] as string;
+            if (SelectedGameRowView == null) return;
+            var longplayTitle = SelectedGameRowView.Row["Title"] as string;
             List<YoutubeHelper.YouTubeInfo> videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
             if (!videos.Any()) return;
             var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);

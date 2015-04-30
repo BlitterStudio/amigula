@@ -36,7 +36,7 @@ namespace Amigula.Helpers
         }
 
         /// <summary>
-        ///     Returns a List<see cref="MainWindow.YouTubeInfo">YouTubeInfo</see> which represent
+        ///     Returns a List<see cref="YouTubeInfo">YouTubeInfo</see> which represent
         ///     the YouTube videos that matched the keyWord input parameter
         /// </summary>
         public static List<YouTubeInfo> LoadVideosKey(string keyWord)

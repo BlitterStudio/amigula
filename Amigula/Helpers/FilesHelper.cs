@@ -37,7 +37,7 @@ namespace Amigula.Helpers
                 MessageBox.Show(
                     "Sorry, an exception has occured while trying to read/write to a file!\n\n" +
                     ex.Message);
-            }          
+            }
         }
     }
 }

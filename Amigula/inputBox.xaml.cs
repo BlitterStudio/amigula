@@ -26,7 +26,6 @@ namespace Amigula
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
         {
-            
         }
     }
 }

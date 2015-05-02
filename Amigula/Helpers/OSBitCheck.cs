@@ -18,7 +18,7 @@ namespace Amigula.Helpers
             {
                 return true;
             }
-            // Detect whether the current process is a 32-bit process 
+            // Detect whether the current process is a 32-bit process
             // running on a 64-bit system.
             bool flag;
             return ((DoesWin32MethodExist("kernel32.dll", "IsWow64Process") &&

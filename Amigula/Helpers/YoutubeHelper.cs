@@ -11,6 +11,7 @@ namespace Amigula.Helpers
         public class YouTubeInfo
         {
             public string LinkUrl { get; set; }
+
             public string EmbedUrl { get; set; }
         }
 
@@ -42,7 +43,7 @@ namespace Amigula.Helpers
         public static List<YouTubeInfo> LoadVideosKey(string keyWord)
         {
             const string search = "http://gdata.youtube.com/feeds/api/videos?q={0}&alt=rss&&max-results=1&v=2";
-            
+
             try
             {
                 XElement xraw = XElement.Load(String.Format(search, keyWord));
@@ -51,13 +52,13 @@ namespace Amigula.Helpers
                 if (xElement != null)
                 {
                     IEnumerable<YouTubeInfo> links = (from item in xElement.Descendants("item")
-                        let element = item.Element("link")
-                        where element != null
-                        select new YouTubeInfo
-                        {
-                            LinkUrl = element.Value,
-                            EmbedUrl = GetEmbedUrlFromLink(element.Value),
-                        }).Take(1);
+                                                      let element = item.Element("link")
+                                                      where element != null
+                                                      select new YouTubeInfo
+                                                      {
+                                                          LinkUrl = element.Value,
+                                                          EmbedUrl = GetEmbedUrlFromLink(element.Value),
+                                                      }).Take(1);
 
                     return links.ToList();
                 }

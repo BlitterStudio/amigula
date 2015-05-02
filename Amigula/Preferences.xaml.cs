@@ -39,10 +39,10 @@ namespace Amigula
             // Show open file dialog box
             bool? result = selectFile.ShowDialog();
 
-            // Process open file dialog box results 
+            // Process open file dialog box results
             if (result == true)
             {
-                // Select file 
+                // Select file
                 tboxWinUAEPath.Text = selectFile.FileName;
             }
         }
@@ -101,10 +101,10 @@ namespace Amigula
             // Show open file dialog box
             bool? result = selectFile.ShowDialog();
 
-            // Process open file dialog box results 
+            // Process open file dialog box results
             if (result == true)
             {
-                // Select file 
+                // Select file
                 tboxMusicPlayerPath.Text = selectFile.FileName;
             }
         }
@@ -112,7 +112,7 @@ namespace Amigula
         private void SelectMusicFolder()
         {
             var selectFolder = new System.Windows.Forms.FolderBrowserDialog();
-            try 
+            try
             {
                 if (String.IsNullOrEmpty(tboxMusicPath.Text) == false)
                 {
@@ -171,6 +171,5 @@ namespace Amigula
         {
             SelectMusicPlayerFolder();
         }
-
     }
 }

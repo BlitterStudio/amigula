@@ -18,12 +18,12 @@ namespace Amigula.Helpers
             return (ICommand)obj.GetValue(CommandProperty);
         }
 
-/*
-        public static void SetCommand(DependencyObject obj, ICommand value)
-        {
-            obj.SetValue(CommandProperty, value);
-        }
-*/
+        /*
+                public static void SetCommand(DependencyObject obj, ICommand value)
+                {
+                    obj.SetValue(CommandProperty, value);
+                }
+        */
 
         // Using a DependencyProperty as the backing store for Command.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty CommandProperty =
@@ -111,12 +111,12 @@ namespace Amigula.Helpers
             return (bool)obj.GetValue(ShowSortGlyphProperty);
         }
 
-/*
-        public static void SetShowSortGlyph(DependencyObject obj, bool value)
-        {
-            obj.SetValue(ShowSortGlyphProperty, value);
-        }
-*/
+        /*
+                public static void SetShowSortGlyph(DependencyObject obj, bool value)
+                {
+                    obj.SetValue(ShowSortGlyphProperty, value);
+                }
+        */
 
         // Using a DependencyProperty as the backing store for ShowSortGlyph.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ShowSortGlyphProperty =
@@ -127,12 +127,12 @@ namespace Amigula.Helpers
             return (ImageSource)obj.GetValue(SortGlyphAscendingProperty);
         }
 
-/*
-        public static void SetSortGlyphAscending(DependencyObject obj, ImageSource value)
-        {
-            obj.SetValue(SortGlyphAscendingProperty, value);
-        }
-*/
+        /*
+                public static void SetSortGlyphAscending(DependencyObject obj, ImageSource value)
+                {
+                    obj.SetValue(SortGlyphAscendingProperty, value);
+                }
+        */
 
         // Using a DependencyProperty as the backing store for SortGlyphAscending.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SortGlyphAscendingProperty =
@@ -143,18 +143,18 @@ namespace Amigula.Helpers
             return (ImageSource)obj.GetValue(SortGlyphDescendingProperty);
         }
 
-/*
-        public static void SetSortGlyphDescending(DependencyObject obj, ImageSource value)
-        {
-            obj.SetValue(SortGlyphDescendingProperty, value);
-        }
-*/
+        /*
+                public static void SetSortGlyphDescending(DependencyObject obj, ImageSource value)
+                {
+                    obj.SetValue(SortGlyphDescendingProperty, value);
+                }
+        */
 
         // Using a DependencyProperty as the backing store for SortGlyphDescending.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SortGlyphDescendingProperty =
             DependencyProperty.RegisterAttached("SortGlyphDescending", typeof(ImageSource), typeof(GridViewSort), new UIPropertyMetadata(null));
 
-        #endregion
+        #endregion Public attached properties
 
         #region Private attached properties
 
@@ -172,7 +172,7 @@ namespace Amigula.Helpers
         private static readonly DependencyProperty SortedColumnHeaderProperty =
             DependencyProperty.RegisterAttached("SortedColumnHeader", typeof(GridViewColumnHeader), typeof(GridViewSort), new UIPropertyMetadata(null));
 
-        #endregion
+        #endregion Private attached properties
 
         #region Column header click event handler
 
@@ -180,7 +180,7 @@ namespace Amigula.Helpers
         {
             var headerClicked = e.OriginalSource as GridViewColumnHeader;
             if (headerClicked == null) return;
-            if (headerClicked.Column == null) return;            
+            if (headerClicked.Column == null) return;
             string propertyName = GetPropertyName(headerClicked.Column);
             if (string.IsNullOrEmpty(propertyName)) return;
             var listView = GetAncestor<ListView>(headerClicked);
@@ -199,7 +199,7 @@ namespace Amigula.Helpers
             }
         }
 
-        #endregion
+        #endregion Column header click event handler
 
         #region Helper methods
 
@@ -263,7 +263,7 @@ namespace Amigula.Helpers
             }
         }
 
-        #endregion
+        #endregion Helper methods
 
         #region SortGlyphAdorner nested class
 
@@ -307,7 +307,7 @@ namespace Amigula.Helpers
                     pathSegmentCollection,
                     true);
 
-                var pathFigureCollection = new PathFigureCollection {pathFigure};
+                var pathFigureCollection = new PathFigureCollection { pathFigure };
 
                 var pathGeometry = new PathGeometry(pathFigureCollection);
                 return pathGeometry;
@@ -331,6 +331,6 @@ namespace Amigula.Helpers
             }
         }
 
-        #endregion
+        #endregion SortGlyphAdorner nested class
     }
 }

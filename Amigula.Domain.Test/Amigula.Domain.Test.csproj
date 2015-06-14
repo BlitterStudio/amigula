@@ -62,17 +62,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AmigulaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Amigula.Domain\Amigula.Domain.csproj">
       <Project>{895461f0-3501-4cec-b398-9d5457c58236}</Project>
       <Name>Amigula.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Amigula.Persistence\Amigula.Persistence.csproj">
-      <Project>{f1d9b8a4-f5bf-41c2-b090-3667c7d94a72}</Project>
-      <Name>Amigula.Persistence</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

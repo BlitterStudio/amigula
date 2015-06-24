@@ -11,36 +11,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Amigula.Domain.Test
 {
     /// <summary>
-    /// Summary description for AmigulaServiceTest
+    /// Tests for the GamesService class
     /// </summary>
     [TestClass]
     public class GamesServiceTest
     {
-        public GamesServiceTest()
-        {
-            //
-            // TODO: Add constructor logic here
-            //
-        }
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///Gets or sets the test context which provides
-        ///information about and functionality for the current test run.
-        ///</summary>
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
-
         private IGamesRepository _gamesRepository;
         private GamesService _gamesService;
 

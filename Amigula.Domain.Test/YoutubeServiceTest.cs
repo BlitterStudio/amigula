@@ -17,9 +17,21 @@ namespace Amigula.Domain.Test
         }
 
         [TestMethod]
-        public void UrlExists_ValidUrl_ReturnsTrue()
+        public void UrlExists_ValidHttpUrl_ReturnsTrue()
         {
             const string urlToTest = "http://www.youtube.com";
+
+            var result = _youtubeService.UrlExists(urlToTest);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(bool));
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void UrlExists_ValidHttpsUrl_ReturnsTrue()
+        {
+            const string urlToTest = "https://www.youtube.com";
 
             var result = _youtubeService.UrlExists(urlToTest);
 

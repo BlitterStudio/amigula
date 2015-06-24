@@ -16,7 +16,17 @@ namespace Amigula.Domain.Services
         /// <returns></returns>
         public bool UrlExists(string url)
         {
-            if (!IsValidUri(url)) return false;
+            var urlIsValid = IsValidUri(url);
+
+            if (!urlIsValid)
+            {
+                var urlWithHttp = BuildHttpUri(url);
+                urlIsValid = IsValidUri(urlWithHttp);
+                if (urlIsValid) url = urlWithHttp;
+            }
+
+            if (!urlIsValid) return false;
+
             try
             {
                 //Creating the HttpWebRequest
@@ -36,15 +46,26 @@ namespace Amigula.Domain.Services
                 //Any exception will return false.
                 return false;
             }
+
             return false;
         }
 
         private static bool IsValidUri(string url)
         {
             Uri uriResult;
-            var result = Uri.TryCreate(url, UriKind.Absolute, out uriResult) && uriResult.Scheme == Uri.UriSchemeHttp ||
-                         uriResult.Scheme == Uri.UriSchemeHttps;
-            return result;
+            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out uriResult) ;
+            if (isValidUri)
+            {
+                isValidUri =  uriResult.Scheme == Uri.UriSchemeHttp ||
+                               uriResult.Scheme == Uri.UriSchemeHttps;
+            }
+
+            return isValidUri;
+        }
+
+        private static string BuildHttpUri(string uri)
+        {
+            return string.Format("{0}{1}{2}/", Uri.UriSchemeHttp, Uri.SchemeDelimiter, uri);
         }
     }
 }

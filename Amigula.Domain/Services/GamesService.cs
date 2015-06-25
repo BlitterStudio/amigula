@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
@@ -94,7 +96,7 @@ namespace Amigula.Domain.Services
         }
 
         /// <summary>
-        /// Prepare the title for using it as a parameter in a URL, replace spaces with "%20".
+        ///     Prepare the title for using it as a parameter in a URL, replace spaces with "%20".
         /// </summary>
         /// <param name="gameTitle"></param>
         /// <returns></returns>
@@ -110,6 +112,131 @@ namespace Amigula.Domain.Services
                     .Replace(" ", "%20");
 
             return cleanedGameTitle;
+        }
+
+        /// <summary>
+        ///     Determine if a game is multi-disk from the filename, using certain scenarios
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns>A list of the filenames for the game, multi-disk or single disk</returns>
+        public IEnumerable<string> IdentifyGameDisks(string gameFullPath)
+        {
+            // If the game consists of more than 1 Disk, then the first disk should be passed to WinUAE as usual,
+            // but the rest of them should go in the DiskSwapper feature of WinUAE. To do that, the config file must be
+            // edited and lines diskimage0-19=<path to filename> must be appended/edited.
+
+            // Checks to be done for possible versions of multi-disk games:
+            // 1. <game> Disk1.zip, <game> Disk2.zip etc.
+            // 2. <game> Disk01.zip, <game> Disk02.zip etc.
+            // 3. <game> (Disk 1 of 2).zip, <game> (Disk 2 of 2).zip etc.
+            // 4. <game> (Disk 01 of 11).zip, <game> (Disk 02 of 11).zip etc.
+            // 5. <game>-1.zip, <game>-2.zip etc.
+
+            var gameDisksFullPath = new List<string>();
+            var diskNumber = 1;
+
+            if (IsMultiDisk1(gameFullPath))
+            {
+                // case 1. <game> Disk1.zip, <game> Disk2.zip etc.
+                do
+                {
+                    gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk(\d{1})\.", "Disk" + diskNumber + "."));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(gameFullPath, @"Disk(\d{1})\.", "Disk" + diskNumber + ".")));
+                return gameDisksFullPath;
+            }
+
+            if (IsMultiDisk2(gameFullPath))
+            {
+                // case 2. <game> Disk01.zip, <game> Disk02.zip etc.
+                do
+                {
+                    gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
+                        "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + "."));
+                    diskNumber++;
+                } while (
+                    File.Exists(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
+                        "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + ".")));
+                return gameDisksFullPath;
+            }
+            if (IsMultiDisk3(gameFullPath))
+            {
+                // case 3. <game> (Disk 1 of 2).zip, <game> (Disk 2 of 2).zip etc.
+                do
+                {
+                    gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk\s(\d{1})\sof",
+                        "Disk " + diskNumber + " of"));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(gameFullPath, @"Disk\s(\d{1})\sof", "Disk " + diskNumber + " of")));
+                return gameDisksFullPath;
+            }
+            if (IsMultiDisk4(gameFullPath))
+            {
+                // case 4. <game> (Disk 01 of 11).zip, <game> (Disk 02 of 11).zip etc.
+                do
+                {
+                    gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk\s(\d{2})\sof",
+                        "Disk " + diskNumber.ToString("00") + " of"));
+                    diskNumber++;
+                } while (
+                    File.Exists(Regex.Replace(gameFullPath, @"Disk\s(\d{2})\sof",
+                        "Disk " + diskNumber.ToString("00") + " of")));
+                return gameDisksFullPath;
+            }
+            if (IsMultiDisk5(gameFullPath))
+            {
+                // case 5. <game>-1.zip, <game>-2.zip etc.
+                do
+                {
+                    gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"-(\d{1})\.", "-" + diskNumber + "."));
+                    diskNumber++;
+                } while (File.Exists(Regex.Replace(gameFullPath, @"-(\d{1})\.", "-" + diskNumber + ".")));
+                return gameDisksFullPath;
+            }
+            // if all else fails, return the one disk game back
+            gameDisksFullPath.Add(gameFullPath);
+            return gameDisksFullPath;
+        }
+
+        private static bool IsMultiDisk5(string gameFullPath)
+        {
+            return Regex.IsMatch(gameFullPath, @"-(\d{1})\....$");
+        }
+
+        private static bool IsMultiDisk4(string gameFullPath)
+        {
+            int n;
+            return Regex.IsMatch(gameFullPath, @"Disk\s(\d{2})\sof\s(\d{2})") &&
+                   int.TryParse(
+                       gameFullPath.Substring(
+                           gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 2), out n);
+        }
+
+        private static bool IsMultiDisk3(string gameFullPath)
+        {
+            int n;
+            return Regex.IsMatch(gameFullPath, @"Disk\s(\d{1})\sof") &&
+                   int.TryParse(
+                       gameFullPath.Substring(
+                           gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 1), out n);
+        }
+
+        private static bool IsMultiDisk2(string gameFullPath)
+        {
+            int n;
+            return Regex.IsMatch(gameFullPath, @"Disk(\d{2})\....$") &&
+                   int.TryParse(
+                       gameFullPath.Substring(
+                           gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 2), out n);
+        }
+
+        private static bool IsMultiDisk1(string gameFullPath)
+        {
+            int n;
+            return Regex.IsMatch(gameFullPath, @"Disk(\d{1})\....$") &&
+                   int.TryParse(
+                       gameFullPath.Substring(
+                           gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 1), out n);
         }
     }
 }

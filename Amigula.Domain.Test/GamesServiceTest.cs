@@ -86,11 +86,11 @@ namespace Amigula.Domain.Test
         }
 
         [TestMethod]
-        public void PrepareGameTitleForScreenshot_GameTitle_ReturnsGameScreenshotsDto()
+        public void PrepareTitleScreenshot_GameTitle_ReturnsGameScreenshotsDto()
         {
             const string gameTitle = "Apidya v1.2 (1990) [Publisher name]";
 
-            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+            var result = _gamesService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
@@ -102,11 +102,11 @@ namespace Amigula.Domain.Test
         }
 
         [TestMethod]
-        public void PrepareGameTitleForScreenshot_GameTitleWithSpaces_ReturnsGameScreenshotsDto()
+        public void PrepareTitleScreenshot_GameTitleWithSpaces_ReturnsGameScreenshotsDto()
         {
             const string gameTitle = "International Karate Plus v1.3 (1988) [Publisher name]";
 
-            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+            var result = _gamesService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
@@ -118,11 +118,11 @@ namespace Amigula.Domain.Test
         }
 
         [TestMethod]
-        public void PrepareGameTitleForScreenshot_NumericGameTitle_ReturnsGameScreenshotsDto()
+        public void PrepareTitleScreenshot_NumericGameTitle_ReturnsGameScreenshotsDto()
         {
             const string gameTitle = "1942 v1.3 (1988) [Publisher name]";
 
-            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+            var result = _gamesService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
@@ -134,9 +134,9 @@ namespace Amigula.Domain.Test
         }
 
         [TestMethod]
-        public void PrepareGameTitleForScreenshot_Null_ReturnsGameScreenshotsDto()
+        public void PrepareTitleScreenshot_Null_ReturnsGameScreenshotsDto()
         {
-            var result = _gamesService.PrepareGameTitleForScreenshot(null);
+            var result = _gamesService.PrepareTitleScreenshot(null);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
@@ -145,6 +145,40 @@ namespace Amigula.Domain.Test
             Assert.IsNull(result.Screenshot2);
             Assert.IsNull(result.Screenshot3);
             Assert.IsNull(result.GameFolder);
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_Title_ReturnsString()
+        {
+            const string gameTitle = "Apidya v1.2 (1990) [Publisher name]";
+
+            var result = _gamesService.PrepareTitleUrl(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "Apidya");
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_TitleWithSpaces_ReturnsStringWithoutSpaces()
+        {
+            const string gameTitle = "International Karate Plus v1.3 (1988) [Publisher name]";
+
+            var result = _gamesService.PrepareTitleUrl(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "International%20Karate%20Plus");
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_Null_ReturnsEmptyString()
+        {
+            var result = _gamesService.PrepareTitleUrl(null);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "");
         }
     }
 }

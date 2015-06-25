@@ -21,7 +21,7 @@ namespace Amigula.Domain.Services
             return gamesDto;
         }
 
-        public GameScreenshotsDto PrepareGameTitleForScreenshot(string gameTitle)
+        public GameScreenshotsDto PrepareTitleScreenshot(string gameTitle)
         {
             var result = new GameScreenshotsDto();
             if (string.IsNullOrEmpty(gameTitle)) return result;
@@ -91,6 +91,25 @@ namespace Amigula.Domain.Services
 
             return Regex.Replace(gameTitle, " $", "")
                 .Replace(" ", "_") + suffix;
+        }
+
+        /// <summary>
+        /// Prepare the title for using it as a parameter in a URL, replace spaces with "%20".
+        /// </summary>
+        /// <param name="gameTitle"></param>
+        /// <returns></returns>
+        public string PrepareTitleUrl(string gameTitle)
+        {
+            if (string.IsNullOrEmpty(gameTitle)) return "";
+
+            var cleanedGameTitle = CleanGameTitle(gameTitle);
+
+            if (cleanedGameTitle.Length > 0)
+                cleanedGameTitle = cleanedGameTitle
+                    .TrimEnd(' ')
+                    .Replace(" ", "%20");
+
+            return cleanedGameTitle;
         }
     }
 }

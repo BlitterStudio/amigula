@@ -85,5 +85,37 @@ namespace Amigula.Domain.Test
             Assert.IsInstanceOfType(result, typeof(IEnumerable<GamesDto>));
             Assert.AreEqual(result.Count(), 3);
         }
+
+        [TestMethod]
+        public void PrepareGameTitleForScreenshot_GameTitle_ReturnsGameScreenshotsDto()
+        {
+            const string gameTitle = "Apidya v1.2 (1990) [Publisher name]";
+
+            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.AreEqual(result.Title, "Apidya");
+            Assert.AreEqual(result.Screenshot1, "Apidya.png");
+            Assert.AreEqual(result.Screenshot2, "Apidya_1.png");
+            Assert.AreEqual(result.Screenshot3, "Apidya_2.png");
+            Assert.AreEqual(result.GameFolder, "A\\");
+        }
+
+        [TestMethod]
+        public void PrepareGameTitleForScreenshot_GameTitleWithSpaces_ReturnsGameScreenshotsDto()
+        {
+            const string gameTitle = "International Karate Plus v1.3 (1988) [Publisher name]";
+
+            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.AreEqual(result.Title, "International Karate Plus");
+            Assert.AreEqual(result.Screenshot1, "International_Karate_Plus.png");
+            Assert.AreEqual(result.Screenshot2, "International_Karate_Plus_1.png");
+            Assert.AreEqual(result.Screenshot3, "International_Karate_Plus_2.png");
+            Assert.AreEqual(result.GameFolder, "I\\");
+        }
     }
 }

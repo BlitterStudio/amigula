@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DTO\EmulatorDto.cs" />
+    <Compile Include="DTO\GameScreenshotsDto.cs" />
     <Compile Include="DTO\GamesDto.cs" />
     <Compile Include="Helpers\OsBitCheck.cs" />
     <Compile Include="Helpers\SafeNativeMethods.cs" />

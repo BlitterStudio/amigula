@@ -117,5 +117,35 @@ namespace Amigula.Domain.Test
             Assert.AreEqual(result.Screenshot3, "International_Karate_Plus_2.png");
             Assert.AreEqual(result.GameFolder, "I\\");
         }
+
+        [TestMethod]
+        public void PrepareGameTitleForScreenshot_NumericGameTitle_ReturnsGameScreenshotsDto()
+        {
+            const string gameTitle = "1942 v1.3 (1988) [Publisher name]";
+
+            var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.AreEqual(result.Title, "1942");
+            Assert.AreEqual(result.Screenshot1, "1942.png");
+            Assert.AreEqual(result.Screenshot2, "1942_1.png");
+            Assert.AreEqual(result.Screenshot3, "1942_2.png");
+            Assert.AreEqual(result.GameFolder, "0\\");
+        }
+
+        [TestMethod]
+        public void PrepareGameTitleForScreenshot_Null_ReturnsGameScreenshotsDto()
+        {
+            var result = _gamesService.PrepareGameTitleForScreenshot(null);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsNull(result.Title);
+            Assert.IsNull(result.Screenshot1);
+            Assert.IsNull(result.Screenshot2);
+            Assert.IsNull(result.Screenshot3);
+            Assert.IsNull(result.GameFolder);
+        }
     }
 }

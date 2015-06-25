@@ -27,20 +27,29 @@ namespace Amigula.Domain.Services
         public GameScreenshotsDto PrepareGameTitleForScreenshot(string gameTitle)
         {
             var result = new GameScreenshotsDto();
-            int n;
+            if (string.IsNullOrEmpty(gameTitle)) return result;
+         
+            result.GameFolder = DetermineTitleSubfolder(gameTitle);
+            result.Title = CleanGameTitle(gameTitle);
 
-            // Get the first letter of the game, to get the subfolder from that.
-            // if the first letter is a number, the subfolder should be set to "0"
-            if (!string.IsNullOrEmpty(gameTitle) 
-                && int.TryParse(gameTitle.Substring(0, 1), out n))
-                result.GameFolder = "0\\";
-            else if (!string.IsNullOrEmpty(gameTitle))
-                result.GameFolder = gameTitle.Substring(0, 1) + "\\";
+            result.Screenshot1 = DetermineTitleScreenshot(result.Title, 1);
+            result.Screenshot2 = DetermineTitleScreenshot(result.Title, 2);
+            result.Screenshot3 = DetermineTitleScreenshot(result.Title, 3);
 
-            // Use RegEx to clean up anything in () or []
+            return result;
+        }
+
+        /// <summary>
+        /// Remove version information and anything with () or [] from title
+        /// </summary>
+        /// <param name="gameTitle"></param>
+        /// <returns>Cleaned up Title</returns>
+        private static string CleanGameTitle(string gameTitle)
+        {
+            // Remove anything in the title containing () or []
             gameTitle = Regex.Replace(gameTitle, @"[\[(].+?[\])]", "");
 
-            // if there's version information (e.g. v1.2) in the filename exclude it as well
+            // if there's version information (e.g. v1.2) in the filename remove it as well
             if (Regex.IsMatch(gameTitle, @"\sv(\d{1})"))
             {
                 gameTitle = gameTitle.Substring(0,
@@ -48,21 +57,43 @@ namespace Amigula.Domain.Services
                         StringComparison
                             .OrdinalIgnoreCase));
             }
+            return gameTitle;
+        }
 
-            result.Title = gameTitle;
+        /// <summary>
+        /// Get the first letter of the game title, to get the subfolder from that.
+        /// if the first letter is a number, the subfolder should be set to "0"
+        /// in both scenarios we add 2 backslashes at the end, since this is a path.
+        /// </summary>
+        /// <param name="gameTitle"></param>
+        /// <returns>Game Screenshot Folder</returns>
+        private static string DetermineTitleSubfolder(string gameTitle)
+        {
+            int n;
+            if (int.TryParse(gameTitle.Substring(0, 1), out n))
+                return "0\\";
+            return gameTitle.Substring(0, 1) + "\\";
+        }
 
-            // now try to match the filename to the title selected, adding ".png" at the end
-            // this is far from perfect, needs improvement!
-            if (gameTitle.Length > 0)
-            {
-                result.Screenshot1 = Regex.Replace(gameTitle, " $", "")
-                    .Replace(" ", "_") + ".png";
-                result.Screenshot2 = Regex.Replace(gameTitle, " $", "")
-                    .Replace(" ", "_") + "_1.png";
-                result.Screenshot3 = Regex.Replace(gameTitle, " $", "")
-                    .Replace(" ", "_") + "_2.png";
-            }
-            return result;
+        /// <summary>
+        /// Replace spaces with underscores, adding ".png" at the end
+        /// </summary>
+        /// <param name="gameTitle"></param>
+        /// <param name="screenshotNumber"></param>
+        /// <returns></returns>
+        private static string DetermineTitleScreenshot(string gameTitle, int screenshotNumber)
+        {
+            // Screenshot 1 does not get any numbering,
+            // Screenshot 2 gets the suffix _1.png,
+            // Screenshot 3 gets the suffix _2.png
+
+            var suffix = ".png";
+
+            if (screenshotNumber == 2) suffix = "_1" + suffix;
+            if (screenshotNumber == 3) suffix = "_2" + suffix;
+
+            return Regex.Replace(gameTitle, " $", "")
+                .Replace(" ", "_") + suffix;
         }
     }
 }

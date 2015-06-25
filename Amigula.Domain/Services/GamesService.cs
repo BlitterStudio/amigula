@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -28,7 +25,7 @@ namespace Amigula.Domain.Services
         {
             var result = new GameScreenshotsDto();
             if (string.IsNullOrEmpty(gameTitle)) return result;
-         
+
             result.GameFolder = DetermineTitleSubfolder(gameTitle);
             result.Title = CleanGameTitle(gameTitle);
 
@@ -40,7 +37,7 @@ namespace Amigula.Domain.Services
         }
 
         /// <summary>
-        /// Remove version information and anything with () or [] from title
+        ///     Remove version information and anything with () or [] from title
         /// </summary>
         /// <param name="gameTitle"></param>
         /// <returns>Cleaned up Title</returns>
@@ -61,9 +58,9 @@ namespace Amigula.Domain.Services
         }
 
         /// <summary>
-        /// Get the first letter of the game title, to get the subfolder from that.
-        /// if the first letter is a number, the subfolder should be set to "0"
-        /// in both scenarios we add 2 backslashes at the end, since this is a path.
+        ///     Get the first letter of the game title, to get the subfolder from that.
+        ///     if the first letter is a number, the subfolder should be set to "0"
+        ///     in both scenarios we add 2 backslashes at the end, since this is a path.
         /// </summary>
         /// <param name="gameTitle"></param>
         /// <returns>Game Screenshot Folder</returns>
@@ -76,7 +73,7 @@ namespace Amigula.Domain.Services
         }
 
         /// <summary>
-        /// Replace spaces with underscores, adding ".png" at the end
+        ///     Replace spaces with underscores, adding ".png" at the end
         /// </summary>
         /// <param name="gameTitle"></param>
         /// <param name="screenshotNumber"></param>

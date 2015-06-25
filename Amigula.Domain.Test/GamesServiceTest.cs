@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Amigula.Domain.Services;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
+using Amigula.Domain.Services;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Amigula.Domain.Test
 {
     /// <summary>
-    /// Tests for the GamesService class
+    ///     Tests for the GamesService class
     /// </summary>
     [TestClass]
     public class GamesServiceTest
     {
-        private IGamesRepository _gamesRepository;
-        private GamesService _gamesService;
-
         private readonly List<GamesDto> _gamesDtos = new List<GamesDto>
         {
             new GamesDto
@@ -65,6 +61,9 @@ namespace Amigula.Domain.Test
             }
         };
 
+        private IGamesRepository _gamesRepository;
+        private GamesService _gamesService;
+
         [TestInitialize]
         public void Initialize()
         {
@@ -82,7 +81,7 @@ namespace Amigula.Domain.Test
             var result = _gamesService.GetGamesList();
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(IEnumerable<GamesDto>));
+            Assert.IsInstanceOfType(result, typeof (IEnumerable<GamesDto>));
             Assert.AreEqual(result.Count(), 3);
         }
 
@@ -94,7 +93,7 @@ namespace Amigula.Domain.Test
             var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
             Assert.AreEqual(result.Title, "Apidya");
             Assert.AreEqual(result.Screenshot1, "Apidya.png");
             Assert.AreEqual(result.Screenshot2, "Apidya_1.png");
@@ -110,7 +109,7 @@ namespace Amigula.Domain.Test
             var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
             Assert.AreEqual(result.Title, "International Karate Plus");
             Assert.AreEqual(result.Screenshot1, "International_Karate_Plus.png");
             Assert.AreEqual(result.Screenshot2, "International_Karate_Plus_1.png");
@@ -126,7 +125,7 @@ namespace Amigula.Domain.Test
             var result = _gamesService.PrepareGameTitleForScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
             Assert.AreEqual(result.Title, "1942");
             Assert.AreEqual(result.Screenshot1, "1942.png");
             Assert.AreEqual(result.Screenshot2, "1942_1.png");
@@ -140,7 +139,7 @@ namespace Amigula.Domain.Test
             var result = _gamesService.PrepareGameTitleForScreenshot(null);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof (GameScreenshotsDto));
             Assert.IsNull(result.Title);
             Assert.IsNull(result.Screenshot1);
             Assert.IsNull(result.Screenshot2);

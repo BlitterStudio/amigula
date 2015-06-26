@@ -164,7 +164,7 @@ namespace Amigula.Domain.Services
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 5);
                 return gameDisksFullPath;
             }
-            // if all else fails, return the one disk game back
+            // if none of the above matches, assume the game has only one disk
             gameDisksFullPath.Add(gameFullPath);
             return gameDisksFullPath;
         }

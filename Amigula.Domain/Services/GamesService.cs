@@ -187,11 +187,11 @@ namespace Amigula.Domain.Services
                 do
                 {
                     gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
-                        "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + "."));
+                        "Disk" + diskNumber.ToString("00") + "."));
                     diskNumber++;
                 } while (
                     _gamesRepository.FilenameExists(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
-                        "Disk" + diskNumber.ToString(CultureInfo.InvariantCulture) + ".")));
+                        "Disk" + diskNumber.ToString("00") + ".")));
             if (method == 3)
                 do
                 {

@@ -10,5 +10,7 @@ namespace Amigula.Domain.Interfaces
     public interface IGamesRepository
     {
         IEnumerable<GamesDto> GetGamesList();
+
+        bool FilenameExists(string gameFullPath);
     }
 }

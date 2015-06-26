@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amigula.AmigaForeverReposit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amigula.AmigaForeverRepository.Test", "Amigula.AmigaForeverRepository.Test\Amigula.AmigaForeverRepository.Test.csproj", "{0A20DBD8-F65D-47A2-AC6A-E5CB86278826}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amigula.Persistence", "Amigula.Persistence\Amigula.Persistence.csproj", "{28DAC1E4-9725-4504-81F2-0029421631A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,18 @@ Global
 		{0A20DBD8-F65D-47A2-AC6A-E5CB86278826}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0A20DBD8-F65D-47A2-AC6A-E5CB86278826}.Release|x86.ActiveCfg = Release|Any CPU
 		{0A20DBD8-F65D-47A2-AC6A-E5CB86278826}.Release|x86.Build.0 = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Debug|x86.Build.0 = Debug|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{28DAC1E4-9725-4504-81F2-0029421631A0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

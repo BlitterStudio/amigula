@@ -180,5 +180,90 @@ namespace Amigula.Domain.Test
             Assert.IsInstanceOfType(result, typeof(string));
             Assert.AreEqual(result, "");
         }
+
+        [TestMethod]
+        public void GetGameDisks_GameWithOneDisk_ReturnsFullPathString()
+        {
+            A.CallTo(() => _gamesRepository.FilenameExists(A<string>.Ignored))
+                .Returns(true)
+                .Once();
+            const string gameFilename = "International Karate Plus.adf";
+
+            var result = _gamesService.GetGameDisks(gameFilename);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
+            Assert.AreEqual(result.Count(), 1);
+        }
+
+        [TestMethod]
+        public void GetGameDisks_GameWithFourDisksMethod1_ReturnsFullPathStringForAllDisks()
+        {
+            A.CallTo(() => _gamesRepository.FilenameExists(A<string>.Ignored))
+                .Returns(true)
+                .NumberOfTimes(3);
+
+            const string gameFilename = "Mortal Kombat Disk1.zip";
+            const string lastGameDisk = "Mortal Kombat Disk4.zip";
+
+            var result = _gamesService.GetGameDisks(gameFilename);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
+            Assert.AreEqual(result.Count(), 4);
+            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+        }
+
+        [TestMethod]
+        public void GetGameDisks_GameWithFourDisksMethod2_ReturnsFullPathStringForAllDisks()
+        {
+            A.CallTo(() => _gamesRepository.FilenameExists(A<string>.Ignored))
+                .Returns(true)
+                .NumberOfTimes(3);
+
+            const string gameFilename = "Mortal Kombat Disk01.zip";
+            const string lastGameDisk = "Mortal Kombat Disk04.zip";
+
+            var result = _gamesService.GetGameDisks(gameFilename);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
+            Assert.AreEqual(result.Count(), 4);
+            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+        }
+
+        [TestMethod]
+        public void GetGameDisks_GameWithFourDisksMethod3_ReturnsFullPathStringForAllDisks()
+        {
+            A.CallTo(() => _gamesRepository.FilenameExists(A<string>.Ignored))
+                .Returns(true)
+                .NumberOfTimes(3);
+            const string gameFilename = "Mortal Kombat (Disk 1 of 4).zip";
+            const string lastGameDisk = "Mortal Kombat (Disk 4 of 4).zip";
+
+            var result = _gamesService.GetGameDisks(gameFilename);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
+            Assert.AreEqual(result.Count(), 4);
+            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+        }
+
+        [TestMethod]
+        public void GetGameDisks_GameWithFourDisksMethod4_ReturnsFullPathStringForAllDisks()
+        {
+            A.CallTo(() => _gamesRepository.FilenameExists(A<string>.Ignored))
+                .Returns(true)
+                .NumberOfTimes(3);
+            const string gameFilename = "Mortal Kombat (Disk 01 of 04).zip";
+            const string lastGameDisk = "Mortal Kombat (Disk 04 of 04).zip";
+
+            var result = _gamesService.GetGameDisks(gameFilename);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
+            Assert.AreEqual(result.Count(), 4);
+            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+        }
     }
 }

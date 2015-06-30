@@ -15,7 +15,7 @@ namespace Amigula.AmigaForeverRepository.Test
         }
 
         [TestMethod]
-        public void GetEmulatorPaths_ReturnsEmulatorDto()
+        public void AmigaForeverGetEmulatorPaths_ReturnsEmulatorDto()
         {
             // This test will only pass if you have Amiga Forever installed!
             var result = _amigaForever.GetEmulatorPaths();

@@ -210,8 +210,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 4);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -228,8 +229,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 4);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -245,8 +247,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 4);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -262,8 +265,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 4);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -279,8 +283,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 4);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -296,8 +301,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 11);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -313,8 +319,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 11);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -330,8 +337,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 11);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -347,8 +355,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 11);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
         [TestMethod]
@@ -364,8 +373,9 @@ namespace Amigula.Domain.Test
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
-            Assert.AreEqual(result.Count(), 11);
-            Assert.IsTrue(result.Last().Equals(lastGameDisk));
+            var enumerable = result as IList<string> ?? result.ToList();
+            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
     }
 }

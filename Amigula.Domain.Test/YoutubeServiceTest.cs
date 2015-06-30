@@ -1,6 +1,4 @@
-﻿using System;
-using Amigula.Domain.Services;
-using FakeItEasy.Configuration;
+﻿using Amigula.Domain.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Amigula.Domain.Test

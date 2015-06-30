@@ -133,32 +133,32 @@ namespace Amigula.Domain.Services
 
             var gameDisksFullPath = new List<string>();
 
-            if (IsMultiDisk1(gameFullPath))
+            if (IsMultiDiskPattern1(gameFullPath))
             {
                 // case 1. <game> Disk1.zip, <game> Disk2.zip etc.
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 1);
                 return gameDisksFullPath;
             }
 
-            if (IsMultiDisk2(gameFullPath))
+            if (IsMultiDiskPattern2(gameFullPath))
             {
                 // case 2. <game> Disk01.zip, <game> Disk02.zip etc.
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 2);
                 return gameDisksFullPath;
             }
-            if (IsMultiDisk3(gameFullPath))
+            if (IsMultiDiskPattern3(gameFullPath))
             {
                 // case 3. <game> (Disk 1 of 2).zip, <game> (Disk 2 of 2).zip etc.
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 3);
                 return gameDisksFullPath;
             }
-            if (IsMultiDisk4(gameFullPath))
+            if (IsMultiDiskPattern4(gameFullPath))
             {
                 // case 4. <game> (Disk 01 of 11).zip, <game> (Disk 02 of 11).zip etc.
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 4);
                 return gameDisksFullPath;
             }
-            if (IsMultiDisk5(gameFullPath))
+            if (IsMultiDiskPattern5(gameFullPath))
             {
                 // case 5. <game>-1.zip, <game>-2.zip etc.
                 gameDisksFullPath = GetDisksFullPath(gameFullPath, 5);
@@ -223,12 +223,12 @@ namespace Amigula.Domain.Services
             return gameDisksFullPath;
         }
 
-        private static bool IsMultiDisk5(string gameFullPath)
+        private static bool IsMultiDiskPattern5(string gameFullPath)
         {
             return Regex.IsMatch(gameFullPath, @"-(\d{1})\....$");
         }
 
-        private static bool IsMultiDisk4(string gameFullPath)
+        private static bool IsMultiDiskPattern4(string gameFullPath)
         {
             int n;
             return Regex.IsMatch(gameFullPath, @"Disk\s(\d{2})\sof\s(\d{2})") &&
@@ -237,7 +237,7 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 2), out n);
         }
 
-        private static bool IsMultiDisk3(string gameFullPath)
+        private static bool IsMultiDiskPattern3(string gameFullPath)
         {
             int n;
             return Regex.IsMatch(gameFullPath, @"Disk\s(\d{1})\sof") &&
@@ -246,7 +246,7 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 1), out n);
         }
 
-        private static bool IsMultiDisk2(string gameFullPath)
+        private static bool IsMultiDiskPattern2(string gameFullPath)
         {
             int n;
             return Regex.IsMatch(gameFullPath, @"Disk(\d{2})\....$") &&
@@ -255,7 +255,7 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 2), out n);
         }
 
-        private static bool IsMultiDisk1(string gameFullPath)
+        private static bool IsMultiDiskPattern1(string gameFullPath)
         {
             int n;
             return Regex.IsMatch(gameFullPath, @"Disk(\d{1})\....$") &&

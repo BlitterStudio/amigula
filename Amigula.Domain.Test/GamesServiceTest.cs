@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 using Amigula.Domain.Services;
@@ -376,6 +377,19 @@ namespace Amigula.Domain.Test
             var enumerable = result as IList<string> ?? result.ToList();
             Assert.AreEqual(enumerable.Count(), 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
+        }
+
+        [TestMethod]
+        public void AddGameScreenshot_GameFilename_ReturnsOperationResult()
+        {
+            const string screenshot = "Screenshot1.png";
+            const string gameTitle = "Apidya";
+
+            var result = _gamesService.AddGameScreenshot(gameTitle, screenshot);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(OperationResult));
+            Assert.IsTrue(result.Success);
         }
     }
 }

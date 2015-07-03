@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
+using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -262,6 +263,56 @@ namespace Amigula.Domain.Services
                    int.TryParse(
                        gameFullPath.Substring(
                            gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 1), out n);
+        }
+
+        public OperationResult AddGameScreenshot(string gameTitle, string screenshot)
+        {
+            var gameSubFolder = DetermineTitleSubfolder(gameTitle);
+
+            var renamedScreenshot = RenameNewScreenshotFilename(gameTitle);
+            var destination = BuildDestinationPath(gameSubFolder, renamedScreenshot);
+
+            var result = _gamesRepository.CopyFileInPlace(screenshot, destination);
+
+            return result;
+
+            //if (!Directory.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder)))
+            //    Directory.CreateDirectory(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder));
+        }
+
+        private string BuildDestinationPath(string gameSubFolder, string renamedScreenshot)
+        {
+            var combinedPath = Path.Combine(gameSubFolder, gameSubFolder);
+            return combinedPath;
+        }
+
+        private string RenameNewScreenshotFilename(string gameTitle)
+        {
+            throw new NotImplementedException();
+            //if (
+            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
+            //        gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))
+            //{
+            //    File.Copy(screenshotFilename,
+            //        Path.Combine(Settings.Default.ScreenshotsPath,
+            //            gameSubFolder + gameTitle.Replace(" ", "_") + ".png"));
+            //}
+            //else if (
+            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
+            //        gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png")))
+            //{
+            //    File.Copy(screenshotFilename,
+            //        Path.Combine(Settings.Default.ScreenshotsPath,
+            //            gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png"));
+            //}
+            //else if (
+            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
+            //        gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png")))
+            //{
+            //    File.Copy(screenshotFilename,
+            //        Path.Combine(Settings.Default.ScreenshotsPath,
+            //            gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png"));
+            //}
         }
     }
 }

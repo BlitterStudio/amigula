@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\OperationResult.cs" />
     <Compile Include="DTO\EmulatorDto.cs" />
     <Compile Include="DTO\GameScreenshotsDto.cs" />
     <Compile Include="DTO\GamesDto.cs" />

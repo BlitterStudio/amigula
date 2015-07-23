@@ -269,7 +269,7 @@ namespace Amigula.Domain.Services
         {
             var gameSubFolder = DetermineTitleSubfolder(gameTitle);
 
-            var renamedScreenshot = RenameNewScreenshotFilename(gameTitle);
+            var renamedScreenshot = RenameNewScreenshotFilename(gameTitle, screenshot);
             var destination = BuildDestinationPath(gameSubFolder, renamedScreenshot);
 
             var result = _gamesRepository.CopyFileInPlace(screenshot, destination);
@@ -282,11 +282,11 @@ namespace Amigula.Domain.Services
 
         private string BuildDestinationPath(string gameSubFolder, string renamedScreenshot)
         {
-            var combinedPath = Path.Combine(gameSubFolder, gameSubFolder);
+            var combinedPath = Path.Combine(gameSubFolder, renamedScreenshot);
             return combinedPath;
         }
 
-        private string RenameNewScreenshotFilename(string gameTitle)
+        private string RenameNewScreenshotFilename(string gameTitle, string screenshot)
         {
             throw new NotImplementedException();
             //if (

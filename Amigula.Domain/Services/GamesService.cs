@@ -289,6 +289,16 @@ namespace Amigula.Domain.Services
         private string RenameNewScreenshotFilename(string gameTitle, string screenshot)
         {
             throw new NotImplementedException();
+
+            // use gametitle + .png as the screenshot name
+            // test if that filename already exists
+            // if it does, change the screenshot name to gametitle + _1.png
+            // test if that filename already exists
+            // if it does, change the screenshot name to gametitle + _2.png
+            // test if that filename already exists
+            // if it still does, then report an error
+
+
             //if (
             //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
             //        gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))

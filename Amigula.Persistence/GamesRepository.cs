@@ -24,18 +24,18 @@ namespace Amigula.Persistence
 
         public OperationResult CopyFileInPlace(string screenshot, string destination)
         {
-            if (ScreenshotPathDoesNotExist(destination))
-                CreateScreenshotPath(destination);
+            if (PathDoesNotExist(destination))
+                CreatePath(destination);
 
             throw new NotImplementedException();
         }
 
-        private void CreateScreenshotPath(string destination)
+        private void CreatePath(string destination)
         {
             throw new NotImplementedException();
         }
 
-        private bool ScreenshotPathDoesNotExist(string destination)
+        private bool PathDoesNotExist(string destination)
         {
             throw new NotImplementedException();
         }

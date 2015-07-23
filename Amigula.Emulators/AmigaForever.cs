@@ -6,7 +6,7 @@ using Amigula.Domain.Helpers;
 using Amigula.Domain.Interfaces;
 using Microsoft.Win32;
 
-namespace Amigula.AmigaForeverRepository
+namespace Amigula.Emulators
 {
     public class AmigaForever : IEmulatorRepository
     {

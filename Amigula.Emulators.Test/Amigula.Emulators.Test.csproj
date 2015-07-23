@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0A20DBD8-F65D-47A2-AC6A-E5CB86278826}</ProjectGuid>
+    <ProjectGuid>{697AA59E-2967-42C1-84EB-64B60E290D0A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Amigula.AmigaForeverRepository.Test</RootNamespace>
-    <AssemblyName>Amigula.AmigaForeverRepository.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <RootNamespace>Amigula.Emulators.Test</RootNamespace>
+    <AssemblyName>Amigula.Emulators.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -50,12 +50,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AmigaForeverTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Amigula.Domain\Amigula.Domain.csproj">
       <Project>{895461f0-3501-4cec-b398-9d5457c58236}</Project>
       <Name>Amigula.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Amigula.Emulators\Amigula.Emulators.csproj">
+      <Project>{332b3be1-347e-43c8-b444-d915f6820ecf}</Project>
+      <Name>Amigula.Emulators</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

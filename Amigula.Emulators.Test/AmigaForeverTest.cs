@@ -1,7 +1,7 @@
 using Amigula.Domain.DTO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Amigula.AmigaForeverRepository.Test
+namespace Amigula.Emulators.Test
 {
     [TestClass]
     public class AmigaForeverTest

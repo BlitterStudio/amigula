@@ -17,12 +17,12 @@ namespace Amigula.Persistence
             throw new NotImplementedException();
         }
 
-        public bool FilenameExists(string gameFullPath)
+        public bool FilenameExists(string filenameFullPath)
         {
-            return File.Exists(gameFullPath);
+            return File.Exists(filenameFullPath);
         }
 
-        public OperationResult CopyFileInPlace(string screenshot, string destination)
+        public OperationResult CopyFileInPlace(string filename, string destination)
         {
             if (PathDoesNotExist(destination))
                 CreatePath(destination);
@@ -36,6 +36,11 @@ namespace Amigula.Persistence
         }
 
         private bool PathDoesNotExist(string destination)
+        {
+            throw new NotImplementedException();
+        }
+
+        public OperationResult RenameFile(string oldFilename, string newFilename)
         {
             throw new NotImplementedException();
         }

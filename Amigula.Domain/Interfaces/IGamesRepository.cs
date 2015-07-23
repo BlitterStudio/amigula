@@ -12,7 +12,8 @@ namespace Amigula.Domain.Interfaces
     {
         IEnumerable<GamesDto> GetGamesList();
 
-        bool FilenameExists(string gameFullPath);
-        OperationResult CopyFileInPlace(string screenshot, string destination);
+        bool FilenameExists(string filenameFullPath);
+        OperationResult CopyFileInPlace(string filename, string destination);
+        OperationResult RenameFile(string oldFilename, string newFilename);
     }
 }

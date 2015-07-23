@@ -311,6 +311,14 @@ namespace Amigula.Domain.Services
                 }
             }
 
+            if (ScreenshotFileExists(renamedScreenshot))
+            {
+                // error! The filename already exists even after attempting to increment the numbering!
+            }
+            else
+            {
+                _gamesRepository.RenameFile(screenshot, renamedScreenshot);
+            }
 
             throw new NotImplementedException();
             //if (

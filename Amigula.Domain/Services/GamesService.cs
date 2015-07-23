@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Text.RegularExpressions;
 using Amigula.Domain.Classes;
@@ -11,6 +12,9 @@ namespace Amigula.Domain.Services
     public class GamesService
     {
         private readonly IGamesRepository _gamesRepository;
+        
+        // TODO The below must be stored in the Settings
+        private readonly string _screenshotsPath = @"C:\GameBase\Screenshots";
 
         public GamesService(IGamesRepository gamesRepository)
         {
@@ -288,8 +292,6 @@ namespace Amigula.Domain.Services
 
         private string RenameNewScreenshotFilename(string gameTitle, string screenshot)
         {
-            throw new NotImplementedException();
-
             // use gametitle + .png as the screenshot name
             // test if that filename already exists
             // if it does, change the screenshot name to gametitle + _1.png
@@ -298,7 +300,19 @@ namespace Amigula.Domain.Services
             // test if that filename already exists
             // if it still does, then report an error
 
+            var renamedScreenshot = $"{gameTitle}.png";
 
+            if (ScreenshotFileExists(renamedScreenshot))
+            {
+                for (int i = 1; i < 3; i++)
+                {
+                    renamedScreenshot = $"{gameTitle}_{i}.png";
+                    if (!ScreenshotFileExists(renamedScreenshot)) break;
+                }
+            }
+
+
+            throw new NotImplementedException();
             //if (
             //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
             //        gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))
@@ -323,6 +337,13 @@ namespace Amigula.Domain.Services
             //        Path.Combine(Settings.Default.ScreenshotsPath,
             //            gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png"));
             //}
+        }
+
+        private bool ScreenshotFileExists(string filename)
+        {
+            var titleSubFolder = DetermineTitleSubfolder(filename);
+            var fullpath = Path.Combine(_screenshotsPath, titleSubFolder, filename);
+            return _gamesRepository.FilenameExists(fullpath);
         }
     }
 }

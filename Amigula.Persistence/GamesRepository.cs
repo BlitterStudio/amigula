@@ -32,6 +32,8 @@ namespace Amigula.Persistence
 
         private void CreatePath(string destination)
         {
+            //if (!Directory.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder)))
+            //    Directory.CreateDirectory(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder));
             throw new NotImplementedException();
         }
 

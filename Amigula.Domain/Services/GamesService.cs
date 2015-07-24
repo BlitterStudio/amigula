@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.IO;
 using System.Text.RegularExpressions;
-using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -12,9 +9,6 @@ namespace Amigula.Domain.Services
     public class GamesService
     {
         private readonly IGamesRepository _gamesRepository;
-        
-        // TODO The below must be stored in the Settings
-        private readonly string _screenshotsPath = @"C:\GameBase\Screenshots";
 
         public GamesService(IGamesRepository gamesRepository)
         {
@@ -25,97 +19,6 @@ namespace Amigula.Domain.Services
         {
             var gamesDto = _gamesRepository.GetGamesList();
             return gamesDto;
-        }
-
-        public GameScreenshotsDto PrepareTitleScreenshot(string gameTitle)
-        {
-            var result = new GameScreenshotsDto();
-            if (string.IsNullOrEmpty(gameTitle)) return result;
-
-            result.GameFolder = DetermineTitleSubfolder(gameTitle);
-            result.Title = CleanGameTitle(gameTitle);
-
-            result.Screenshot1 = DetermineTitleScreenshot(result.Title, 1);
-            result.Screenshot2 = DetermineTitleScreenshot(result.Title, 2);
-            result.Screenshot3 = DetermineTitleScreenshot(result.Title, 3);
-
-            return result;
-        }
-
-        /// <summary>
-        ///     Remove version information and anything with () or [] from title
-        /// </summary>
-        /// <param name="gameTitle"></param>
-        /// <returns>Cleaned up Title</returns>
-        private static string CleanGameTitle(string gameTitle)
-        {
-            // Remove anything in the title containing () or []
-            gameTitle = Regex.Replace(gameTitle, @"[\[(].+?[\])]", "");
-
-            // if there's version information (e.g. v1.2) in the filename remove it as well
-            if (Regex.IsMatch(gameTitle, @"\sv(\d{1})"))
-            {
-                gameTitle = gameTitle.Substring(0,
-                    gameTitle.IndexOf(" v",
-                        StringComparison
-                            .OrdinalIgnoreCase));
-            }
-            return gameTitle;
-        }
-
-        /// <summary>
-        ///     Get the first letter of the game title, to get the subfolder from that.
-        ///     if the first letter is a number, the subfolder should be set to "0"
-        ///     in both scenarios we add 2 backslashes at the end, since this is a path.
-        /// </summary>
-        /// <param name="gameTitle"></param>
-        /// <returns>Game Screenshot Folder</returns>
-        private static string DetermineTitleSubfolder(string gameTitle)
-        {
-            int n;
-            if (int.TryParse(gameTitle.Substring(0, 1), out n))
-                return "0\\";
-            return gameTitle.Substring(0, 1) + "\\";
-        }
-
-        /// <summary>
-        ///     Replace spaces with underscores, adding ".png" at the end
-        /// </summary>
-        /// <param name="gameTitle"></param>
-        /// <param name="screenshotNumber"></param>
-        /// <returns></returns>
-        private static string DetermineTitleScreenshot(string gameTitle, int screenshotNumber)
-        {
-            // Screenshot 1 does not get any numbering,
-            // Screenshot 2 gets the suffix _1.png,
-            // Screenshot 3 gets the suffix _2.png
-
-            var suffix = ".png";
-
-            if (screenshotNumber == 2) suffix = "_1" + suffix;
-            if (screenshotNumber == 3) suffix = "_2" + suffix;
-
-            return Regex.Replace(gameTitle, " $", "")
-                .Replace(" ", "_") + suffix;
-        }
-
-        /// <summary>
-        ///     Prepare the title for using it as a parameter in a URL, replace spaces with "%20".
-        /// </summary>
-        /// <param name="gameTitle"></param>
-        /// <returns></returns>
-        public string PrepareTitleUrl(string gameTitle)
-        {
-            if (string.IsNullOrEmpty(gameTitle)) return "";
-
-            var cleanedGameTitle = CleanGameTitle(gameTitle);
-
-            if (cleanedGameTitle.Length > 0)
-                cleanedGameTitle = cleanedGameTitle
-                    .TrimEnd(' ')
-                    .Replace(" ", "%20");
-
-            return cleanedGameTitle;
         }
 
         /// <summary>
@@ -267,91 +170,6 @@ namespace Amigula.Domain.Services
                    int.TryParse(
                        gameFullPath.Substring(
                            gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 1), out n);
-        }
-
-        public OperationResult AddGameScreenshot(string gameTitle, string screenshot)
-        {
-            var gameSubFolder = DetermineTitleSubfolder(gameTitle);
-
-            var renamedScreenshot = RenameNewScreenshotFilename(gameTitle, screenshot);
-            var destination = BuildDestinationPath(gameSubFolder, renamedScreenshot);
-
-            var result = _gamesRepository.CopyFileInPlace(screenshot, destination);
-
-            return result;
-
-            //if (!Directory.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder)))
-            //    Directory.CreateDirectory(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder));
-        }
-
-        private string BuildDestinationPath(string gameSubFolder, string renamedScreenshot)
-        {
-            var combinedPath = Path.Combine(gameSubFolder, renamedScreenshot);
-            return combinedPath;
-        }
-
-        private string RenameNewScreenshotFilename(string gameTitle, string screenshot)
-        {
-            // use gametitle + .png as the screenshot name
-            // test if that filename already exists
-            // if it does, change the screenshot name to gametitle + _1.png
-            // test if that filename already exists
-            // if it does, change the screenshot name to gametitle + _2.png
-            // test if that filename already exists
-            // if it still does, then report an error
-
-            var renamedScreenshot = $"{gameTitle}.png";
-
-            if (ScreenshotFileExists(renamedScreenshot))
-            {
-                for (int i = 1; i < 3; i++)
-                {
-                    renamedScreenshot = $"{gameTitle}_{i}.png";
-                    if (!ScreenshotFileExists(renamedScreenshot)) break;
-                }
-            }
-
-            if (ScreenshotFileExists(renamedScreenshot))
-            {
-                // error! The filename already exists even after attempting to increment the numbering!
-            }
-            else
-            {
-                _gamesRepository.RenameFile(screenshot, renamedScreenshot);
-            }
-
-            throw new NotImplementedException();
-            //if (
-            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-            //        gameSubFolder + gameTitle.Replace(" ", "_") + ".png")))
-            //{
-            //    File.Copy(screenshotFilename,
-            //        Path.Combine(Settings.Default.ScreenshotsPath,
-            //            gameSubFolder + gameTitle.Replace(" ", "_") + ".png"));
-            //}
-            //else if (
-            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-            //        gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png")))
-            //{
-            //    File.Copy(screenshotFilename,
-            //        Path.Combine(Settings.Default.ScreenshotsPath,
-            //            gameSubFolder + gameTitle.Replace(" ", "_") + "_1.png"));
-            //}
-            //else if (
-            //    !File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
-            //        gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png")))
-            //{
-            //    File.Copy(screenshotFilename,
-            //        Path.Combine(Settings.Default.ScreenshotsPath,
-            //            gameSubFolder + gameTitle.Replace(" ", "_") + "_2.png"));
-            //}
-        }
-
-        private bool ScreenshotFileExists(string filename)
-        {
-            var titleSubFolder = DetermineTitleSubfolder(filename);
-            var fullpath = Path.Combine(_screenshotsPath, titleSubFolder, filename);
-            return _gamesRepository.FilenameExists(fullpath);
         }
     }
 }

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Amigula.Domain.Services
 {
     public class YoutubeService
     {
         /// <summary>
-        /// Checks if the specified URL exists.
+        ///     Checks if the specified URL exists.
         /// </summary>
         /// <param name="url">The URL.</param>
         /// <returns></returns>
@@ -53,11 +49,11 @@ namespace Amigula.Domain.Services
         private static bool IsValidUri(string url)
         {
             Uri uriResult;
-            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out uriResult) ;
+            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out uriResult);
             if (isValidUri)
             {
-                isValidUri =  uriResult.Scheme == Uri.UriSchemeHttp ||
-                               uriResult.Scheme == Uri.UriSchemeHttps;
+                isValidUri = uriResult.Scheme == Uri.UriSchemeHttp ||
+                             uriResult.Scheme == Uri.UriSchemeHttps;
             }
 
             return isValidUri;
@@ -65,7 +61,7 @@ namespace Amigula.Domain.Services
 
         private static string BuildHttpUri(string uri)
         {
-            return string.Format("{0}{1}{2}/", Uri.UriSchemeHttp, Uri.SchemeDelimiter, uri);
+            return $"{Uri.UriSchemeHttp}{Uri.SchemeDelimiter}{uri}/";
         }
     }
 }

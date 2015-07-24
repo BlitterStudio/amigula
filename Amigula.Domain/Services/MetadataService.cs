@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Amigula.Domain.Interfaces;
 using HtmlAgilityPack;
@@ -65,6 +66,26 @@ namespace Amigula.Domain.Services
                 int.TryParse(Regex.Replace(Regex.Match(selectedGamePath, @"\((\d{4})\)").Value, @"\(|\)", ""),
                     out gameYear);
             return gameYear;
+        }
+
+        public void LookupUrl(string gameTitle, string website)
+        {
+            if (string.IsNullOrEmpty(gameTitle)) return;
+            switch (website)
+            {
+                case "HOL":
+                {
+                    const string targetUrl = @"http://hol.abime.net/hol_search.php?find=";
+                    Process.Start(targetUrl + gameTitle);
+                    break;
+                }
+                case "LemonAmiga":
+                {
+                    const string targetUrl = @"http://www.lemonamiga.com/games/list.php?list_letter=";
+                    Process.Start(targetUrl + gameTitle);
+                    break;
+                }
+            }
         }
     }
 }

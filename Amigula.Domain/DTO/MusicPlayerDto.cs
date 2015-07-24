@@ -8,6 +8,6 @@ namespace Amigula.Domain.DTO
 {
     public class MusicPlayerDto
     {
-        public string MusicPlayerPath { get; set; }
+        public string PlayerPath { get; set; }
     }
 }

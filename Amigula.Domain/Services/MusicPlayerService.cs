@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -19,8 +20,14 @@ namespace Amigula.Domain.Services
 
         public MusicPlayerDto GetMusicPlayerPath()
         {
-            var musicPlayerPath = _playerRepository.GetMusicPlayerPath();
+            var musicPlayerPath = _playerRepository.GetPlayerPath();
             return musicPlayerPath;
+        }
+
+        public OperationResult PlayGameMusic(string gameTitle)
+        {
+            var playMusicResult = _playerRepository.PlayGameMusic(gameTitle);
+            return playMusicResult;
         }
     }
 }

@@ -12,15 +12,16 @@ namespace Amigula.Emulators
         public EmulatorDto GetEmulatorPaths()
         {
             var programFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-            var getCommonDocumentsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
+            var commonDocumentsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
             var emulatorPathValues = new EmulatorDto();
 
             if (Directory.Exists(Path.Combine(programFilesPath, "WinUAE")))
             {
                 // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
                 emulatorPathValues.EmulatorPath = Path.Combine(programFilesPath, "WinUAE\\WinUAE.exe");
-                if (Directory.Exists(Path.Combine(getCommonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
-                    emulatorPathValues.ConfigurationFilesPath = Path.Combine(getCommonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
+
+                if (Directory.Exists(Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
+                    emulatorPathValues.ConfigurationFilesPath = Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
                 else if (Directory.Exists(Path.Combine(programFilesPath, "WinUAE\\Configurations")))
                     emulatorPathValues.ConfigurationFilesPath = Path.Combine(programFilesPath, "WinUAE\\Configurations");
             }
@@ -29,13 +30,13 @@ namespace Amigula.Emulators
             {
                 var programFilesPath32 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 
-                if (
-                    Directory.Exists(Path.Combine(programFilesPath32, "WinUAE")))
+                if (Directory.Exists(Path.Combine(programFilesPath32, "WinUAE")))
                 {
                     // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
                     emulatorPathValues.EmulatorPath = Path.Combine(programFilesPath32, "WinUAE\\WinUAE.exe");
-                    if (Directory.Exists(Path.Combine(getCommonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
-                        emulatorPathValues.ConfigurationFilesPath = Path.Combine(getCommonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
+
+                    if (Directory.Exists(Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
+                        emulatorPathValues.ConfigurationFilesPath = Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
                     else if (Directory.Exists(Path.Combine(programFilesPath32, "WinUAE\\Configurations")))
                         emulatorPathValues.ConfigurationFilesPath = Path.Combine(programFilesPath32, "WinUAE\\Configurations");
                 }

@@ -32,7 +32,7 @@ namespace Amigula.Domain.Test
             var result = _screenshotsService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof(ScreenshotsDto));
             Assert.AreEqual(result.Title, "Apidya");
             Assert.AreEqual(result.Screenshot1, "Apidya.png");
             Assert.AreEqual(result.Screenshot2, "Apidya_1.png");
@@ -48,7 +48,7 @@ namespace Amigula.Domain.Test
             var result = _screenshotsService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof(ScreenshotsDto));
             Assert.AreEqual(result.Title, "International Karate Plus");
             Assert.AreEqual(result.Screenshot1, "International_Karate_Plus.png");
             Assert.AreEqual(result.Screenshot2, "International_Karate_Plus_1.png");
@@ -64,7 +64,7 @@ namespace Amigula.Domain.Test
             var result = _screenshotsService.PrepareTitleScreenshot(gameTitle);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof(ScreenshotsDto));
             Assert.AreEqual(result.Title, "1942");
             Assert.AreEqual(result.Screenshot1, "1942.png");
             Assert.AreEqual(result.Screenshot2, "1942_1.png");
@@ -78,7 +78,7 @@ namespace Amigula.Domain.Test
             var result = _screenshotsService.PrepareTitleScreenshot(null);
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(GameScreenshotsDto));
+            Assert.IsInstanceOfType(result, typeof(ScreenshotsDto));
             Assert.IsNull(result.Title);
             Assert.IsNull(result.Screenshot1);
             Assert.IsNull(result.Screenshot2);

@@ -6,12 +6,12 @@ namespace Amigula.Domain.Test
     [TestClass]
     public class YoutubeServiceTest
     {
-        private YoutubeService _youtubeService;
+        private VideoService _youtubeService;
 
         [TestInitialize]
         public void Initialize()
         {
-            _youtubeService = new YoutubeService();
+            _youtubeService = new VideoService();
         }
 
         [TestMethod]

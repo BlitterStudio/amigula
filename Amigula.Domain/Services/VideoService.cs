@@ -1,10 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using Amigula.Domain.DTO;
+using Amigula.Domain.Interfaces;
 
 namespace Amigula.Domain.Services
 {
-    public class YoutubeService
+    public class VideoService
     {
+        private const string AmigaLongplayKeyword = @"Amiga Longplay ";
+        private readonly IVideoRepository _videoRepository;
+
+        public VideoService(IVideoRepository videoRepository)
+        {
+            _videoRepository = videoRepository;
+        }
+
+        public IEnumerable<VideoDto> GetVideos(string title)
+        {
+            if (string.IsNullOrEmpty(title)) return new List<VideoDto>();
+            var searchKeyword = AmigaLongplayKeyword + title;
+            var videos = _videoRepository.GetVideos(searchKeyword);
+            return videos;
+        }
+
+        public string GetEmbeddedVideo(IEnumerable<VideoDto> videos)
+        {
+            var videoDtos = videos as IList<VideoDto> ?? videos.ToList();
+            var firstVideo = videoDtos.FirstOrDefault();
+
+            return firstVideo?.EmbedUrl;
+        }
+
         /// <summary>
         ///     Checks if the specified URL exists.
         /// </summary>

@@ -19,9 +19,9 @@ namespace Amigula.Domain.Services
             _fileOperations = fileOperations;
         }
 
-        public GameScreenshotsDto PrepareTitleScreenshot(string gameTitle)
+        public ScreenshotsDto PrepareTitleScreenshot(string gameTitle)
         {
-            var result = new GameScreenshotsDto();
+            var result = new ScreenshotsDto();
             if (string.IsNullOrEmpty(gameTitle)) return result;
 
             result.GameFolder = DetermineTitleSubfolder(gameTitle);

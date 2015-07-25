@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Amigula.Domain.DTO
 {
-    public class GameScreenshotsDto
+    public class ScreenshotsDto
     {
         public string Title { get; set; }
         public string GameFolder { get; set; }

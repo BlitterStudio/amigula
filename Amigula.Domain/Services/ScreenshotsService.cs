@@ -8,13 +8,13 @@ namespace Amigula.Domain.Services
 {
     public class ScreenshotsService
     {
-        private readonly IGamesRepository _gamesRepository;
         // TODO The below must be stored in the Settings
         private readonly string _screenshotsPath = @"C:\GameBase\Screenshots";
+        private readonly IScreenshotsRepository _screenshotsRepository;
 
-        public ScreenshotsService(IGamesRepository gamesRepository)
+        public ScreenshotsService(IScreenshotsRepository screenshotsRepository)
         {
-            _gamesRepository = gamesRepository;
+            _screenshotsRepository = screenshotsRepository;
         }
 
         public GameScreenshotsDto PrepareTitleScreenshot(string gameTitle)
@@ -73,12 +73,18 @@ namespace Amigula.Domain.Services
             var renamedScreenshotFile = CreateScreenshotFilename(gameTitle, screenshot);
             if (renamedScreenshotFile != screenshot)
             {
-                _gamesRepository.CopyFileInPlace(screenshot, GetFullPath(screenshot));
-                _gamesRepository.RenameFile(screenshot, renamedScreenshotFile);
+                _screenshotsRepository.CopyFileInPlace(screenshot, GetFullPath(screenshot));
+                _screenshotsRepository.RenameFile(screenshot, renamedScreenshotFile);
                 return new OperationResult {Success = true};
             }
 
             return new OperationResult {Success = false, Information = "Could not add new Screenshot for game!"};
+        }
+
+        public OperationResult Delete(string screenshot)
+        {
+            var result = _screenshotsRepository.Delete(screenshot);
+            return result;
         }
 
         private string CreateScreenshotFilename(string gameTitle, string screenshot)
@@ -108,7 +114,7 @@ namespace Amigula.Domain.Services
         private bool ScreenshotFileExists(string filename)
         {
             var fullpath = GetFullPath(filename);
-            return _gamesRepository.FilenameExists(fullpath);
+            return _screenshotsRepository.FilenameExists(fullpath);
         }
 
         private string GetFullPath(string filename)

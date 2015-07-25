@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -13,36 +8,6 @@ namespace Amigula.Persistence
     public class GamesRepository : IGamesRepository
     {
         public IEnumerable<GamesDto> GetGamesList()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool FilenameExists(string filenameFullPath)
-        {
-            return File.Exists(filenameFullPath);
-        }
-
-        public OperationResult CopyFileInPlace(string filename, string destination)
-        {
-            if (PathDoesNotExist(destination))
-                CreatePath(destination);
-
-            throw new NotImplementedException();
-        }
-
-        private void CreatePath(string destination)
-        {
-            //if (!Directory.Exists(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder)))
-            //    Directory.CreateDirectory(Path.Combine(Settings.Default.ScreenshotsPath, gameSubFolder));
-            throw new NotImplementedException();
-        }
-
-        private bool PathDoesNotExist(string destination)
-        {
-            throw new NotImplementedException();
-        }
-
-        public OperationResult RenameFile(string oldFilename, string newFilename)
         {
             throw new NotImplementedException();
         }

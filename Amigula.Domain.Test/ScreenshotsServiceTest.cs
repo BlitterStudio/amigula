@@ -11,15 +11,17 @@ namespace Amigula.Domain.Test
     [TestClass]
     public class ScreenshotsServiceTest
     {
-        private IGamesRepository _gamesRepository;
+        private IScreenshotsRepository _screenshotsRepository;
+        private IFileOperations _fileOperations;
         private ScreenshotsService _screenshotsService;
 
         [TestInitialize]
         public void Initialize()
         {
-            _gamesRepository = A.Fake<IGamesRepository>();
+            _screenshotsRepository = A.Fake<IScreenshotsRepository>();
+            _fileOperations = A.Fake<IFileOperations>();
 
-            _screenshotsService = new ScreenshotsService(_gamesRepository);
+            _screenshotsService = new ScreenshotsService(_screenshotsRepository, _fileOperations);
         }
 
         [TestMethod]

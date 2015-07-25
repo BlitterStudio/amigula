@@ -11,10 +11,12 @@ namespace Amigula.Domain.Services
         // TODO The below must be stored in the Settings
         private readonly string _screenshotsPath = @"C:\GameBase\Screenshots";
         private readonly IScreenshotsRepository _screenshotsRepository;
+        private readonly IFileOperations _fileOperations;
 
-        public ScreenshotsService(IScreenshotsRepository screenshotsRepository)
+        public ScreenshotsService(IScreenshotsRepository screenshotsRepository, IFileOperations fileOperations)
         {
             _screenshotsRepository = screenshotsRepository;
+            _fileOperations = fileOperations;
         }
 
         public GameScreenshotsDto PrepareTitleScreenshot(string gameTitle)
@@ -73,8 +75,8 @@ namespace Amigula.Domain.Services
             var renamedScreenshotFile = CreateScreenshotFilename(gameTitle, screenshot);
             if (renamedScreenshotFile != screenshot)
             {
-                _screenshotsRepository.CopyFileInPlace(screenshot, GetFullPath(screenshot));
-                _screenshotsRepository.RenameFile(screenshot, renamedScreenshotFile);
+                _fileOperations.CopyFileInPlace(screenshot, GetFullPath(screenshot));
+                _fileOperations.RenameFile(screenshot, renamedScreenshotFile);
                 return new OperationResult {Success = true};
             }
 
@@ -83,7 +85,7 @@ namespace Amigula.Domain.Services
 
         public OperationResult Delete(string screenshot)
         {
-            var result = _screenshotsRepository.Delete(screenshot);
+            var result = _fileOperations.Delete(screenshot);
             return result;
         }
 
@@ -114,7 +116,7 @@ namespace Amigula.Domain.Services
         private bool ScreenshotFileExists(string filename)
         {
             var fullpath = GetFullPath(filename);
-            return _screenshotsRepository.FilenameExists(fullpath);
+            return _fileOperations.FilenameExists(fullpath);
         }
 
         private string GetFullPath(string filename)

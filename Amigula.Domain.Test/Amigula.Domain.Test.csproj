@@ -65,12 +65,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="GamesServiceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EmulatorServiceTest.cs" />
-    <Compile Include="ScreenshotsServiceTest.cs" />
-    <Compile Include="GameTitleServiceTest.cs" />
-    <Compile Include="YoutubeServiceTest.cs" />
+    <Compile Include="Services\EmulatorServiceTest.cs" />
+    <Compile Include="Services\GamesServiceTest.cs" />
+    <Compile Include="Services\GameTitleServiceTest.cs" />
+    <Compile Include="Services\ScreenshotsServiceTest.cs" />
+    <Compile Include="Services\VideoServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Amigula.Domain\Amigula.Domain.csproj">
@@ -81,6 +81,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

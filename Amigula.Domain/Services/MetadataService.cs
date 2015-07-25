@@ -36,7 +36,7 @@ namespace Amigula.Domain.Services
         /// </summary>
         /// <param name="selectedGamePath">The selected game filename</param>
         /// <returns></returns>
-        public int GetGameYear(string selectedGamePath)
+        public int GetYearFromFilename(string selectedGamePath)
         {
             // Try to get the game Year from the filename
             // e.g. gameTitle (1988) (Psygnosis).zip should return 1988 as gameYear

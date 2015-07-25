@@ -1,27 +1,24 @@
-﻿using System;
-using Amigula.Domain.Classes;
+﻿using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 using Amigula.Domain.Services;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Amigula.Domain.Test
+namespace Amigula.Domain.Test.Services
 {
     [TestClass]
     public class ScreenshotsServiceTest
     {
         private IScreenshotsRepository _screenshotsRepository;
-        private IFileOperations _fileOperations;
         private ScreenshotsService _screenshotsService;
 
         [TestInitialize]
         public void Initialize()
         {
             _screenshotsRepository = A.Fake<IScreenshotsRepository>();
-            _fileOperations = A.Fake<IFileOperations>();
 
-            _screenshotsService = new ScreenshotsService(_screenshotsRepository, _fileOperations);
+            _screenshotsService = new ScreenshotsService(_screenshotsRepository);
         }
 
         [TestMethod]
@@ -92,7 +89,7 @@ namespace Amigula.Domain.Test
             const string screenshot = "Screenshot1.png";
             const string gameTitle = "Apidya";
 
-            var result = _screenshotsService.AddGameScreenshot(gameTitle, screenshot);
+            var result = _screenshotsService.Add(gameTitle, screenshot);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(OperationResult));

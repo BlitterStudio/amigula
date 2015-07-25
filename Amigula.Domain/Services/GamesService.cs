@@ -8,8 +8,8 @@ namespace Amigula.Domain.Services
 {
     public class GamesService
     {
-        private readonly IGamesRepository _gamesRepository;
         private readonly IFileOperations _fileOperations;
+        private readonly IGamesRepository _gamesRepository;
 
         public GamesService(IGamesRepository gamesRepository, IFileOperations fileOperations)
         {

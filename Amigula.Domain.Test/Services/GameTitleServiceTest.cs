@@ -1,8 +1,7 @@
-﻿using System;
-using Amigula.Domain.Services;
+﻿using Amigula.Domain.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Amigula.Domain.Test
+namespace Amigula.Domain.Test.Services
 {
     [TestClass]
     public class GameTitleServiceTest

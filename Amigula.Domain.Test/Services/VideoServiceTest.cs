@@ -1,17 +1,21 @@
-﻿using Amigula.Domain.Services;
+﻿using Amigula.Domain.Interfaces;
+using Amigula.Domain.Services;
+using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Amigula.Domain.Test
+namespace Amigula.Domain.Test.Services
 {
     [TestClass]
-    public class YoutubeServiceTest
+    public class VideoServiceTest
     {
         private VideoService _youtubeService;
+        private IVideoRepository _videoRepository;
 
         [TestInitialize]
         public void Initialize()
         {
-            _youtubeService = new VideoService();
+            _videoRepository = A.Fake<IVideoRepository>();
+            _youtubeService = new VideoService(_videoRepository);
         }
 
         [TestMethod]

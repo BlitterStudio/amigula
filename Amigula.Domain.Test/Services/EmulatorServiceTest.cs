@@ -4,7 +4,7 @@ using Amigula.Domain.Services;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Amigula.Domain.Test
+namespace Amigula.Domain.Test.Services
 {
     [TestClass]
     public class EmulatorServiceTest

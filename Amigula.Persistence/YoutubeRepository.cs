@@ -34,7 +34,8 @@ namespace Amigula.Persistence
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "ERROR");
+                //TODO Handle this with custom exception maybe
+                //MessageBox.Show(e.Message, "ERROR");
             }
             return null;
         }

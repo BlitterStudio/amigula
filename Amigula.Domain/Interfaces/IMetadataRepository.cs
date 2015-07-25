@@ -10,5 +10,8 @@ namespace Amigula.Domain.Interfaces
     public interface IMetadataRepository
     {
         string GetGameMetadata(string gameTitle);
+        string GetGenre(string gameTitle);
+        string GetPublisher(string gameTitle);
+        string GetYear(string gameTitle);
     }
 }

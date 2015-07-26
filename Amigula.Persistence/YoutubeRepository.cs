@@ -37,7 +37,7 @@ namespace Amigula.Persistence
                 //TODO Handle this with custom exception maybe
                 //MessageBox.Show(e.Message, "ERROR");
             }
-            return null;
+            return new List<VideoDto>();
         }
 
         /// <summary>

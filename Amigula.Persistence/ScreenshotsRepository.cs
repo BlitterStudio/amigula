@@ -47,7 +47,7 @@ namespace Amigula.Persistence
         {
             _fileOperations.CopyFileInPlace(screenshot, GetFullPath(screenshot));
             _fileOperations.RenameFile(screenshot, renamedScreenshot);
-            return new OperationResult { Success = true };
+            return new OperationResult { Success = true, Information = renamedScreenshot};
         }
 
         public OperationResult Delete(string screenshot)

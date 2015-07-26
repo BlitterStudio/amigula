@@ -68,7 +68,7 @@ namespace Amigula.Domain.Services
             var renamedScreenshot = CreateScreenshotFilename(gameTitle, screenshot);
             if (renamedScreenshot != screenshot)
             {
-                var result = _screenshotsRepository.Add(screenshot, renamedScreenshot);
+                var result = _screenshotsRepository.Add(gameTitle, renamedScreenshot);
                 return result;
             }
 

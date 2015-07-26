@@ -91,7 +91,7 @@ namespace Amigula.Domain.Test.Services
         {
             const string screenshot = "Screenshot1.png";
             const string gameTitle = "Apidya";
-            A.CallTo(() => _screenshotsRepository.Add(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _screenshotsRepository.Add(gameTitle, A<string>.Ignored))
                 .Returns(new OperationResult {Success = true});
 
             var result = _screenshotsService.Add(gameTitle, screenshot);
@@ -114,6 +114,59 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(OperationResult));
             Assert.IsFalse(result.Success);
+        }
+
+        [TestMethod]
+        public void AddScreenshot_NewFile_IteratesOnceReturnsSuccess()
+        {
+            const string screenshot = "Screenshot1.png";
+            const string gameTitle = "Apidya";
+            A.CallTo(() => _screenshotsRepository.ScreenshotFileExists(A<string>.Ignored))
+                .Returns(true)
+                .Once();
+            A.CallTo(() => _screenshotsRepository.Add(gameTitle, A<string>.Ignored))
+                .Returns(new OperationResult { Success = true , Information = "apidya_1.png"});
+
+            var result = _screenshotsService.Add(gameTitle, screenshot);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(OperationResult));
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual("apidya_1.png", result.Information);
+        }
+
+        [TestMethod]
+        public void AddScreenshot_NewFile_IteratesTwiceReturnsSuccess()
+        {
+            const string screenshot = "Screenshot1.png";
+            const string gameTitle = "Apidya";
+            A.CallTo(() => _screenshotsRepository.ScreenshotFileExists(A<string>.Ignored))
+                .Returns(true)
+                .Once();
+            A.CallTo(() => _screenshotsRepository.Add(gameTitle, A<string>.Ignored))
+                .Returns(new OperationResult { Success = true, Information = "apidya_2.png" });
+
+            var result = _screenshotsService.Add(gameTitle, screenshot);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(OperationResult));
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual("apidya_2.png", result.Information);
+        }
+
+        [TestMethod]
+        public void DeleteScreenshot_Filename_ReturnsSuccess()
+        {
+            const string screenshot = "Apidya_2.png";
+            A.CallTo(() => _screenshotsRepository.Delete(screenshot))
+                .Returns(new OperationResult { Success = true, Information = "apidya_2.png" });
+
+            var result = _screenshotsService.Delete(screenshot);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(OperationResult));
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual("apidya_2.png", result.Information);
         }
     }
 }

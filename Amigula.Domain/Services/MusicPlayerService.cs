@@ -18,7 +18,7 @@ namespace Amigula.Domain.Services
             _playerRepository = playerRepository;
         }
 
-        public MusicPlayerDto GetMusicPlayerPath()
+        public MusicPlayerDto GetPlayerPath()
         {
             var musicPlayerPath = _playerRepository.GetPlayerPath();
             return musicPlayerPath;

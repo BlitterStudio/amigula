@@ -71,6 +71,7 @@
     <Compile Include="Services\GameTitleServiceTest.cs" />
     <Compile Include="Services\ScreenshotsServiceTest.cs" />
     <Compile Include="Services\MusicPlayerServiceTest.cs" />
+    <Compile Include="Services\MetadataServiceTest.cs" />
     <Compile Include="Services\VideoServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>

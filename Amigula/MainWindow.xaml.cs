@@ -330,7 +330,7 @@ namespace Amigula
             get
             {
                 // Detect whether we're running on a 64-bit OS, change the registry scope accordingly
-                string rootKey = OSBitCheck.Is64BitOperatingSystem()
+                var rootKey = OSBitCheck.Is64BitOperatingSystem()
                     ? "SOFTWARE\\Wow6432Node\\CLoanto\\Amiga Forever"
                     : "SOFTWARE\\CLoanto\\Amiga Forever";
                 return rootKey;
@@ -358,7 +358,7 @@ namespace Amigula
             get
             {
                 // Set the Cancel click event as an observable so we can monitor it
-                IObservable<EventPattern<EventArgs>> cancelClicked = Observable.FromEventPattern<EventArgs>(btnCancel,
+                var cancelClicked = Observable.FromEventPattern<EventArgs>(btnCancel,
                     "Click");
                 return cancelClicked;
             }
@@ -398,7 +398,7 @@ namespace Amigula
         {
             // Show a warning that an application is not defined/selected in Preferences.
             // After that, allow the user to set the path to the application and save it in the Settings.
-            MessageBoxResult result = MessageBox.Show(messageText, "No Application Specified", MessageBoxButton.YesNo,
+            var result = MessageBox.Show(messageText, "No Application Specified", MessageBoxButton.YesNo,
                                                       MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
             var selectFile = new OpenFileDialog
@@ -408,7 +408,7 @@ namespace Amigula
                 Filter = "Executable files (*.exe)|*.exe"
             };
 
-            bool? appResult = selectFile.ShowDialog();
+            var appResult = selectFile.ShowDialog();
 
             // Process open file dialog box results
             if (appResult != true) return;
@@ -438,7 +438,7 @@ namespace Amigula
         {
             try
             {
-                IEnumerable<string> configFiles = Directory.EnumerateFiles(Settings.Default.UAEConfigsPath, "*.uae");
+                var configFiles = Directory.EnumerateFiles(Settings.Default.UAEConfigsPath, "*.uae");
                 _uaeConfigViewSource = configFiles.ToList();
             }
             catch (Exception ex)
@@ -527,21 +527,21 @@ namespace Amigula
                             for (var i = 0; i < gameDisksFullPath.Count; i++)
                             {
                                 // replace any entry of diskimageX=* (where X=number and *=anything)
-                                diskImageX[i] = "diskimage" + i + "=.*";
+                                diskImageX[i] = $"diskimage{i}=.*";
                                 // text to be placed in the UAE config for the DiskSwapper
-                                gameDisksFullPath[i] = "diskimage" + i + "=" + gameDisksFullPath[i];
+                                gameDisksFullPath[i] = $"diskimage{i}={gameDisksFullPath[i]}";
                             }
                             // cleanup any extra entries of diskimageX in the config file
                             for (var i = gameDisksFullPath.Count; i < 20; i++)
                             {
-                                diskImageX[i] = "diskimage" + i + "=.*";
-                                gameDisksFullPath[i] = "diskimage" + i + "=";
+                                diskImageX[i] = $"diskimage{i}=.*";
+                                gameDisksFullPath[i] = $"diskimage{i}=";
                             }
                             // open the UAE config, check if it contains any entries for "diskimage="
                             // if it does, replace them with the current disks of the selected game
                             // if it doesn't, append those lines to the config file
                             if (selectedUaeConfig == "default")
-                                FilesHelper.ReplaceInFile("configs\\" + selectedUaeConfig + ".uae", diskImageX,
+                                FilesHelper.ReplaceInFile($"configs\\{selectedUaeConfig}.uae", diskImageX,
                                     gameDisksFullPath);
                             else if (selectedUaeConfig != null)
                                 FilesHelper.ReplaceInFile(
@@ -600,7 +600,7 @@ namespace Amigula
         /// <returns></returns>
         private static bool ConfirmUserAction(string img)
         {
-            MessageBoxResult result =
+            var result =
                 MessageBox.Show("Are you sure? This will DELETE the following file from the Screenshots folder:\n\n" +
                                 img, "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
             return result == MessageBoxResult.Yes;
@@ -654,8 +654,8 @@ namespace Amigula
         /// <returns></returns>
         private static bool EnsureSingleInstance()
         {
-            Process currentProcess = Process.GetCurrentProcess();
-            Process runningProcess = (from process in Process.GetProcesses()
+            var currentProcess = Process.GetCurrentProcess();
+            var runningProcess = (from process in Process.GetProcesses()
                                       where
                                           process.Id != currentProcess.Id &&
                                           process.ProcessName.Equals(
@@ -765,10 +765,10 @@ namespace Amigula
                 do
                 {
                     //gameDisksFullPath[n] = selectedGamePath.Replace("Disk1","Disk"+n);
-                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + diskNumber + ".");
+                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", $"Disk{diskNumber}.");
                     n++;
                     diskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", "Disk" + diskNumber + ".")));
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk(\d{1})\.", $"Disk{diskNumber}.")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"Disk(\d{2})\....$") &&
@@ -805,10 +805,10 @@ namespace Amigula
                 do
                 {
                     gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof",
-                                                         "Disk " + diskNumber + " of");
+                        $"Disk {diskNumber} of");
                     n++;
                     diskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof", "Disk " + diskNumber + " of")));
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{1})\sof", $"Disk {diskNumber} of")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"Disk\s(\d{2})\sof\s(\d{2})") &&
@@ -824,12 +824,12 @@ namespace Amigula
                 do
                 {
                     gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"Disk\s(\d{2})\sof",
-                                                         "Disk " + diskNumber.ToString("00") + " of");
+                        $"Disk {diskNumber.ToString("00")} of");
                     n++;
                     diskNumber++;
                 } while (
                     File.Exists(Regex.Replace(selectedGamePath, @"Disk\s(\d{2})\sof",
-                                              "Disk " + diskNumber.ToString("00") + " of")));
+                        $"Disk {diskNumber.ToString("00")} of")));
                 return gameDisksFullPath;
             }
             if (Regex.IsMatch(selectedGamePath, @"-(\d{1})\....$"))
@@ -841,10 +841,10 @@ namespace Amigula
                 int diskNumber = 1;
                 do
                 {
-                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + diskNumber + ".");
+                    gameDisksFullPath[n] = Regex.Replace(selectedGamePath, @"-(\d{1})\.", $"-{diskNumber}.");
                     n++;
                     diskNumber++;
-                } while (File.Exists(Regex.Replace(selectedGamePath, @"-(\d{1})\.", "-" + diskNumber + ".")));
+                } while (File.Exists(Regex.Replace(selectedGamePath, @"-(\d{1})\.", $"-{diskNumber}.")));
                 return gameDisksFullPath;
             }
             else
@@ -1072,7 +1072,7 @@ namespace Amigula
                 if (File.Exists(Settings.Default.MusicPlayerPath))
                 {
                     // Need to check if file exists first
-                    string gameMusicFile = CleanGameTitle(currentgame, "Screenshot")
+                    var gameMusicFile = CleanGameTitle(currentgame, "Screenshot")
                         .Replace("_", " ")
                         .Replace(".png", ".zip");
                     if (string.IsNullOrEmpty(gameMusicFile)) return;
@@ -1248,7 +1248,7 @@ namespace Amigula
             // Load longplay video
             if (SelectedGameRowView == null) return;
             var longplayTitle = SelectedGameRowView.Row["Title"] as string;
-            var videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
+            var videos = YoutubeHelper.LoadVideosKey($"Amiga Longplay {longplayTitle}");
             if (videos == null || !videos.Any()) return;
             var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
             wbLongplay.Source = video;
@@ -2357,7 +2357,7 @@ namespace Amigula
                 try
                 {
                     Process.Start(Path.Combine(Environment.CurrentDirectory,
-                        "configs\\" + comboUAEconfig.SelectedValue + ".uae"));
+                        $"configs\\{comboUAEconfig.SelectedValue}.uae"));
                 }
                 catch (Exception ex)
                 {
@@ -2520,7 +2520,8 @@ namespace Amigula
         private void editMenu_EmptyLib_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result =
-                MessageBox.Show("Are you sure? This will DELETE all the entries from your database\n\n", "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBox.Show("Are you sure? This will DELETE all the entries from your database\n\n", 
+                "Please confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
             // Empty the games library DataSet and Database
             _amigulaDbDataSet.Clear();

@@ -31,7 +31,7 @@ namespace Amigula
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : IDisposable
+    public sealed partial class MainWindow : IDisposable
     {
         private static readonly ProgressBar ProgBar = new ProgressBar();
         private static List<string> _uaeConfigViewSource;
@@ -86,26 +86,15 @@ namespace Amigula
         }
 
         // The bulk of the clean-up code is implemented in Dispose(bool)
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                // free managed resources
-                if (_amigulaDbDataSetGamesTableAdapter != null)
-                {
-                    _amigulaDbDataSetGamesTableAdapter.Dispose();
-                }
+            if (!disposing) return;
+            // free managed resources
+            _amigulaDbDataSetGamesTableAdapter?.Dispose();
 
-                if (_amigulaDbDataSetGenresTableAdapter != null)
-                {
-                    _amigulaDbDataSetGenresTableAdapter.Dispose();
-                }
+            _amigulaDbDataSetGenresTableAdapter?.Dispose();
 
-                if (_amigulaDbDataSetPublishersTableAdapter != null)
-                {
-                    _amigulaDbDataSetPublishersTableAdapter.Dispose();
-                }
-            }
+            _amigulaDbDataSetPublishersTableAdapter?.Dispose();
         }
 
         ///
@@ -865,8 +854,7 @@ namespace Amigula
             else
             {
                 // if all else fails, return the one disked game back
-                var gameDisksFullPath = new SortedList<int, string>();
-                gameDisksFullPath[n] = selectedGamePath;
+                var gameDisksFullPath = new SortedList<int, string> {[n] = selectedGamePath};
                 return gameDisksFullPath;
             }
         }
@@ -953,9 +941,14 @@ namespace Amigula
             }
             else
             {
-                var tmpPath = Path.Combine(Path.GetDirectoryName(Settings.Default.EmulatorPath), "Configurations");
-                if (Directory.Exists(tmpPath))
-                    Settings.Default.UAEConfigsPath = tmpPath;
+                var emulatorSettingsPath = Settings.Default.EmulatorPath;
+                var emulatorDirName = Path.GetDirectoryName(emulatorSettingsPath);
+                if (emulatorDirName != null)
+                {
+                    var tmpPath = Path.Combine(emulatorDirName, "Configurations");
+                    if (Directory.Exists(tmpPath))
+                        Settings.Default.UAEConfigsPath = tmpPath;
+                }
             }
 
             // If there's no Music player set in Preferences and Deliplayer is found installed, prompt the user to pick that directly.
@@ -1140,7 +1133,7 @@ namespace Amigula
                         Settings.Default.Save();
                     }
                 }
-            if (patRegistry != null) patRegistry.Close();
+            patRegistry?.Close();
         }
 
         /// <summary>
@@ -2169,9 +2162,10 @@ namespace Amigula
         private void listViewMenuItemShowInExplorer_Click(object sender, RoutedEventArgs e)
         {
             var oDataRowView = SelectedGameRowView;
-            if (oDataRowView == null) return;
-            if (oDataRowView.Row != null)
-                Process.Start(Path.GetDirectoryName(oDataRowView.Row["PathToFile"] as string));
+            var pathToFile = oDataRowView?.Row?["PathToFile"] as string;
+            var dirNameForFile = Path.GetDirectoryName(pathToFile);
+            if (pathToFile == null) return;
+            if (dirNameForFile != null) Process.Start(dirNameForFile);
         }
 
         /// <summary>

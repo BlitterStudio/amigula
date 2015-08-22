@@ -159,7 +159,7 @@ namespace Amigula
         /// </summary>
         private void CenterMainWindowIfNoSettingsFound()
         {
-            if (int.Parse(Top.ToString(CultureInfo.InvariantCulture)) == 0 && int.Parse(Left.ToString(CultureInfo.InvariantCulture)) == 0)
+            //if (int.Parse(Top.ToString(CultureInfo.InvariantCulture)) == 0 && int.Parse(Left.ToString(CultureInfo.InvariantCulture)) == 0)
                 WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
@@ -996,7 +996,7 @@ namespace Amigula
             {
                 if (Directory.Exists("C:\\GameBase\\GameBase Amiga"))
                 {
-                    MessageBoxResult result =
+                    var result =
                         MessageBox.Show(
                             "I found GameBase installed in your system.\n\nWould you like to use the Screenshots and Music paths from it?",
                             "GameBase found", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -1028,14 +1028,17 @@ namespace Amigula
                 gameScreenshot.UriSource =
                     new Uri(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile));
                 gameScreenshot.EndInit();
+
+                return gameScreenshot;
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show(
                     "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
                     "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            return gameScreenshot;
+            return new BitmapImage();
         }
 
         /// <summary>
@@ -1256,16 +1259,16 @@ namespace Amigula
             // Load longplay video
             if (SelectedGameRowView == null) return;
             var longplayTitle = SelectedGameRowView.Row["Title"] as string;
-            List<YoutubeHelper.YouTubeInfo> videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
-            if (!videos.Any()) return;
+            var videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
+            if (videos == null || !videos.Any()) return;
             var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
             wbLongplay.Source = video;
         }
 
         private bool DoesGenreExistInDatabase(string fetchedGenre)
         {
-            bool genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
-                .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
+            var genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
+                .Any(row => fetchedGenre == row.Field<string>("Genre_label"));
             return genreExists;
         }
 
@@ -1685,7 +1688,7 @@ namespace Amigula
             if (!string.IsNullOrEmpty(Settings.Default.ScreenshotsPath))
             {
                 // call cleanGameTitle to cleanup the title and add the png extension to it
-                string gameImageFile = CleanGameTitle(currentgame, "Screenshot");
+                var gameImageFile = CleanGameTitle(currentgame, "Screenshot");
 
                 imgScreenshot.Opacity = defaultOpacity;
                 imgScreenshot2.Opacity = defaultOpacity;
@@ -1711,7 +1714,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_1.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_1.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
@@ -1725,7 +1728,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_2.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_2.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;
@@ -1740,7 +1743,7 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "_.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot.Source = gameScreenshot;
@@ -1755,7 +1758,7 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "__1.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "__1.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
@@ -1769,7 +1772,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "__2.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "__2.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;

@@ -159,8 +159,8 @@ namespace Amigula
         /// </summary>
         private void CenterMainWindowIfNoSettingsFound()
         {
-            if (int.Parse(Top.ToString(CultureInfo.InvariantCulture)) == 0 && int.Parse(Left.ToString(CultureInfo.InvariantCulture)) == 0)
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //if (int.Parse(Top.ToString(CultureInfo.InvariantCulture)) == 0 && int.Parse(Left.ToString(CultureInfo.InvariantCulture)) == 0)
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         /// <summary>
@@ -478,7 +478,7 @@ namespace Amigula
             // cleanupType = "Screenshot" - cleanup for Screenshot usage (replace spaces with underscores)
 
             var oDataRowView = currentgame as DataRowView;
-            string selectedGame = "";
+            var selectedGame = "";
             if (oDataRowView == null) return selectedGame;
             switch (cleanupType)
             {
@@ -494,25 +494,28 @@ namespace Amigula
                         else if (selectedGame != null) gameSubFolder = selectedGame.Substring(0, 1) + "\\";
 
                         // Use RegEx to clean up anything in () or []
-                        selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
-
-                        // if there's version information (e.g. v1.2) in the filename exclude it as well
-                        //if (selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) > 1 &&
-                        //    int.TryParse(selectedGame.Substring(selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) + 2, 1), out n))
-                        if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                        if (selectedGame != null)
                         {
-                            selectedGame = selectedGame.Substring(0,
-                                selectedGame.IndexOf(" v",
-                                    StringComparison
-                                        .OrdinalIgnoreCase));
-                        }
+                            selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
 
-                        // now try to match the filename to the title selected, adding ".png" at the end
-                        // this is far from perfect, needs improvement!
-                        if (selectedGame.Length > 0)
-                            selectedGame = Regex.Replace(selectedGame, " $", "").Replace(" ", "_") + ".png";
-                        // join the subfolder and game filename together before returning it
-                        selectedGame = gameSubFolder + selectedGame;
+                            // if there's version information (e.g. v1.2) in the filename exclude it as well
+                            //if (selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) > 1 &&
+                            //    int.TryParse(selectedGame.Substring(selectedGame.IndexOf(" v", StringComparison.OrdinalIgnoreCase) + 2, 1), out n))
+                            if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                            {
+                                selectedGame = selectedGame.Substring(0,
+                                    selectedGame.IndexOf(" v",
+                                        StringComparison
+                                            .OrdinalIgnoreCase));
+                            }
+
+                            // now try to match the filename to the title selected, adding ".png" at the end
+                            // this is far from perfect, needs improvement!
+                            if (selectedGame.Length > 0)
+                                selectedGame = Regex.Replace(selectedGame, " $", "").Replace(" ", "_") + ".png";
+                            // join the subfolder and game filename together before returning it
+                            selectedGame = gameSubFolder + selectedGame;
+                        }
                         break;
                     }
                 case "Path":
@@ -523,7 +526,7 @@ namespace Amigula
                         var selectedUaeConfig = oDataRowView.Row["UAEconfig"] as string;
 
                         // new variable to hold a list of all the game disks, with full path-filenames
-                        SortedList<int, string> gameDisksFullPath = IdentifyGameDisks(selectedGamePath);
+                        var gameDisksFullPath = IdentifyGameDisks(selectedGamePath);
 
                         // variable to hold the "diskimageX=" values in the UAE config, one for each disk found
                         var diskImageX = new SortedList<int, string>();
@@ -532,7 +535,7 @@ namespace Amigula
                         if (gameDisksFullPath.Count > 1)
                         {
                             // then for each disk found, we need to add an entry in the UAE config file to pass it to the DiskSwapper
-                            for (int i = 0; i < gameDisksFullPath.Count; i++)
+                            for (var i = 0; i < gameDisksFullPath.Count; i++)
                             {
                                 // replace any entry of diskimageX=* (where X=number and *=anything)
                                 diskImageX[i] = "diskimage" + i + "=.*";
@@ -540,7 +543,7 @@ namespace Amigula
                                 gameDisksFullPath[i] = "diskimage" + i + "=" + gameDisksFullPath[i];
                             }
                             // cleanup any extra entries of diskimageX in the config file
-                            for (int i = gameDisksFullPath.Count; i < 20; i++)
+                            for (var i = gameDisksFullPath.Count; i < 20; i++)
                             {
                                 diskImageX[i] = "diskimage" + i + "=.*";
                                 gameDisksFullPath[i] = "diskimage" + i + "=";
@@ -551,7 +554,7 @@ namespace Amigula
                             if (selectedUaeConfig == "default")
                                 FilesHelper.ReplaceInFile("configs\\" + selectedUaeConfig + ".uae", diskImageX,
                                     gameDisksFullPath);
-                            else
+                            else if (selectedUaeConfig != null)
                                 FilesHelper.ReplaceInFile(
                                     Path.Combine(Settings.Default.UAEConfigsPath, selectedUaeConfig) + ".uae",
                                     diskImageX, gameDisksFullPath);
@@ -564,7 +567,7 @@ namespace Amigula
                                            Path.Combine(Environment.CurrentDirectory,
                                                "configs\\" + selectedUaeConfig + ".uae") + "\"" + " -0 \"" +
                                            selectedGamePath + "\"";
-                        else
+                        else if (selectedUaeConfig != null)
                             selectedGame = "-f \"" +
                                            Path.Combine(Environment.CurrentDirectory,
                                                Path.Combine(Settings.Default.UAEConfigsPath,
@@ -578,16 +581,19 @@ namespace Amigula
                         // Replace any spaces with "%20" and try to clean up the title
                         selectedGame = oDataRowView.Row["Title"] as string;
                         // Use RegEx to clean up anything in () or []
-                        selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
-                        // if there's version information (e.g. v1.2) in the filename exclude it as well
-                        if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                        if (selectedGame != null)
                         {
-                            selectedGame = selectedGame.Substring(0,
-                                selectedGame.IndexOf(" v",
-                                    StringComparison
-                                        .OrdinalIgnoreCase));
+                            selectedGame = Regex.Replace(selectedGame, @"[\[(].+?[\])]", "");
+                            // if there's version information (e.g. v1.2) in the filename exclude it as well
+                            if (Regex.IsMatch(selectedGame, @"\sv(\d{1})"))
+                            {
+                                selectedGame = selectedGame.Substring(0,
+                                    selectedGame.IndexOf(" v",
+                                        StringComparison
+                                            .OrdinalIgnoreCase));
+                            }
+                            if (selectedGame.Length > 0) selectedGame = selectedGame.TrimEnd(' ').Replace(" ", "%20");
                         }
-                        if (selectedGame.Length > 0) selectedGame = selectedGame.TrimEnd(' ').Replace(" ", "%20");
                         break;
                     }
             }
@@ -918,36 +924,36 @@ namespace Amigula
                         if (
                             Directory.Exists(
                                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WinUAE")))
-                        {
-                            // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
-                            Settings.Default.EmulatorPath =
+                    {
+                        // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
+                        Settings.Default.EmulatorPath =
+                            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                                         "WinUAE\\WinUAE.exe");
+                        if (
+                            Directory.Exists(
+                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
+                                             "Amiga Files\\WinUAE\\Configurations")))
+                            Settings.Default.UAEConfigsPath =
+                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
+                                             "Amiga Files\\WinUAE\\Configurations");
+                        else if (
+                            Directory.Exists(
                                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                                             "WinUAE\\WinUAE.exe");
-                            if (
-                                Directory.Exists(
-                                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
-                                                 "Amiga Files\\WinUAE\\Configurations")))
-                                Settings.Default.UAEConfigsPath =
-                                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
-                                                 "Amiga Files\\WinUAE\\Configurations");
-                            else if (
-                                Directory.Exists(
-                                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                                                 "WinUAE\\Configurations")))
-                                Settings.Default.UAEConfigsPath =
-                                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                                                 "WinUAE\\Configurations");
-                            Settings.Default.Save();
-                        }
-                        else
-                            AppNotDefined(
-                                "The path to WinUAE is not defined in the preferences and I couldn't locate it automatically!\n\nWithout WinUAE, you can't run any games.\n\nDo you want to select the path now?",
-                                "Emulator");
+                                             "WinUAE\\Configurations")))
+                            Settings.Default.UAEConfigsPath =
+                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                                             "WinUAE\\Configurations");
+                        Settings.Default.Save();
+                    }
+                    else
+                        AppNotDefined(
+                            "The path to WinUAE is not defined in the preferences and I couldn't locate it automatically!\n\nWithout WinUAE, you can't run any games.\n\nDo you want to select the path now?",
+                            "Emulator");
                 }
             }
             else
             {
-                string tmpPath = Path.Combine(Path.GetDirectoryName(Settings.Default.EmulatorPath), "Configurations");
+                var tmpPath = Path.Combine(Path.GetDirectoryName(Settings.Default.EmulatorPath), "Configurations");
                 if (Directory.Exists(tmpPath))
                     Settings.Default.UAEConfigsPath = tmpPath;
             }
@@ -990,7 +996,7 @@ namespace Amigula
             {
                 if (Directory.Exists("C:\\GameBase\\GameBase Amiga"))
                 {
-                    MessageBoxResult result =
+                    var result =
                         MessageBox.Show(
                             "I found GameBase installed in your system.\n\nWould you like to use the Screenshots and Music paths from it?",
                             "GameBase found", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -1022,41 +1028,44 @@ namespace Amigula
                 gameScreenshot.UriSource =
                     new Uri(Path.Combine(Settings.Default.ScreenshotsPath, gameImageFile));
                 gameScreenshot.EndInit();
+
+                return gameScreenshot;
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show(
                     "An exception has occured while trying to display the game's image:\n\n" + ex.Message,
                     "An exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            return gameScreenshot;
+            return new BitmapImage();
         }
 
         /// <summary>
         ///     Search for the selected title in various websites
         /// </summary>
         /// <param name="currentgame">The currently selected title</param>
-        /// <param name="URLsite">The website to lookup the title on, possible values are "HOL, "LemonAmiga"</param>
-        private static void LookupUrl(object currentgame, string URLsite)
+        /// <param name="urlSite">The website to lookup the title on, possible values are "HOL, "LemonAmiga"</param>
+        private static void LookupUrl(object currentgame, string urlSite)
         {
             // Search for the selected game in various Amiga websites
             // Valid parameters for URLsite are:
             // HOL - search for the game in HOL
             // LemonAmiga - search for the game in LemonAmiga
-            string gameTitleforUrl = CleanGameTitle(currentgame, "URL");
-            if (String.IsNullOrEmpty(gameTitleforUrl)) return;
-            switch (URLsite)
+            var gameTitleforUrl = CleanGameTitle(currentgame, "URL");
+            if (string.IsNullOrEmpty(gameTitleforUrl)) return;
+            switch (urlSite)
             {
                 case "HOL":
                     {
-                        const string targetURL = @"http://hol.abime.net/hol_search.php?find=";
-                        Process.Start(targetURL + gameTitleforUrl);
+                        const string targetUrl = @"http://hol.abime.net/hol_search.php?find=";
+                        Process.Start(targetUrl + gameTitleforUrl);
                         break;
                     }
                 case "LemonAmiga":
                     {
-                        const string targetURL = @"http://www.lemonamiga.com/games/list.php?list_letter=";
-                        Process.Start(targetURL + gameTitleforUrl);
+                        const string targetUrl = @"http://www.lemonamiga.com/games/list.php?list_letter=";
+                        Process.Start(targetUrl + gameTitleforUrl);
                         break;
                     }
             }
@@ -1179,15 +1188,15 @@ namespace Amigula
             try
             {
                 // Check if the path to file already exists in the database, skip inserting it if it does
-                if (_amigulaDbDataSetGamesTableAdapter.FileExists(x) == 0)
-                {
+                if (_amigulaDbDataSetGamesTableAdapter.FileExists(x) != 0) return;
+                if (_amigulaDbDataSet == null) return;
+                if (x != null)
                     _amigulaDbDataSet.Games.AddGamesRow(
                         Regex.Replace(Path.GetFileNameWithoutExtension(x),
                             @"Disk\s(\d{1})\sof\s(\d{1})|Disk-(\d{1})|Disk(\d{1})$|Disk(\d{2})$|Disk[A-Za-z]$|-(\d{1})$|[\[(].+?[\])]|_",
                             ""), x, "default", IdentifyGameDisks(x).Count,
                         GetGameYear(x), 0, DateTime.Today, 0, gameGenre,
                         gamePublisher, "");
-                }
             }
             catch (Exception ex)
             {
@@ -1250,16 +1259,16 @@ namespace Amigula
             // Load longplay video
             if (SelectedGameRowView == null) return;
             var longplayTitle = SelectedGameRowView.Row["Title"] as string;
-            List<YoutubeHelper.YouTubeInfo> videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
-            if (!videos.Any()) return;
+            var videos = YoutubeHelper.LoadVideosKey("Amiga Longplay " + longplayTitle);
+            if (videos == null || !videos.Any()) return;
             var video = new Uri(YoutubeHelper.GetEmbedUrlFromLink(videos[0].EmbedUrl), UriKind.Absolute);
             wbLongplay.Source = video;
         }
 
         private bool DoesGenreExistInDatabase(string fetchedGenre)
         {
-            bool genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
-                .Any(row => fetchedGenre == row.Field<String>("Genre_label"));
+            var genreExists = _amigulaDbDataSet.Genres.AsEnumerable()
+                .Any(row => fetchedGenre == row.Field<string>("Genre_label"));
             return genreExists;
         }
 
@@ -1573,14 +1582,14 @@ namespace Amigula
                                          .ToObservable(TaskPoolScheduler.Default)
                                          .TakeUntil(cancelFileScanning)
                                          .Do(x =>
-                                             {
-                                                 AddGamesRow(x, gameGenre, gamePublisher);
-                                             })
+                                         {
+                                             AddGamesRow(x, gameGenre, gamePublisher);
+                                         })
                                          .TakeLast(1)
                                          .Do(_ =>
-                                             {
-                                                 UpdateGamesDatabase();
-                                             })
+                                         {
+                                             UpdateGamesDatabase();
+                                         })
                                          .ObserveOnDispatcher()
                                          .Subscribe(y => { },
                                                     () =>
@@ -1679,7 +1688,7 @@ namespace Amigula
             if (!string.IsNullOrEmpty(Settings.Default.ScreenshotsPath))
             {
                 // call cleanGameTitle to cleanup the title and add the png extension to it
-                string gameImageFile = CleanGameTitle(currentgame, "Screenshot");
+                var gameImageFile = CleanGameTitle(currentgame, "Screenshot");
 
                 imgScreenshot.Opacity = defaultOpacity;
                 imgScreenshot2.Opacity = defaultOpacity;
@@ -1705,7 +1714,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_1.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_1.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
@@ -1719,7 +1728,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "_2.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_2.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;
@@ -1734,7 +1743,7 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "_.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "_.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot.Source = gameScreenshot;
@@ -1749,7 +1758,7 @@ namespace Amigula
                                                  gameImageFile.Replace(".png", "__1.png"))))
                     {
                         // initialize a new image source
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "__1.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot2.Source = gameScreenshot;
@@ -1763,7 +1772,7 @@ namespace Amigula
                         File.Exists(Path.Combine(Settings.Default.ScreenshotsPath,
                                                  gameImageFile.Replace(".png", "__2.png"))))
                     {
-                        var gameScreenshot = LoadGameScreenshot(gameImageFile);
+                        var gameScreenshot = LoadGameScreenshot(gameImageFile.Replace(".png", "__2.png"));
 
                         // assign our image source to the placeholder
                         imgScreenshot3.Source = gameScreenshot;
@@ -2160,7 +2169,9 @@ namespace Amigula
         private void listViewMenuItemShowInExplorer_Click(object sender, RoutedEventArgs e)
         {
             var oDataRowView = SelectedGameRowView;
-            if (oDataRowView != null) Process.Start(Path.GetDirectoryName(oDataRowView.Row["PathToFile"] as string));
+            if (oDataRowView == null) return;
+            if (oDataRowView.Row != null)
+                Process.Start(Path.GetDirectoryName(oDataRowView.Row["PathToFile"] as string));
         }
 
         /// <summary>

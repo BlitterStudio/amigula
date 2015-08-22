@@ -9,7 +9,7 @@
         </Grid.ColumnDefinitions>
         <Label Content="Games Library path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
         <TextBox Grid.Column="0" x:Name="tboxGamesLibPath" Height="23" VerticalAlignment="Top" Margin="10,36,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
-        <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,36,10,0" Height="23" Grid.Column="1" Click="btnChangeGamesPath_Click"/>
+        <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,36,10,0" Height="23" Grid.Column="1" Click="btnChangeGamesPath_Click" UseLayoutRounding="False"/>
         <Label Grid.Column="0" Content="WinUAE path:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,69,0,0"/>
         <TextBox Grid.Column="0" x:Name="tboxWinUAEPath" Height="23" VerticalAlignment="Top" Margin="10,95,5,0" VerticalContentAlignment="Center" MaxLines="1"/>
         <Button Content="Change" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="0,95,10,0" Height="23" Grid.Column="1" Click="btnChangeUAEPath_Click"/>

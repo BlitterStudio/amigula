@@ -552,16 +552,12 @@ namespace Amigula
                         // finally, pass it over as a parameter to UAE below
                         // if the config file doesn't exist, WinUAE should still startup with the full GUI so it should be safe no to check for it
                         if (selectedUaeConfig == "default")
-                            selectedGame = "-f \"" +
-                                           Path.Combine(Environment.CurrentDirectory,
-                                               "configs\\" + selectedUaeConfig + ".uae") + "\"" + " -0 \"" +
-                                           selectedGamePath + "\"";
+                            selectedGame =
+                                $"-f \"{Path.Combine(Environment.CurrentDirectory, "configs\\" + selectedUaeConfig + ".uae")}\"" +
+                                $" -0 \"{selectedGamePath}\"";
                         else if (selectedUaeConfig != null)
-                            selectedGame = "-f \"" +
-                                           Path.Combine(Environment.CurrentDirectory,
-                                               Path.Combine(Settings.Default.UAEConfigsPath,
-                                                   selectedUaeConfig) + ".uae") + "\"" + " -0 \"" +
-                                           selectedGamePath + "\"";
+                            selectedGame =
+                                $"-f \"{Path.Combine(Environment.CurrentDirectory, Path.Combine(Settings.Default.UAEConfigsPath, selectedUaeConfig) + ".uae")}\" -s use_gui=no -0 \"{selectedGamePath}\"";
                         break;
                     }
                 case "URL":
@@ -1474,7 +1470,7 @@ namespace Amigula
             }
             else
             {
-                string gamePath = CleanGameTitle(GamesListView.SelectedItem, "Path");
+                var gamePath = CleanGameTitle(GamesListView.SelectedItem, "Path");
                 if (string.IsNullOrEmpty(gamePath) == false)
                     LaunchUaeWithConfigAndGame(gamePath);
                 else

@@ -29,17 +29,15 @@ namespace Amigula.Emulators
             // Do a secondary check in case our operating system is Windows XP 32-bit (and WinUAE is under Program Files)
             {
                 var programFilesPath32 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                if (!Directory.Exists(Path.Combine(programFilesPath32, "WinUAE"))) return emulatorPathValues;
+                
+                // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
+                emulatorPathValues.EmulatorPath = Path.Combine(programFilesPath32, "WinUAE\\WinUAE.exe");
 
-                if (Directory.Exists(Path.Combine(programFilesPath32, "WinUAE")))
-                {
-                    // WinUAE was found in Program Files, check if Configurations exists under Public Documents or the WinUAE folder
-                    emulatorPathValues.EmulatorPath = Path.Combine(programFilesPath32, "WinUAE\\WinUAE.exe");
-
-                    if (Directory.Exists(Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
-                        emulatorPathValues.ConfigurationFilesPath = Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
-                    else if (Directory.Exists(Path.Combine(programFilesPath32, "WinUAE\\Configurations")))
-                        emulatorPathValues.ConfigurationFilesPath = Path.Combine(programFilesPath32, "WinUAE\\Configurations");
-                }
+                if (Directory.Exists(Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations")))
+                    emulatorPathValues.ConfigurationFilesPath = Path.Combine(commonDocumentsPath, "Amiga Files\\WinUAE\\Configurations");
+                else if (Directory.Exists(Path.Combine(programFilesPath32, "WinUAE\\Configurations")))
+                    emulatorPathValues.ConfigurationFilesPath = Path.Combine(programFilesPath32, "WinUAE\\Configurations");
             }
 
             return emulatorPathValues;

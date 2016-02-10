@@ -27,7 +27,7 @@ namespace Amigula.Helpers
         {
             try
             {
-                string embedUrl = link.Replace("watch?v=", "embed/").Replace("&feature=youtube_gdata", "");
+                var embedUrl = link.Replace("watch?v=", "embed/").Replace("&feature=youtube_gdata", "");
                 return embedUrl;
             }
             catch
@@ -46,12 +46,12 @@ namespace Amigula.Helpers
 
             try
             {
-                XElement xraw = XElement.Load(String.Format(search, keyWord));
-                XElement xroot = XElement.Parse(xraw.ToString());
+                var xraw = XElement.Load(string.Format(search, keyWord));
+                var xroot = XElement.Parse(xraw.ToString());
                 var xElement = xroot.Element("channel");
                 if (xElement != null)
                 {
-                    IEnumerable<YouTubeInfo> links = (from item in xElement.Descendants("item")
+                    var links = (from item in xElement.Descendants("item")
                                                       let element = item.Element("link")
                                                       where element != null
                                                       select new YouTubeInfo

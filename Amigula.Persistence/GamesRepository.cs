@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
@@ -14,7 +15,7 @@ namespace Amigula.Persistence
 
         public bool IsGameExists(string filename)
         {
-            throw new NotImplementedException();
+            return File.Exists(filename);
         }
     }
 }

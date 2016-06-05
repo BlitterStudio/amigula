@@ -6,9 +6,9 @@ namespace Amigula.Domain.Interfaces
     public interface IScreenshotsRepository
     {
         BitmapImage LoadImage(string filename);
-        string GetTitleSubfolder(string gameTitle);
-        OperationResult Add(string gameTitle, string screenshot);
-        OperationResult Delete(string screenshot);
-        bool ScreenshotFileExists(string screenshot);
+        string GetGameSubfolder(string gameTitle);
+        OperationResult Add(string filename, string newFilename);
+        OperationResult Delete(string filename);
+        bool IsFileExists(string filename);
     }
 }

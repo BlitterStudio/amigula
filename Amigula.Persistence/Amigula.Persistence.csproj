@@ -48,7 +48,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileOperations.cs" />
     <Compile Include="GamesRepository.cs" />
     <Compile Include="HolRepository.cs" />
     <Compile Include="MusicPlayerRepository.cs" />

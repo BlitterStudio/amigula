@@ -91,9 +91,7 @@ namespace Amigula
             if (!disposing) return;
             // free managed resources
             _amigulaDbDataSetGamesTableAdapter?.Dispose();
-
             _amigulaDbDataSetGenresTableAdapter?.Dispose();
-
             _amigulaDbDataSetPublishersTableAdapter?.Dispose();
         }
 

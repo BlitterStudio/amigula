@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
@@ -8,13 +9,11 @@ namespace Amigula.Domain.Services
 {
     public class GamesService
     {
-        private readonly IFileOperations _fileOperations;
         private readonly IGamesRepository _gamesRepository;
 
-        public GamesService(IGamesRepository gamesRepository, IFileOperations fileOperations)
+        public GamesService(IGamesRepository gamesRepository)
         {
             _gamesRepository = gamesRepository;
-            _fileOperations = fileOperations;
         }
 
         public IEnumerable<GamesDto> GetGamesList()
@@ -90,7 +89,7 @@ namespace Amigula.Domain.Services
                     gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"Disk(\d{1})\.", "Disk" + diskNumber + "."));
                     diskNumber++;
                 } while (
-                    _fileOperations.FilenameExists(Regex.Replace(gameFullPath, @"Disk(\d{1})\.",
+                    _gamesRepository.IsGameExists(Regex.Replace(gameFullPath, @"Disk(\d{1})\.",
                         "Disk" + diskNumber + ".")));
 
             if (method == 2)
@@ -100,7 +99,7 @@ namespace Amigula.Domain.Services
                         "Disk" + diskNumber.ToString("00") + "."));
                     diskNumber++;
                 } while (
-                    _fileOperations.FilenameExists(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
+                    _gamesRepository.IsGameExists(Regex.Replace(gameFullPath, @"Disk(\d{2})\.",
                         "Disk" + diskNumber.ToString("00") + ".")));
             if (method == 3)
                 do
@@ -109,7 +108,7 @@ namespace Amigula.Domain.Services
                         "Disk " + diskNumber + " of"));
                     diskNumber++;
                 } while (
-                    _fileOperations.FilenameExists(Regex.Replace(gameFullPath, @"Disk\s(\d{1})\sof",
+                    _gamesRepository.IsGameExists(Regex.Replace(gameFullPath, @"Disk\s(\d{1})\sof",
                         "Disk " + diskNumber + " of")));
 
             if (method == 4)
@@ -119,7 +118,7 @@ namespace Amigula.Domain.Services
                         "Disk " + diskNumber.ToString("00") + " of"));
                     diskNumber++;
                 } while (
-                    _fileOperations.FilenameExists(Regex.Replace(gameFullPath, @"Disk\s(\d{2})\sof",
+                    _gamesRepository.IsGameExists(Regex.Replace(gameFullPath, @"Disk\s(\d{2})\sof",
                         "Disk " + diskNumber.ToString("00") + " of")));
 
             if (method == 5)
@@ -128,7 +127,7 @@ namespace Amigula.Domain.Services
                     gameDisksFullPath.Add(Regex.Replace(gameFullPath, @"-(\d{1})\.", "-" + diskNumber + "."));
                     diskNumber++;
                 } while (
-                    _fileOperations.FilenameExists(Regex.Replace(gameFullPath, @"-(\d{1})\.", "-" + diskNumber + ".")));
+                    _gamesRepository.IsGameExists(Regex.Replace(gameFullPath, @"-(\d{1})\.", "-" + diskNumber + ".")));
 
             return gameDisksFullPath;
         }

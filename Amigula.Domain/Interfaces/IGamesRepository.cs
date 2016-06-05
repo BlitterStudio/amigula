@@ -6,5 +6,6 @@ namespace Amigula.Domain.Interfaces
     public interface IGamesRepository
     {
         IEnumerable<GamesDto> GetGamesList();
+        bool IsGameExists(string filename);
     }
 }

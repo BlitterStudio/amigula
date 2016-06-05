@@ -11,5 +11,10 @@ namespace Amigula.Persistence
         {
             throw new NotImplementedException();
         }
+
+        public bool IsGameExists(string filename)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

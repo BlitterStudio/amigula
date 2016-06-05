@@ -53,7 +53,6 @@
     <Compile Include="Helpers\OsBitCheck.cs" />
     <Compile Include="Helpers\SafeNativeMethods.cs" />
     <Compile Include="Interfaces\IEmulatorRepository.cs" />
-    <Compile Include="Interfaces\IFileOperations.cs" />
     <Compile Include="Interfaces\IGamesRepository.cs" />
     <Compile Include="Interfaces\IMetadataRepository.cs" />
     <Compile Include="Interfaces\IMusicPlayerRepository.cs" />

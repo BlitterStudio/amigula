@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using Amigula.Domain.Classes;
 using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
@@ -14,31 +15,18 @@ namespace Amigula.Domain.Services
             _screenshotsRepository = screenshotsRepository;
         }
 
-        public ScreenshotsDto PrepareTitleScreenshot(string gameTitle)
+        public ScreenshotsDto GetGameScreenshots(string gameTitle)
         {
             var result = new ScreenshotsDto();
             if (string.IsNullOrEmpty(gameTitle)) return result;
 
-            result.GameFolder = GetTitleSubfolder(gameTitle);
+            result.GameFolder = _screenshotsRepository.GetGameSubfolder(gameTitle);
             result.Title = GameTitleService.CleanGameTitle(gameTitle);
 
-            result.Screenshot1 = DetermineTitleScreenshot(result.Title, 1);
-            result.Screenshot2 = DetermineTitleScreenshot(result.Title, 2);
-            result.Screenshot3 = DetermineTitleScreenshot(result.Title, 3);
+            result.Screenshot1 = BuildScreenshotFilename(result.Title, 1);
+            result.Screenshot2 = BuildScreenshotFilename(result.Title, 2);
+            result.Screenshot3 = BuildScreenshotFilename(result.Title, 3);
 
-            return result;
-        }
-
-        /// <summary>
-        ///     Get the first letter of the game title, to get the subfolder from that.
-        ///     if the first letter is a number, the subfolder should be set to "0"
-        ///     in both scenarios we add 2 backslashes at the end, since this is a path.
-        /// </summary>
-        /// <param name="gameTitle"></param>
-        /// <returns>Game Screenshot Folder</returns>
-        private string GetTitleSubfolder(string gameTitle)
-        {
-            var result = _screenshotsRepository.GetTitleSubfolder(gameTitle);
             return result;
         }
 
@@ -48,7 +36,7 @@ namespace Amigula.Domain.Services
         /// <param name="gameTitle"></param>
         /// <param name="screenshotNumber"></param>
         /// <returns></returns>
-        private string DetermineTitleScreenshot(string gameTitle, int screenshotNumber)
+        private static string BuildScreenshotFilename(string gameTitle, int screenshotNumber)
         {
             // Screenshot 1 does not get any numbering,
             // Screenshot 2 gets the suffix _1.png,
@@ -63,16 +51,21 @@ namespace Amigula.Domain.Services
                 .Replace(" ", "_") + suffix;
         }
 
-        public OperationResult Add(string gameTitle, string screenshot)
+        public OperationResult Add(string gameTitle, string filename)
         {
-            var renamedScreenshot = CreateScreenshotFilename(gameTitle, screenshot);
-            if (renamedScreenshot != screenshot)
-            {
-                var result = _screenshotsRepository.Add(gameTitle, renamedScreenshot);
-                return result;
-            }
-
-            return new OperationResult {Success = false, Information = "Could not add new Screenshot for game!"};
+            // Get the filename from the full path
+            var screenshot = Path.GetFileName(filename);
+            // Rename filename according to game title
+            var renamedScreenshot = RenameScreenshot(gameTitle, screenshot);
+            // if the filename was changed we can proceed. Otherwise, the 3 available screenshots are already occupied
+            if (renamedScreenshot == screenshot)
+                return new OperationResult
+                {
+                    Success = false,
+                    Information = "Could not add new Screenshot for game! Try deleting one of the existing ones first."
+                };
+            var result = _screenshotsRepository.Add(filename, renamedScreenshot);
+            return result;
         }
 
         public OperationResult Delete(string screenshot)
@@ -81,7 +74,7 @@ namespace Amigula.Domain.Services
             return result;
         }
 
-        private string CreateScreenshotFilename(string gameTitle, string screenshot)
+        private string RenameScreenshot(string gameTitle, string screenshot)
         {
             // use gametitle + .png as the screenshot name
             // test if that filename already exists
@@ -93,16 +86,16 @@ namespace Amigula.Domain.Services
 
             var renamedScreenshot = $"{gameTitle}.png";
 
-            if (_screenshotsRepository.ScreenshotFileExists(renamedScreenshot))
+            if (_screenshotsRepository.IsFileExists(renamedScreenshot))
             {
                 for (var i = 1; i < 3; i++)
                 {
                     renamedScreenshot = $"{gameTitle}_{i}.png";
-                    if (!_screenshotsRepository.ScreenshotFileExists(renamedScreenshot)) break;
+                    if (!_screenshotsRepository.IsFileExists(renamedScreenshot)) break;
                 }
             }
 
-            return _screenshotsRepository.ScreenshotFileExists(renamedScreenshot) ? screenshot : renamedScreenshot;
+            return _screenshotsRepository.IsFileExists(renamedScreenshot) ? screenshot : renamedScreenshot;
         }
     }
 }

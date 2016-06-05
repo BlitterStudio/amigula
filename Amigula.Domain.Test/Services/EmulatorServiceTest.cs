@@ -16,7 +16,6 @@ namespace Amigula.Domain.Test.Services
         public void Initialize()
         {
             _emulatorRepository = A.Fake<IEmulatorRepository>();
-
             _emulatorService = new EmulatorService(_emulatorRepository);
         }
 

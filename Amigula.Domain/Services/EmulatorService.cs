@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Amigula.Domain.DTO;
+﻿using Amigula.Domain.DTO;
 using Amigula.Domain.Interfaces;
 
 namespace Amigula.Domain.Services

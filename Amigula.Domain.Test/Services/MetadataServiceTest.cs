@@ -1,5 +1,4 @@
-﻿using System;
-using Amigula.Domain.Interfaces;
+﻿using Amigula.Domain.Interfaces;
 using Amigula.Domain.Services;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

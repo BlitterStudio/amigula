@@ -131,11 +131,21 @@ namespace Amigula.Domain.Services
             return gameDisksFullPath;
         }
 
+        /// <summary>
+        ///     Check if the title contains the pattern "-1"
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns></returns>
         private static bool IsMultiDiskPattern5(string gameFullPath)
         {
             return Regex.IsMatch(gameFullPath, @"-(\d{1})\....$");
         }
 
+        /// <summary>
+        ///     Check if the title contains the pattern "Disk 01 of XX"
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns></returns>
         private static bool IsMultiDiskPattern4(string gameFullPath)
         {
             int n;
@@ -145,6 +155,11 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 2), out n);
         }
 
+        /// <summary>
+        ///     Check if the title contains the pattern "Disk 1 of"
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns></returns>
         private static bool IsMultiDiskPattern3(string gameFullPath)
         {
             int n;
@@ -154,6 +169,11 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk ", StringComparison.OrdinalIgnoreCase) + 5, 1), out n);
         }
 
+        /// <summary>
+        ///     Check if the title contains the pattern "Disk01"
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns></returns>
         private static bool IsMultiDiskPattern2(string gameFullPath)
         {
             int n;
@@ -163,6 +183,11 @@ namespace Amigula.Domain.Services
                            gameFullPath.IndexOf("Disk", StringComparison.OrdinalIgnoreCase) + 4, 2), out n);
         }
 
+        /// <summary>
+        ///     Check if the title contains the pattern "Disk1"
+        /// </summary>
+        /// <param name="gameFullPath"></param>
+        /// <returns></returns>
         private static bool IsMultiDiskPattern1(string gameFullPath)
         {
             int n;

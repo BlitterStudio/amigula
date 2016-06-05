@@ -70,7 +70,7 @@ namespace Amigula.Domain.Test.Services
             const string gameFilename = "gameTitle (1988) (Psygnosis).zip";
             const int expectedYear = 1988;
 
-            var result = _metadataService.GetYearFromFilename(gameFilename);
+            var result = MetadataService.GetYearFromFilename(gameFilename);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(int));
@@ -83,7 +83,7 @@ namespace Amigula.Domain.Test.Services
             const string gameFilename = "gameTitle (Psygnosis).zip";
             const int expectedYear = 1900;
 
-            var result = _metadataService.GetYearFromFilename(gameFilename);
+            var result = MetadataService.GetYearFromFilename(gameFilename);
 
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(int));

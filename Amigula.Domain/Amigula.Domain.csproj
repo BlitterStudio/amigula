@@ -61,7 +61,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\EmulatorService.cs" />
     <Compile Include="Services\GamesService.cs" />
-    <Compile Include="Services\GameTitleService.cs" />
     <Compile Include="Services\MetadataService.cs" />
     <Compile Include="Services\MusicPlayerService.cs" />
     <Compile Include="Services\ScreenshotsService.cs" />

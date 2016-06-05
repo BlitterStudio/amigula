@@ -21,7 +21,7 @@ namespace Amigula.Domain.Services
             if (string.IsNullOrEmpty(gameTitle)) return result;
 
             result.GameFolder = _screenshotsRepository.GetGameSubfolder(gameTitle);
-            result.Title = GameTitleService.CleanGameTitle(gameTitle);
+            result.Title = GamesService.CleanGameTitle(gameTitle);
 
             result.Screenshot1 = BuildScreenshotFilename(result.Title, 1);
             result.Screenshot2 = BuildScreenshotFilename(result.Title, 2);

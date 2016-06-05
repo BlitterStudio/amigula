@@ -80,7 +80,7 @@ namespace Amigula.Domain.Test.Services
             var result = _gamesService.GetGamesList();
 
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof (IEnumerable<GamesDto>));
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<GamesDto>));
             Assert.AreEqual(result.Count(), 3);
         }
 
@@ -114,7 +114,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.AreEqual(enumerable.Count, 4);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -133,7 +133,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.AreEqual(enumerable.Count, 4);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -151,7 +151,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.AreEqual(enumerable.Count, 4);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -169,7 +169,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.AreEqual(enumerable.Count, 4);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -187,7 +187,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 4);
+            Assert.AreEqual(enumerable.Count, 4);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -205,7 +205,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.AreEqual(enumerable.Count, 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -223,7 +223,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.AreEqual(enumerable.Count, 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -241,7 +241,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.AreEqual(enumerable.Count, 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -259,7 +259,7 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.AreEqual(enumerable.Count, 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
         }
 
@@ -277,8 +277,42 @@ namespace Amigula.Domain.Test.Services
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
             var enumerable = result as IList<string> ?? result.ToList();
-            Assert.AreEqual(enumerable.Count(), 11);
+            Assert.AreEqual(enumerable.Count, 11);
             Assert.IsTrue(enumerable.Last().Equals(lastGameDisk));
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_Title_ReturnsString()
+        {
+            const string gameTitle = "Apidya v1.2 (1990) [Publisher name]";
+
+            var result = GamesService.PrepareTitleUrl(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "Apidya");
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_TitleWithSpaces_ReturnsStringWithoutSpaces()
+        {
+            const string gameTitle = "International Karate Plus v1.3 (1988) [Publisher name]";
+
+            var result = GamesService.PrepareTitleUrl(gameTitle);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "International%20Karate%20Plus");
+        }
+
+        [TestMethod]
+        public void PrepareTitleUrl_Null_ReturnsEmptyString()
+        {
+            var result = GamesService.PrepareTitleUrl(null);
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(string));
+            Assert.AreEqual(result, "");
         }
     }
 }
